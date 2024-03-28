@@ -25,12 +25,12 @@ void File::WriteData(std::string DataDirectory) {
 }
 
 void File_iss::Parse() {
-#pragma omp critical
-    {
-        printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
-        printf("%-17s : %s\n", "Parsing data from", GetFileDirectory().c_str());
-        fflush(stdout);
-    }
+    // #pragma omp critical
+    //     {
+    //         printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
+    //         printf("%-17s : %s\n", "Parsing data from", GetFileDirectory().c_str());
+    //         fflush(stdout);
+    //     }
 
     FILE* File = fopen(GetFileDirectory().c_str(), "rb");
 
@@ -43,14 +43,14 @@ void File_iss::Parse() {
         int pid;
         int eventid = 0;
         float array[9];
-#pragma omp critical
-        {
-            printf("%s%s%s%s ", PP::BOLD, PP::BLUE, "[INFO]", PP::RESET);
-            printf("EventID = %4d ; Psi = %.3f ; b = %.3f fm\n",
-                   TempBlock.GetEventID(), TempBlock.GetReactionPlaneAngle(),
-                   TempBlock.GetImpactParameter());
-            fflush(stdout);
-        }
+        // #pragma omp critical
+        //         {
+        //             printf("%s%s%s%s ", PP::BOLD, PP::BLUE, "[INFO]", PP::RESET);
+        //             printf("EventID = %4d ; Psi = %.3f ; b = %.3f fm\n",
+        //                    TempBlock.GetEventID(), TempBlock.GetReactionPlaneAngle(),
+        //                    TempBlock.GetImpactParameter());
+        //             fflush(stdout);
+        //         }
         while (fread(&total_particles, sizeof(int), 1, File)) {
             eventid++;
             TempBlock.SetNumberOfParticles(total_particles);
@@ -78,13 +78,13 @@ void File_iss::Parse() {
         }
         GetFileData().ShrinkEventBlocks();
 
-#pragma omp critical
-        {
-            printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-            printf("%-17s : %s\n", "Parsed data from",
-                   GetFileDirectory().c_str());
-            fflush(stdout);
-        }
+        // #pragma omp critical
+        //         {
+        //             printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
+        //             printf("%-17s : %s\n", "Parsed data from",
+        //                    GetFileDirectory().c_str());
+        //             fflush(stdout);
+        //         }
 
     } else {
 #pragma omp critical
@@ -99,12 +99,12 @@ void File_iss::Parse() {
 }
 
 void File_ampt::Parse() {
-#pragma omp critical
-    {
-        printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
-        printf("%-17s : %s\n", "Parsing data from", GetFileDirectory().c_str());
-        fflush(stdout);
-    }
+    // #pragma omp critical
+    //     {
+    //         printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
+    //         printf("%-17s : %s\n", "Parsing data from", GetFileDirectory().c_str());
+    //         fflush(stdout);
+    //     }
 
     std::ifstream File;
     File.open(GetFileDirectory().c_str(), std::ios::in);
@@ -126,13 +126,13 @@ void File_ampt::Parse() {
         }
         GetFileData().ShrinkEventBlocks();
 
-#pragma omp critical
-        {
-            printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-            printf("%-17s : %s\n", "Parsed data from",
-                   GetFileDirectory().c_str());
-            fflush(stdout);
-        }
+        // #pragma omp critical
+        //         {
+        //             printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
+        //             printf("%-17s : %s\n", "Parsed data from",
+        //                    GetFileDirectory().c_str());
+        //             fflush(stdout);
+        //         }
 
     } else {
 #pragma omp critical

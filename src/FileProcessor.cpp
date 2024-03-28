@@ -48,21 +48,37 @@ void ReadFiles(int NRun, int NBatchMin, int NBatchMax, std::string Directory, in
     Utilities::Duration Clock('M');
     Clock.Start();
     int Counter = 0;
+    // progressbar bar(BatchSize);
+
+    std::string barstring = std::string(PP::BOLD) + std::string(PP::BLUE) + "[INFO]" + std::string(PP::RESET);
+    const int BarWidth = 60;
+    std::cout << barstring << " [";
+    std::cout << std::setw(BarWidth) << std::left << Utilities::repeat((int)((float)Counter / BatchSize * BarWidth), "#");
+    std::cout << "] ";
+    std::cout << std::setw(3) << std::right << (int)((float)Counter / BatchSize * 100);
+    std::cout << "%\r";
+    std::cout.flush();
 #pragma omp parallel
     {
 #pragma omp for
         for (int i = NBatchMin; i <= NBatchMax; ++i) {
             data[i]->Parse();
 #pragma omp atomic
-            {
-                Counter++;
-            }
+            Counter++;
+
 #pragma omp critical
             {
-                std::cout << "finished " << Counter << " of " << BatchSize;
+                std::cout << barstring << " [";
+                std::cout << std::setw(BarWidth) << std::left << Utilities::repeat((int)((float)Counter / BatchSize * BarWidth), "#");
+                std::cout << "] ";
+                std::cout << std::setw(3) << std::right << (int)((float)Counter / BatchSize * 100);
+                std::cout << "%\r";
+                std::cout.flush();
             }
         }
     }
+    printf("\n");
+    fflush(stdout);
 
     for (int i = NBatchMin; i <= NBatchMax; ++i) {
         *campt += *data[i];
@@ -222,21 +238,37 @@ void ReadFiles(int iSSRun, int IPGlasmaRun, int NEvent, std::string parameternam
     Clock.Start();
 
     int Counter = 0;
+    // progressbar bar(BatchSize);
+
+    std::string barstring = std::string(PP::BOLD) + std::string(PP::BLUE) + "[INFO]" + std::string(PP::RESET);
+    const int BarWidth = 60;
+    std::cout << barstring << " [";
+    std::cout << std::setw(BarWidth) << std::left << Utilities::repeat((int)((float)Counter / NEvent * BarWidth), "#");
+    std::cout << "] ";
+    std::cout << std::setw(3) << std::right << (int)((float)Counter / NEvent * 100);
+    std::cout << "%\r";
+    std::cout.flush();
 #pragma omp parallel
     {
 #pragma omp for
         for (int i = 0; i < NEvent; ++i) {
             data[i]->Parse();
 #pragma omp atomic
-            {
-                Counter++;
-            }
+            Counter++;
+
 #pragma omp critical
             {
-                std::cout << "finished " << Counter << " of " << NEvent;
+                std::cout << barstring << " [";
+                std::cout << std::setw(BarWidth) << std::left << Utilities::repeat((int)((float)Counter / NEvent * BarWidth), "#");
+                std::cout << "] ";
+                std::cout << std::setw(3) << std::right << (int)((float)Counter / NEvent * 100);
+                std::cout << "%\r";
+                std::cout.flush();
             }
         }
     }
+    printf("\n");
+    fflush(stdout);
 
     for (int i = 0; i < NEvent; ++i) {
         *ciss += *data[i];
