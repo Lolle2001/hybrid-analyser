@@ -19,6 +19,9 @@ void ReadFiles(int NRun, int NBatchMin, int NBatchMax, std::string Directory, in
         FileSize += Utilities::GetFileSize(Directory + "/" + std::to_string(NRun) + "/" + std::to_string(NRun) + "_" + std::to_string(i) + "/ana/ampt.dat", 3);
     }
     printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
+    printf("%-14s : %s\n", "Reading data from", (Directory + "/" + std::to_string(NRun)).c_str());
+    fflush(stdout);
+    printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
     printf("%s : %s%.3f GB%s\n", "Total datasize to read", PP::HIGHLIGHT, FileSize, PP::RESET);
     fflush(stdout);
 
@@ -87,7 +90,7 @@ void ReadFiles(int NRun, int NBatchMin, int NBatchMax, std::string Directory, in
     Clock.Stop();
 
     printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-    printf("%s : %s%03ld:%02lld.%03lld%s\n", "Reading time", PP::HIGHLIGHT, Clock.cminutes, Clock.cseconds, Clock.cmilliseconds, PP::RESET);
+    printf("%s : %s%03ld:%02ld.%03ld%s\n", "Reading time", PP::HIGHLIGHT, Clock.cminutes, Clock.cseconds, Clock.cmilliseconds, PP::RESET);
     fflush(stdout);
 
     Clock.Start();
@@ -108,7 +111,10 @@ void ReadFiles(int NRun, int NBatchMin, int NBatchMax, std::string Directory, in
     }
 
     printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-    printf("%s : %s%03ld:%02lld.%03lld%s\n", "Writing time", PP::HIGHLIGHT, Clock.cminutes, Clock.cseconds, Clock.cmilliseconds, PP::RESET);
+    printf("%s : %s%03ld:%02ld.%03ld%s\n", "Writing time", PP::HIGHLIGHT, Clock.cminutes, Clock.cseconds, Clock.cmilliseconds, PP::RESET);
+    fflush(stdout);
+    printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
+    printf("%-14s : %s\n", "Writen data to", datadirectory.str().c_str());
     fflush(stdout);
     printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
     printf("%s : %s%.3Lf MB%s\n", "Total datasize written", PP::HIGHLIGHT, totalsize, PP::RESET);
@@ -219,6 +225,9 @@ void ReadFiles(int iSSRun, int IPGlasmaRun, int NEvent, std::string parameternam
         FileSize += Utilities::GetFileSize(directory.str(), 3);
     }
     printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
+    printf("%-14s : %s\n", "Reading data from", (parameters.iss_data_folder + "/" + std::to_string(iSSRun)).c_str());
+    fflush(stdout);
+    printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
     printf("%s : %s%.3f GB%s\n", "Total datasize to read", PP::HIGHLIGHT, FileSize, PP::RESET);
     fflush(stdout);
 
@@ -291,9 +300,21 @@ void ReadFiles(int iSSRun, int IPGlasmaRun, int NEvent, std::string parameternam
     ciss->WriteData(directory.str());
 
     Clock.Stop();
+    long double totalsize = 0;
+    std::filesystem::recursive_directory_iterator datadirectory_iter(directory.str());
+    for (const auto& entry : datadirectory_iter) {
+        totalsize += Utilities::GetFileSize(entry.path(), 2);
+        // std::cout <<  << std::endl;
+    }
 
     printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
     printf("%s : %s%03ld:%02ld.%03ld%s\n", "Writing time", PP::HIGHLIGHT, Clock.cminutes, Clock.cseconds, Clock.cmilliseconds, PP::RESET);
+    fflush(stdout);
+    printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
+    printf("%-14s : %s\n", "Writen data to", directory.str().c_str());
+    fflush(stdout);
+    printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
+    printf("%s : %s%.3Lf MB%s\n", "Total datasize written", PP::HIGHLIGHT, totalsize, PP::RESET);
     fflush(stdout);
 }
 

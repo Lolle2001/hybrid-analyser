@@ -40,11 +40,11 @@ void DataContainer::WriteData(std::string DataDirectory) {
         File.open(Filename.str(), std::ios::out);
         Histograms3D[entry.first]->PrintCount(File);
         File.close();
-        Filesize = Utilities::GetFileSize(Filename.str(), 1);
-        printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-        printf("%s[%07.3fKB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
-        printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
-        fflush(stdout);
+        // Filesize = Utilities::GetFileSize(Filename.str(), 1);
+        // printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
+        // printf("%s[%07.3fKB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
+        // printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
+        // fflush(stdout);
         Filename.str("");
         Filename.clear();
 
@@ -54,11 +54,11 @@ void DataContainer::WriteData(std::string DataDirectory) {
         File.open(Filename.str(), std::ios::out);
         Histograms3D[entry.first]->PrintTotal(File);
         File.close();
-        Filesize = Utilities::GetFileSize(Filename.str(), 1);
-        printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-        printf("%s[%07.3fKB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
-        printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
-        fflush(stdout);
+        // Filesize = Utilities::GetFileSize(Filename.str(), 1);
+        // printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
+        // printf("%s[%07.3fKB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
+        // printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
+        // fflush(stdout);
         Filename.str("");
         Filename.clear();
 
@@ -68,11 +68,11 @@ void DataContainer::WriteData(std::string DataDirectory) {
         File.open(Filename.str(), std::ios::out);
         Histograms3D[entry.first]->PrintTotalSQR(File);
         File.close();
-        Filesize = Utilities::GetFileSize(Filename.str(), 1);
-        printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-        printf("%s[%07.3fKB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
-        printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
-        fflush(stdout);
+        // Filesize = Utilities::GetFileSize(Filename.str(), 1);
+        // printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
+        // printf("%s[%07.3fKB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
+        // printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
+        // fflush(stdout);
         Filename.str("");
         Filename.clear();
 
@@ -82,11 +82,11 @@ void DataContainer::WriteData(std::string DataDirectory) {
         File.open(Filename.str(), std::ios::out);
         Histograms3D[entry.first]->PrintEdges(File);
         File.close();
-        Filesize = Utilities::GetFileSize(Filename.str(), 1);
-        printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-        printf("%s[%07.3fKB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
-        printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
-        fflush(stdout);
+        // Filesize = Utilities::GetFileSize(Filename.str(), 1);
+        // printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
+        // printf("%s[%07.3fKB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
+        // printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
+        // fflush(stdout);
         Filename.str("");
         Filename.clear();
     }
@@ -97,11 +97,11 @@ void DataContainer::WriteData(std::string DataDirectory) {
         File.open(Filename.str(), std::ios::out);
         Histograms1D[entry.first]->PrintCount(File);
         File.close();
-        Filesize = Utilities::GetFileSize(Filename.str(), 1);
-        printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-        printf("%s[%07.3fKB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
-        printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
-        fflush(stdout);
+        // Filesize = Utilities::GetFileSize(Filename.str(), 1);
+        // printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
+        // printf("%s[%07.3fKB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
+        // printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
+        // fflush(stdout);
         Filename.str("");
         Filename.clear();
 
@@ -111,11 +111,11 @@ void DataContainer::WriteData(std::string DataDirectory) {
         File.open(Filename.str(), std::ios::out);
         Histograms1D[entry.first]->PrintTotal(File);
         File.close();
-        Filesize = Utilities::GetFileSize(Filename.str(), 1);
-        printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-        printf("%s[%07.3fKB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
-        printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
-        fflush(stdout);
+        // Filesize = Utilities::GetFileSize(Filename.str(), 1);
+        // printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
+        // printf("%s[%07.3fKB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
+        // printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
+        // fflush(stdout);
         Filename.str("");
         Filename.clear();
 
@@ -125,11 +125,11 @@ void DataContainer::WriteData(std::string DataDirectory) {
         File.open(Filename.str(), std::ios::out);
         Histograms1D[entry.first]->PrintTotalSQR(File);
         File.close();
-        Filesize = Utilities::GetFileSize(Filename.str(), 1);
-        printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-        printf("%s[%07.3fKB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
-        printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
-        fflush(stdout);
+        // Filesize = Utilities::GetFileSize(Filename.str(), 1);
+        // printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
+        // printf("%s[%07.3fKB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
+        // printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
+        // fflush(stdout);
         Filename.str("");
         Filename.clear();
 
@@ -139,11 +139,11 @@ void DataContainer::WriteData(std::string DataDirectory) {
         File.open(Filename.str(), std::ios::out);
         Histograms1D[entry.first]->PrintEdges(File);
         File.close();
-        Filesize = Utilities::GetFileSize(Filename.str(), 1);
-        printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-        printf("%s[%07.3fKB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
-        printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
-        fflush(stdout);
+        // Filesize = Utilities::GetFileSize(Filename.str(), 1);
+        // printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
+        // printf("%s[%07.3fKB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
+        // printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
+        // fflush(stdout);
         Filename.str("");
         Filename.clear();
     }
@@ -155,10 +155,10 @@ void DataContainer::WriteData(std::string DataDirectory) {
         HistogramMaps3D[entry.first]->PrintCount(File);
         File.close();
         Filesize = Utilities::GetFileSize(Filename.str(), 2);
-        printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-        printf("%s[%07.3fMB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
-        printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
-        fflush(stdout);
+        // printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
+        // printf("%s[%07.3fMB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
+        // printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
+        // fflush(stdout);
         Filename.str("");
         Filename.clear();
 
@@ -169,10 +169,10 @@ void DataContainer::WriteData(std::string DataDirectory) {
         HistogramMaps3D[entry.first]->PrintTotal(File);
         File.close();
         Filesize = Utilities::GetFileSize(Filename.str(), 2);
-        printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-        printf("%s[%07.3fMB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
-        printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
-        fflush(stdout);
+        // printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
+        // printf("%s[%07.3fMB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
+        // printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
+        // fflush(stdout);
         Filename.str("");
         Filename.clear();
 
@@ -183,10 +183,10 @@ void DataContainer::WriteData(std::string DataDirectory) {
         HistogramMaps3D[entry.first]->PrintTotalSQR(File);
         File.close();
         Filesize = Utilities::GetFileSize(Filename.str(), 2);
-        printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-        printf("%s[%07.3fMB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
-        printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
-        fflush(stdout);
+        // printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
+        // printf("%s[%07.3fMB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
+        // printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
+        // fflush(stdout);
         Filename.str("");
         Filename.clear();
 
@@ -196,11 +196,11 @@ void DataContainer::WriteData(std::string DataDirectory) {
         File.open(Filename.str(), std::ios::out);
         HistogramMaps3D[entry.first]->PrintEdges(File);
         File.close();
-        Filesize = Utilities::GetFileSize(Filename.str(), 1);
-        printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-        printf("%s[%07.3fKB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
-        printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
-        fflush(stdout);
+        // Filesize = Utilities::GetFileSize(Filename.str(), 1);
+        // printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
+        // printf("%s[%07.3fKB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
+        // printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
+        // fflush(stdout);
         Filename.str("");
         Filename.clear();
     }
@@ -224,11 +224,11 @@ void DataContainer::WriteEventData(std::string DataDirectory) {
     }
     // std::cout << "iihello" << std::endl;
     File.close();
-    Filesize = Utilities::GetFileSize(Filename.str(), 2);
-    printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-    printf("%s[%07.3fMB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
-    printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
-    fflush(stdout);
+    // Filesize = Utilities::GetFileSize(Filename.str(), 2);
+    // printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
+    // printf("%s[%07.3fMB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
+    // printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
+    // fflush(stdout);
     Filename.str("");
     Filename.clear();
 };
