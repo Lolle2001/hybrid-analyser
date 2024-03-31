@@ -1,22 +1,68 @@
 #include "FileProcessor.hpp"
+
+void ReadSettings(Parameters& parameters, std::string filename) {
+    std::ifstream file;
+
+    // std::cout << filename.str() << std::endl;
+    bool after_equal = false;
+    file.open(filename, std::ios::in);
+    if (file.is_open()) {
+        std::string line;
+        std::string dummy1, dummy2, dummy3;
+        while (std::getline(file, line)) {
+            // std::cout << dummy1 << std::endl;
+
+            if (line.find("ipglasma_data_folder") != std::string::npos) {
+                std::istringstream iss(line);
+                iss >> dummy2 >> dummy3 >> parameters.ipglasma_data_folder;
+            }
+
+            if (line.find("iss_data_folder") != std::string::npos) {
+                std::istringstream iss(line);
+                iss >> dummy2 >> dummy3 >> parameters.iss_data_folder;
+            }
+
+            if (line.find("result_folder") != std::string::npos) {
+                std::istringstream iss(line);
+                iss >> dummy2 >> dummy3 >> parameters.result_folder;
+            }
+            if (line.find("ampt_data_folder") != std::string::npos) {
+                std::istringstream iss(line);
+                iss >> dummy2 >> dummy3 >> parameters.ampt_data_folder;
+            }
+        }
+    } else {
+        std::cout << "Failed to open file" << std::endl;
+    }
+
+    file.close();
+}
+
 namespace AMPT {
-void ReadFiles(int NRun, int NBatchMin, int NBatchMax, std::string Directory, int collisiontype) {
+void ReadFiles(int NRun, int NBatchMin, int NBatchMax, std::string Directory, Parameters& parameters, int collisiontype) {
     printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
     printf("%s : %d(%d)\n", "Reading data from run (size)", NRun, NBatchMax - NBatchMin + 1);
     fflush(stdout);
 
-    std::unique_ptr<Model::File_ampt> campt = std::make_unique<Model::File_ampt>();
+    // Directory = parameters.ampt_data_folder;
+
+    std::unique_ptr<Model::File_ampt> campt = std::make_unique<Model::File_ampt>(collisiontype);
 
     campt->InitializeDataContainer();
     std::vector<std::unique_ptr<Model::File_ampt>> data;
 
-    data.resize(NBatchMax - NBatchMin + 1);
-    // File_input * input;
     int BatchSize = NBatchMax - NBatchMin + 1;
 
+    data.resize(BatchSize);
+
+    // std::cout << BatchSize << std::endl;
+
     double FileSize = 0;
-    for (int i = NBatchMin; i <= NBatchMax; ++i) {
-        FileSize += Utilities::GetFileSize(Directory + "/" + std::to_string(NRun) + "/" + std::to_string(NRun) + "_" + std::to_string(i) + "/ana/ampt.dat", 3);
+    for (int i = 0; i < BatchSize; ++i) {
+        std::stringstream FileDirectory;
+        FileDirectory << Directory << "/" << NRun << "/" << NRun << "_" << i + NBatchMin << "/ana/ampt.dat";
+
+        FileSize += Utilities::GetFileSize(FileDirectory.str(), 3);
     }
     printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
     printf("%-14s : %s\n", "Reading data from", (Directory + "/" + std::to_string(NRun)).c_str());
@@ -25,65 +71,62 @@ void ReadFiles(int NRun, int NBatchMin, int NBatchMax, std::string Directory, in
     printf("%s : %s%.3f GB%s\n", "Total datasize to read", PP::HIGHLIGHT, FileSize, PP::RESET);
     fflush(stdout);
 
-    // int TotalNevent = 0;
+    std::string barstring = std::string(PP::BOLD) + std::string(PP::BLUE) + "[INFO] " + std::string(PP::RESET);
+    Utilities::Progressbar pbar(BatchSize);
+    pbar.SetFrontString(barstring);
 
-    // int nevent[50];
-    // for(int i = NBatchMin; i <= NBatchMax; ++i){
-    //     input = new File_input(Directory + std::to_string(NRun)+ "/" + std::to_string(NRun) + "_" + std::to_string(i) + "/ana/input.ampt");
-    //     input -> ReadFile();
-    //     TotalNevent += input -> NEVENT;
-    //     nevent[i] = input -> NEVENT;
+    printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
+    printf("%s\n", "Initializing histograms...");
+    fflush(stdout);
 
-    // }
-    // printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
-    // printf("%s : %s%d%s\n", "Total datasize to read", PP::HIGHLIGHT, TotalNevent, PP::RESET);
-    // fflush(stdout);
+    pbar.Print();
 
-    // std::cout << input -> IAT << " " << input -> IZT << std::endl;
-
-    for (int i = NBatchMin; i <= NBatchMax; ++i) {
-        data[i] = std::make_unique<Model::File_ampt>(Directory + "/" + std::to_string(NRun) + "/" + std::to_string(NRun) + "_" + std::to_string(i) + "/ana/ampt.dat", collisiontype);
-        data[i]->InitializeDataContainer();
-        // data[i] -> Data.SetParameters(input);
-        // data[i] -> Data.InitializeHistograms();
+#pragma omp parallel
+    {
+#pragma omp for
+        for (int i = 0; i < BatchSize; ++i) {
+            std::stringstream FileDirectory;
+            std::stringstream LogDirectory;
+            FileDirectory << Directory << "/" << NRun << "/" << NRun << "_" << i + NBatchMin << "/ana/ampt.dat";
+            LogDirectory << Directory << "/" << NRun << "/" << NRun << "_" << i + NBatchMin << "/" << NRun << "_" << i + NBatchMin << ".log";
+            data[i] = std::make_unique<Model::File_ampt>(LogDirectory.str(), FileDirectory.str(), collisiontype);
+            data[i]->InitializeDataContainer();
+            // data[i]->ParseLog();
+            pbar.Update();
+#pragma omp critical
+            {
+                pbar.Print();
+            }
+        }
     }
 
     Utilities::Duration Clock('M');
     Clock.Start();
-    int Counter = 0;
-    // progressbar bar(BatchSize);
+    printf("\n");
+    fflush(stdout);
+    pbar.Reset();
+    printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
+    printf("%s\n", "Reading files...");
+    fflush(stdout);
+    pbar.Print();
 
-    std::string barstring = std::string(PP::BOLD) + std::string(PP::BLUE) + "[INFO]" + std::string(PP::RESET);
-    const int BarWidth = 60;
-    std::cout << barstring << " [";
-    std::cout << std::setw(BarWidth) << std::left << Utilities::repeat((int)((float)Counter / BatchSize * BarWidth), "#");
-    std::cout << "] ";
-    std::cout << std::setw(3) << std::right << (int)((float)Counter / BatchSize * 100);
-    std::cout << "%\r";
-    std::cout.flush();
 #pragma omp parallel
     {
 #pragma omp for
-        for (int i = NBatchMin; i <= NBatchMax; ++i) {
+        for (int i = 0; i < BatchSize; ++i) {
             data[i]->Parse();
-#pragma omp atomic
-            Counter++;
 
+            pbar.Update();
 #pragma omp critical
             {
-                std::cout << barstring << " [";
-                std::cout << std::setw(BarWidth) << std::left << Utilities::repeat((int)((float)Counter / BatchSize * BarWidth), "#");
-                std::cout << "] ";
-                std::cout << std::setw(3) << std::right << (int)((float)Counter / BatchSize * 100);
-                std::cout << "%\r";
-                std::cout.flush();
+                pbar.Print();
             }
         }
     }
     printf("\n");
     fflush(stdout);
 
-    for (int i = NBatchMin; i <= NBatchMax; ++i) {
+    for (int i = 0; i < BatchSize; ++i) {
         *campt += *data[i];
     }
 
@@ -123,39 +166,6 @@ void ReadFiles(int NRun, int NBatchMin, int NBatchMax, std::string Directory, in
 }  // namespace AMPT
 
 namespace iSS {
-void ReadSettings(Parameters& parameters, std::string filename) {
-    std::ifstream file;
-
-    // std::cout << filename.str() << std::endl;
-    bool after_equal = false;
-    file.open(filename, std::ios::in);
-    if (file.is_open()) {
-        std::string line;
-        std::string dummy1, dummy2, dummy3;
-        while (std::getline(file, line)) {
-            // std::cout << dummy1 << std::endl;
-
-            if (line.find("ipglasma_data_folder") != std::string::npos) {
-                std::istringstream iss(line);
-                iss >> dummy2 >> dummy3 >> parameters.ipglasma_data_folder;
-            }
-
-            if (line.find("iss_data_folder") != std::string::npos) {
-                std::istringstream iss(line);
-                iss >> dummy2 >> dummy3 >> parameters.iss_data_folder;
-            }
-
-            if (line.find("result_folder") != std::string::npos) {
-                std::istringstream iss(line);
-                iss >> dummy2 >> dummy3 >> parameters.result_folder;
-            }
-        }
-    } else {
-        std::cout << "Failed to open file" << std::endl;
-    }
-
-    file.close();
-}
 
 // If initial state info is coppied into the correct music folder and then iss folder,
 // then initial state info can be accessed more easily. Or a file should be made where
@@ -192,7 +202,7 @@ Statistics::Block_iss GetInitialStateInfo(int NRun, int eventid, Parameters& par
             if (dummy1.find("Ncoll = ") != std::string::npos) {
                 std::istringstream iss(dummy1);
                 iss >> dummy2 >> dummy3 >> value;
-                block.SetNumberOfCollidingNucleons(value);
+                block.SetNumberOfBinaryCollisions(value);
             }
         }
     } else {
@@ -211,7 +221,7 @@ void ReadFiles(int iSSRun, int IPGlasmaRun, int NEvent, std::string parameternam
     Parameters parameters;
     ReadSettings(parameters, parametername);
 
-    std::unique_ptr<Model::File_iss> ciss = std::make_unique<Model::File_iss>();
+    std::unique_ptr<Model::File_iss> ciss = std::make_unique<Model::File_iss>(collisiontype);
     ciss->InitializeDataContainer();
     std::vector<std::unique_ptr<Model::File_iss>> data;
 
@@ -231,48 +241,60 @@ void ReadFiles(int iSSRun, int IPGlasmaRun, int NEvent, std::string parameternam
     printf("%s : %s%.3f GB%s\n", "Total datasize to read", PP::HIGHLIGHT, FileSize, PP::RESET);
     fflush(stdout);
 
-    for (int i = 0; i < NEvent; ++i) {
-        Statistics::Block_iss block = GetInitialStateInfo(IPGlasmaRun, i, parameters);
+    std::string barstring = std::string(PP::BOLD) + std::string(PP::BLUE) + "[INFO] " + std::string(PP::RESET);
+    Utilities::Progressbar pbar(NEvent);
+    pbar.SetFrontString(barstring);
 
-        block.SetEventID(i);
-        std::stringstream directory;
-        directory << parameters.iss_data_folder << "/" << iSSRun << "/" << iSSRun << "_" << std::to_string(i) << "/particle_samples.bin";
+    printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
+    printf("%s\n", "Initializing histograms...");
+    fflush(stdout);
 
-        data[i] = std::make_unique<Model::File_iss>(directory.str(), collisiontype);
-        data[i]->SetInitialState(block);
-        data[i]->InitializeDataContainer();
+    pbar.Print();
+
+#pragma omp parallel
+    {
+#pragma omp for
+        for (int i = 0; i < NEvent; ++i) {
+            Statistics::Block_iss block = GetInitialStateInfo(IPGlasmaRun, i, parameters);
+
+            block.SetEventID(i);
+            std::stringstream directory;
+            directory << parameters.iss_data_folder << "/" << iSSRun << "/" << iSSRun << "_" << std::to_string(i) << "/particle_samples.bin";
+
+            data[i] = std::make_unique<Model::File_iss>(directory.str(), collisiontype);
+            data[i]->SetInitialState(block);
+            data[i]->InitializeDataContainer();
+
+            pbar.Update();
+#pragma omp critical
+            {
+                pbar.Print();
+            }
+        }
     }
 
     Utilities::Duration Clock('M');
     Clock.Start();
+    printf("\n");
+    fflush(stdout);
+    pbar.Reset();
+    printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
+    printf("%s\n", "Reading files...");
+    fflush(stdout);
 
-    int Counter = 0;
-    // progressbar bar(BatchSize);
+    pbar.Print();
 
-    std::string barstring = std::string(PP::BOLD) + std::string(PP::BLUE) + "[INFO]" + std::string(PP::RESET);
-    const int BarWidth = 60;
-    std::cout << barstring << " [";
-    std::cout << std::setw(BarWidth) << std::left << Utilities::repeat((int)((float)Counter / NEvent * BarWidth), "#");
-    std::cout << "] ";
-    std::cout << std::setw(3) << std::right << (int)((float)Counter / NEvent * 100);
-    std::cout << "%\r";
-    std::cout.flush();
 #pragma omp parallel
     {
 #pragma omp for
         for (int i = 0; i < NEvent; ++i) {
             data[i]->Parse();
-#pragma omp atomic
-            Counter++;
+
+            pbar.Update();
 
 #pragma omp critical
             {
-                std::cout << barstring << " [";
-                std::cout << std::setw(BarWidth) << std::left << Utilities::repeat((int)((float)Counter / NEvent * BarWidth), "#");
-                std::cout << "] ";
-                std::cout << std::setw(3) << std::right << (int)((float)Counter / NEvent * 100);
-                std::cout << "%\r";
-                std::cout.flush();
+                pbar.Print();
             }
         }
     }

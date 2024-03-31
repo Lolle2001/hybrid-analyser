@@ -16,9 +16,16 @@ Histogram1D::Histogram1D(
     InitializeIndexMap();
 }
 
-// Histogram1D::Histogram1D(
+Histogram1D::Histogram1D(std::shared_ptr<BinContainer> bincontainerX) {
+    nx = bincontainerX->n;
+    Resize(nx);
+    x_width = bincontainerX->width;
+    x_max = bincontainerX->max;
+    x_min = bincontainerX->min;
+    EdgesX = bincontainerX->Edges;
+    IndexMapX = bincontainerX->IndexMap;
+}
 
-// )
 void Histogram1D::Resize(int& nx_) {
     Contents.resize(nx_);
 }

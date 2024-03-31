@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 
+#include "BinContainer.hpp"
 #include "Messenger.hpp"
 #include "StatisticsContainer.hpp"
 #include "Utilities.hpp"
@@ -20,7 +21,7 @@ class Histogram1D {
    private:
     Vector1D Contents;
 
-    int nx, ny, nz;
+    int nx;
 
     std::map<int, int> IndexMapX;
 
@@ -35,7 +36,10 @@ class Histogram1D {
     // Histogram1D(int & nx_);
     Histogram1D(std::vector<double> EdgesX_);
 
-    void Resize(int& nx_);
+    Histogram1D(std::shared_ptr<BinContainer> bincontainerX);
+
+    void
+    Resize(int& nx_);
 
     void InitializeIndexMap();
 

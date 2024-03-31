@@ -13,6 +13,7 @@ void Main(int argc, char* argv[]) {
     std::string Directory;
     int collisiontype;
     int LowerNBatch = 1;
+    std::string ParameterFile;
 
     // std::cout << "hallo" << std::endl;
 
@@ -20,6 +21,7 @@ void Main(int argc, char* argv[]) {
     bool flag_nb = false;
     bool flag_dir = false;
     bool flag_col = false;
+    bool flag_par = false;
 
     for (int i = 1; i < argc - 1; ++i) {
         // std::cout << i << " " << argv[i] << std::endl;
@@ -48,13 +50,23 @@ void Main(int argc, char* argv[]) {
             // flag_col = true;
             i++;
         }
+        if (std::string(argv[i]).compare("-par") == 0) {
+            ParameterFile = argv[i + 1];
+            flag_par = true;
+            i++;
+        }
     }
+    if (!flag_par) {
+        ParameterFile = "ProcessParameters.par";
+    }
+    Parameters parameters;
+    ReadSettings(parameters, ParameterFile);
     // std::cout << "hallo" << std::endl;
     if (!flag_nr) {
         NRun = std::stoi(argv[2]);
     }
     if (!flag_dir) {
-        Directory = "/home/lieuwe/Documents/Software/AMPT/data";
+        Directory = parameters.ampt_data_folder;
     }
     if (!flag_nb) {
         NBatch = Utilities::GetNBatch(Directory + "/" + std::to_string(NRun));
@@ -62,6 +74,7 @@ void Main(int argc, char* argv[]) {
     if (!flag_col) {
         collisiontype = 0;
     }
+
     std::string centralitybinningname;
     if (collisiontype == 0) {
         centralitybinningname = "Pb-Pb at 5.02 TeV (0-5-10-20-..90-100)";
@@ -82,6 +95,7 @@ void Main(int argc, char* argv[]) {
     printf("%s│%s %-68s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Made by Lieuwe Huisman", PP::HIGHLIGHT, PP::RESET);
     printf("%s│%s %-68s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Made for AMPT version: v23.02.2024", PP::HIGHLIGHT, PP::RESET);
     printf("%s├%-70s┤%s\n", PP::HIGHLIGHT, Utilities::repeat(70, "─").c_str(), PP::RESET);
+    printf("%s│%s %-18s : %-47d %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Number of Threads", omp_get_num_procs(), PP::HIGHLIGHT, PP::RESET);
     printf("%s│%s %-18s : %-47s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Runnumber", std::to_string(NRun).c_str(), PP::HIGHLIGHT, PP::RESET);
     printf("%s│%s %-18s : %-47s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Batchnumber", std::to_string(NBatch).c_str(), PP::HIGHLIGHT, PP::RESET);
     if (LowerNBatch > 1) {
@@ -91,7 +105,7 @@ void Main(int argc, char* argv[]) {
     printf("%s│%s %-18s : %-47s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Centrality Binning", centralitybinningname.c_str(), PP::HIGHLIGHT, PP::RESET);
     printf("%s╰%-70s╯%s\n", PP::HIGHLIGHT, Utilities::repeat(70, "─").c_str(), PP::RESET);
 
-    AMPT::ReadFiles(NRun, LowerNBatch, NBatch, Directory, collisiontype);
+    AMPT::ReadFiles(NRun, LowerNBatch, NBatch, Directory, parameters, collisiontype);
 
     // AMPT::File_ampt* ampt = Model::CombineAMPT(NRun, LowerNBatch, NBatch, Directory + "/", 20, collisiontype);
     // AMPT::File_input* input = Model::Combine_file_input(NRun, LowerNBatch, NBatch, Directory + "/");
@@ -183,6 +197,7 @@ void Main(int argc, char* argv[]) {
     printf("%s│%s %-68s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Version 3.1.0", PP::HIGHLIGHT, PP::RESET);
     printf("%s│%s %-68s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Made by Lieuwe Huisman", PP::HIGHLIGHT, PP::RESET);
     printf("%s├%-70s┤%s\n", PP::HIGHLIGHT, Utilities::repeat(70, "─").c_str(), PP::RESET);
+    printf("%s│%s %-18s : %-47d %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Number of Threads", omp_get_num_procs(), PP::HIGHLIGHT, PP::RESET);
     printf("%s│%s %-18s : %-47s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Runnumber", std::to_string(NRun).c_str(), PP::HIGHLIGHT, PP::RESET);
     printf("%s│%s %-18s : %-47s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "IPGlasma runnumber", std::to_string(IPGlasmaRun).c_str(), PP::HIGHLIGHT, PP::RESET);
     printf("%s│%s %-18s : %-47s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Number of events", std::to_string(NEvent).c_str(), PP::HIGHLIGHT, PP::RESET);
@@ -195,7 +210,7 @@ void Main(int argc, char* argv[]) {
 };  // namespace iSS
 
 int main(int argc, char* argv[]) {
-    if (argc > 2) {
+        if (argc > 2) {
         if (std::string(argv[1]).compare("hydro") == 0) {
             iSS::Main(argc, argv);
         } else if (std::string(argv[1]).compare("transport") == 0) {

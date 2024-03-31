@@ -114,14 +114,15 @@ class Block {
     int NumberOfParticles;
     double ImpactParameter;
     int NumberOfParticipantNucleons;
+    int NumberOfBinaryCollisions;
     double ReactionPlaneAngle;
 
    public:
-    Block() : EventID(0), NumberOfParticles(0), ImpactParameter(0.0), NumberOfParticipantNucleons(0), ReactionPlaneAngle(0.0){};
+    Block() : EventID(0), NumberOfParticles(0), ImpactParameter(0.0), NumberOfParticipantNucleons(0), NumberOfBinaryCollisions(0), ReactionPlaneAngle(0.0){};
 
     Block(int eventID, int numParticles, double impactParam,
-          int numParticipantNucleons, double reactionPlaneAngle)
-        : EventID(eventID), NumberOfParticles(numParticles), ImpactParameter(impactParam), NumberOfParticipantNucleons(numParticipantNucleons), ReactionPlaneAngle(reactionPlaneAngle) {}
+          int numParticipantNucleons, int numBinaryCollisions, double reactionPlaneAngle)
+        : EventID(eventID), NumberOfParticles(numParticles), NumberOfBinaryCollisions(numBinaryCollisions), ImpactParameter(impactParam), NumberOfParticipantNucleons(numParticipantNucleons), ReactionPlaneAngle(reactionPlaneAngle) {}
 
     void SetEventID(int EventID_) { EventID = EventID_; }
     void SetNumberOfParticles(int NumberOfParticles_) {
@@ -136,12 +137,18 @@ class Block {
     void SetReactionPlaneAngle(double ReactionPlaneAngle_) {
         ReactionPlaneAngle = ReactionPlaneAngle_;
     };
+    void SetNumberOfBinaryCollisions(int NumberOfBinaryCollisions_) {
+        NumberOfBinaryCollisions = NumberOfBinaryCollisions_;
+    }
 
     int GetEventID() const { return EventID; };
     int GetNumberOfParticles() const { return NumberOfParticles; }
     double& GetImpactParameter() { return ImpactParameter; }
     int GetNumberOfParticipantNucleons() const {
         return NumberOfParticipantNucleons;
+    }
+    int GetNumberOfBinaryCollisions() const {
+        return NumberOfBinaryCollisions;
     }
     double GetReactionPlaneAngle() const { return ReactionPlaneAngle; }
 
@@ -150,6 +157,7 @@ class Block {
                << std::setw(9) << std::left << NumberOfParticles << " "
                << std::scientific << std::setw(13) << std::left << ImpactParameter << " "
                << std::setw(4) << std::left << NumberOfParticipantNucleons << " "
+               << std::setw(6) << std::left << NumberOfBinaryCollisions << " "
                << std::scientific << std::setw(13) << ReactionPlaneAngle;
     }
 };
@@ -158,16 +166,16 @@ class Block {
 
 class Block_iss : public Block {
    private:
-    int NumberOfCollidingNucleons;
+    // int NumberOfCollidingNucleons;
 
    public:
     Block_iss() : Block(){};
-    void SetNumberOfCollidingNucleons(int NumberOfCollidingNucleons_) { NumberOfCollidingNucleons = NumberOfCollidingNucleons_; }
+    // void SetNumberOfCollidingNucleons(int NumberOfCollidingNucleons_) { NumberOfCollidingNucleons = NumberOfCollidingNucleons_; }
 
     void Write(std::ostream& output) const override {
         Block::Write(output);
-        output << " "
-               << std::setw(4) << std::left << NumberOfCollidingNucleons;
+        // output << " "
+        //        << std::setw(4) << std::left << NumberOfCollidingNucleons;
     }
 };
 

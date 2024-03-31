@@ -7,6 +7,7 @@
 
 #include "ParticleProperties.hpp"
 // #include "File_input.hpp"
+#include "BinContainer.hpp"
 #include "DataFormat.hpp"
 #include "Histogram1D.hpp"
 #include "Histogram3D.hpp"

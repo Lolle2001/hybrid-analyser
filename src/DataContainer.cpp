@@ -300,7 +300,8 @@ void DataContainer::operator+=(DataContainer const &obj) {
 };
 
 void DataContainer::InitialiseHistograms() {
-    centrality_type = "1:PbPb5020";
+    // centrality_type = "1:PbPb5020";
+    // std::cout << centrality_type << std::endl;
 
     EdgesC["1:PbPb5020"] = (std::vector<double>){0.00, 3.49, 4.93, 6.98, 8.55, 9.87, 11.00, 12.10, 13.10, 14.00, 14.90, 20.00};
     // EdgesC["2:PbPb5020"] = (std::vector<double>){0.00,3.49,4.93,6.04,6.98,7.80,8.55,9.23,9.87,10.50,11.00,11.60,12.10,12.60,13.10,13.50,14.00,14.40,14.90,15.60,20.00};
@@ -361,6 +362,7 @@ void DataContainer::InitialiseHistograms() {
     // EdgesMom["4:pi+_pi-"]  = (std::vector<double>){0.3 ,  0.35,  0.4 ,  0.45,  0.5 ,  0.55,  0.6 ,  0.65,  0.7 , 0.75,  0.8 ,  0.85,  0.9 ,  0.95,  1.  ,  1.1 ,  1.2 ,  1.3 , 1.4 ,  1.5 ,  1.6 ,  1.7 ,  1.8 ,  1.9 ,  2.  ,  2.2 ,  2.4 , 2.6 ,  2.8 ,  3.  ,  3.2 ,  3.4 ,  3.6 ,  3.8 ,  4.  ,  4.5 , 5.  ,  5.5 ,  6.  ,  6.5 ,  7.  ,  8.  ,  9.  , 10.  , 11.  , 12.  , 13.  , 14.  , 15.  , 16.  , 18.  , 20. };
 
     // HISTOGRAMS
+    // std::shared_ptr<BinContainer> bincontainer = std::make_shared<BinContainer>(EdgesC[centrality_type]);
 
     Histograms3D["meanpt_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
 
@@ -373,6 +375,8 @@ void DataContainer::InitialiseHistograms() {
     Histograms3D["yield_charged"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
 
     Histograms3D["pt_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:p_pbar"], EdgesRap["1:p_pbar"]);
+    Histograms3D["pt_chlambdas"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:p_pbar"], EdgesRap["1:p_pbar"]);
+    Histograms3D["pt_chneutrons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:p_pbar"], EdgesRap["1:p_pbar"]);
     Histograms3D["pt_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:K+_K-"], EdgesRap["1:K+_K-"]);
     Histograms3D["pt_chpions"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:pi+_pi-"], EdgesRap["1:pi+_pi-"]);
     Histograms3D["pt_charged"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:charged"], EdgesRap["1:charged"]);
@@ -438,6 +442,7 @@ void DataContainer::InitialiseHistograms() {
 
     Histograms1D["impactparameter"] = std::make_unique<Histogram1D>(EdgesC[centrality_type]);
     Histograms1D["participation"] = std::make_unique<Histogram1D>(EdgesC[centrality_type]);
+    Histograms1D["binarycollisions"] = std::make_unique<Histogram1D>(EdgesC[centrality_type]);
     // Histograms1D["participation_2"]   = std::make_unique<Histogram1D>(EdgesC["2:PbPb5020"]);
 
     Filenames["meanpt_chprotons"] = "meanpt_chprotons";
@@ -450,6 +455,8 @@ void DataContainer::InitialiseHistograms() {
     Filenames["yield_charged"] = "yield_charged";
 
     Filenames["pt_chprotons"] = "pt_chprotons";
+    Filenames["pt_chlambdas"] = "pt_chlambdas";
+    Filenames["pt_chneutrons"] = "pt_chneutrons";
     Filenames["pt_chkaons"] = "pt_chkaons";
     Filenames["pt_chpions"] = "pt_chpions";
     Filenames["pt_charged"] = "pt_charged";
@@ -474,6 +481,7 @@ void DataContainer::InitialiseHistograms() {
 
     Filenames["impactparameter"] = "impactparameter";
     Filenames["participation"] = "participation";
+    Filenames["binarycollisions"] = "binarycollisions";
     // Filenames["participation_2"]    = "participation_2";
 
     Filenames["rap_chprotons"] = "rap_chprotons";
@@ -575,6 +583,10 @@ void DataContainer::AddParticle(Statistics::Block &block, Statistics::Line &line
         Histograms3D["v3_3_chprotons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
         Histograms3D["v4_3_chprotons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
         Histograms3D["v5_3_chprotons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+    } else if (line.GetParticlePythiaID() == 2112 | line.GetParticlePythiaID() == -2112) {
+        Histograms3D["pt_chneutrons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+    } else if (line.GetParticlePythiaID() == 3122 | line.GetParticlePythiaID() == -3122) {
+        Histograms3D["pt_chlambdas"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
     }
     if (ChargeMap[line.GetParticlePythiaID()] != 0) {
         Histograms3D["pt_charged"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
@@ -600,6 +612,7 @@ void DataContainer::AddParticle(Statistics::Block &block, Statistics::Line &line
 void DataContainer::AddEvent(Statistics::Block &block) {
     Histograms1D["impactparameter"]->Add(block.GetImpactParameter(), block.GetImpactParameter());
     Histograms1D["participation"]->Add(block.GetImpactParameter(), block.GetNumberOfParticipantNucleons());
+    Histograms1D["binarycollisions"]->Add(block.GetImpactParameter(), block.GetNumberOfBinaryCollisions());
     Histograms3D["pt_chpions"]->AddEvent();
     Histograms3D["pt_ratio_chpions_to_chkaons"]->AddEvent();
     Histograms3D["pt_ratio_chpions_to_chprotons"]->AddEvent();
