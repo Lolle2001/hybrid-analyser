@@ -49,7 +49,9 @@ class DataContainer {
     int nharmonic_max = NUMBER_OF_HARMONICS;
 
    public:
-    DataContainer(){};
+    DataContainer(){
+
+    };
 
     // In derived classes this can be specified further.
     void InitialiseHistograms();

@@ -136,6 +136,10 @@ class Histogram3D {
         return EdgesZ;
     }
 
+    StatisticsContainer& GetContent(int ix, int iy, int iz) {
+        return Contents[ix][iy][iz];
+    }
+
     StatisticsContainer& operator()(int& ix, int& iy, int& iz);
     Vector1D& operator()(int& ix, int& iy);
     Vector2D& operator()(int& ix);

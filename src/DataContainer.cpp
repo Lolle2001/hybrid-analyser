@@ -239,6 +239,7 @@ void DataContainer::Add(DataContainer const &obj) {
             obj.Histograms1D.find(entry.first) != obj.Histograms1D.end()) {
             // Check if both histograms exist before attempting to add them
             *Histograms1D.at(entry.first) += *obj.Histograms1D.at(entry.first);
+
         } else {
 #pragma omp critical
             {
@@ -254,6 +255,8 @@ void DataContainer::Add(DataContainer const &obj) {
             obj.Histograms3D.find(entry.first) != obj.Histograms3D.end()) {
             // Check if both histograms exist before attempting to add them
             *Histograms3D.at(entry.first) += *obj.Histograms3D.at(entry.first);
+            // std::cout << entry.first << " " << Histograms3D[entry.first]->GetContent(0, 0, 0).EntryCount << std::endl;
+
         }
 
         else {
@@ -267,12 +270,8 @@ void DataContainer::Add(DataContainer const &obj) {
     }
 
     for (const auto &entry : HistogramMaps3D) {
-        if (HistogramMaps3D.find(entry.first) != HistogramMaps3D.end() &&
-            obj.HistogramMaps3D.find(entry.first) !=
-                obj.HistogramMaps3D.end()) {
-            // Check if both histograms exist before attempting to add them
-            *HistogramMaps3D.at(entry.first) +=
-                *obj.HistogramMaps3D.at(entry.first);
+        if (HistogramMaps3D.find(entry.first) != HistogramMaps3D.end() && obj.HistogramMaps3D.find(entry.first) != obj.HistogramMaps3D.end()) {
+            *HistogramMaps3D.at(entry.first) += *obj.HistogramMaps3D.at(entry.first);
         } else {
 #pragma omp critical
             {
@@ -365,14 +364,19 @@ void DataContainer::InitialiseHistograms() {
     // std::shared_ptr<BinContainer> bincontainer = std::make_shared<BinContainer>(EdgesC[centrality_type]);
 
     Histograms3D["meanpt_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
-
     Histograms3D["meanpt_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
     Histograms3D["meanpt_chpions"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
     Histograms3D["meanpt_charged"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
-    Histograms3D["yield_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
-    Histograms3D["yield_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
-    Histograms3D["yield_chpions"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
-    Histograms3D["yield_charged"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+
+    Histograms3D["dNdy_1_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+    Histograms3D["dNdy_1_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+    Histograms3D["dNdy_1_chpions"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+    Histograms3D["dNdy_1_charged"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+
+    Histograms3D["dNdeta_1_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+    Histograms3D["dNdeta_1_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+    Histograms3D["dNdeta_1_chpions"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+    Histograms3D["dNdeta_1_charged"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
 
     Histograms3D["pt_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:p_pbar"], EdgesRap["1:p_pbar"]);
     Histograms3D["pt_chlambdas"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:p_pbar"], EdgesRap["1:p_pbar"]);
@@ -380,28 +384,35 @@ void DataContainer::InitialiseHistograms() {
     Histograms3D["pt_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:K+_K-"], EdgesRap["1:K+_K-"]);
     Histograms3D["pt_chpions"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:pi+_pi-"], EdgesRap["1:pi+_pi-"]);
     Histograms3D["pt_charged"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:charged"], EdgesRap["1:charged"]);
+
     Histograms3D["v2_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:p_pbar"], EdgesRap["2:p_pbar"]);
     Histograms3D["v2_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:K+_K-"], EdgesRap["2:K+_K-"]);
     Histograms3D["v2_chpions"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:pi+_pi-"], EdgesRap["2:pi+_pi-"]);
     Histograms3D["v2_charged"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:charged"], EdgesRap["2:charged"]);
+
     Histograms3D["v3_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:p_pbar"], EdgesRap["2:p_pbar"]);
     Histograms3D["v3_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:K+_K-"], EdgesRap["2:K+_K-"]);
     Histograms3D["v3_chpions"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:pi+_pi-"], EdgesRap["2:pi+_pi-"]);
     Histograms3D["v3_charged"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:charged"], EdgesRap["2:charged"]);
+
     Histograms3D["v4_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:p_pbar"], EdgesRap["2:p_pbar"]);
     Histograms3D["v4_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:K+_K-"], EdgesRap["2:K+_K-"]);
     Histograms3D["v4_chpions"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:pi+_pi-"], EdgesRap["2:pi+_pi-"]);
     Histograms3D["v4_charged"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:charged"], EdgesRap["2:charged"]);
+
     Histograms3D["v5_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:p_pbar"], EdgesRap["2:p_pbar"]);
     Histograms3D["v5_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:K+_K-"], EdgesRap["2:K+_K-"]);
     Histograms3D["v5_chpions"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:pi+_pi-"], EdgesRap["2:pi+_pi-"]);
     Histograms3D["v5_charged"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:charged"], EdgesRap["2:charged"]);
+
     Histograms3D["pt_ratio_chpions_to_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:K+_K-"], EdgesRap["1:K+_K-"]);
     Histograms3D["pt_ratio_chpions_to_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:p_pbar"], EdgesRap["1:p_pbar"]);
+
     Histograms3D["rap_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["3:p_pbar"], EdgesRap["3:p_pbar"]);
     Histograms3D["rap_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["3:K+_K-"], EdgesRap["3:K+_K-"]);
     Histograms3D["rap_chpions"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["3:pi+_pi-"], EdgesRap["3:pi+_pi-"]);
     Histograms3D["rap_charged"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["3:charged"], EdgesRap["3:charged"]);
+
     Histograms3D["psrap_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["3:p_pbar"], EdgesRap["3:p_pbar"]);
     Histograms3D["psrap_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["3:K+_K-"], EdgesRap["3:K+_K-"]);
     Histograms3D["psrap_chpions"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["3:pi+_pi-"], EdgesRap["3:pi+_pi-"]);
@@ -411,30 +422,37 @@ void DataContainer::InitialiseHistograms() {
     Histograms3D["v2_2_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["4:K+_K-"], EdgesRap["4:K+_K-"]);
     Histograms3D["v2_2_chpions"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["4:pi+_pi-"], EdgesRap["4:pi+_pi-"]);
     Histograms3D["v2_2_charged"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["4:charged"], EdgesRap["4:charged"]);
+
     Histograms3D["v3_2_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["4:p_pbar"], EdgesRap["4:p_pbar"]);
     Histograms3D["v3_2_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["4:K+_K-"], EdgesRap["4:K+_K-"]);
     Histograms3D["v3_2_chpions"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["4:pi+_pi-"], EdgesRap["4:pi+_pi-"]);
     Histograms3D["v3_2_charged"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["4:charged"], EdgesRap["4:charged"]);
+
     Histograms3D["v4_2_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["4:p_pbar"], EdgesRap["4:p_pbar"]);
     Histograms3D["v4_2_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["4:K+_K-"], EdgesRap["4:K+_K-"]);
     Histograms3D["v4_2_chpions"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["4:pi+_pi-"], EdgesRap["4:pi+_pi-"]);
     Histograms3D["v4_2_charged"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["4:charged"], EdgesRap["4:charged"]);
+
     Histograms3D["v5_2_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["4:p_pbar"], EdgesRap["4:p_pbar"]);
     Histograms3D["v5_2_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["4:K+_K-"], EdgesRap["4:K+_K-"]);
     Histograms3D["v5_2_chpions"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["4:pi+_pi-"], EdgesRap["4:pi+_pi-"]);
     Histograms3D["v5_2_charged"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["4:charged"], EdgesRap["4:charged"]);
+
     Histograms3D["v2_3_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["5:p_pbar"], EdgesRap["5:p_pbar"]);
     Histograms3D["v2_3_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["5:K+_K-"], EdgesRap["5:K+_K-"]);
     Histograms3D["v2_3_chpions"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["5:pi+_pi-"], EdgesRap["5:pi+_pi-"]);
     Histograms3D["v2_3_charged"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["5:charged"], EdgesRap["5:charged"]);
+
     Histograms3D["v3_3_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["5:p_pbar"], EdgesRap["5:p_pbar"]);
     Histograms3D["v3_3_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["5:K+_K-"], EdgesRap["5:K+_K-"]);
     Histograms3D["v3_3_chpions"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["5:pi+_pi-"], EdgesRap["5:pi+_pi-"]);
     Histograms3D["v3_3_charged"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["5:charged"], EdgesRap["5:charged"]);
+
     Histograms3D["v4_3_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["5:p_pbar"], EdgesRap["5:p_pbar"]);
     Histograms3D["v4_3_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["5:K+_K-"], EdgesRap["5:K+_K-"]);
     Histograms3D["v4_3_chpions"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["5:pi+_pi-"], EdgesRap["5:pi+_pi-"]);
     Histograms3D["v4_3_charged"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["5:charged"], EdgesRap["5:charged"]);
+
     Histograms3D["v5_3_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["5:p_pbar"], EdgesRap["5:p_pbar"]);
     Histograms3D["v5_3_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["5:K+_K-"], EdgesRap["5:K+_K-"]);
     Histograms3D["v5_3_chpions"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["5:pi+_pi-"], EdgesRap["5:pi+_pi-"]);
@@ -449,10 +467,16 @@ void DataContainer::InitialiseHistograms() {
     Filenames["meanpt_chkaons"] = "meanpt_chkaons";
     Filenames["meanpt_chpions"] = "meanpt_chpions";
     Filenames["meanpt_charged"] = "meanpt_charged";
-    Filenames["yield_chprotons"] = "yield_chprotons";
-    Filenames["yield_chkaons"] = "yield_chkaons";
-    Filenames["yield_chpions"] = "yield_chpions";
-    Filenames["yield_charged"] = "yield_charged";
+
+    Filenames["dNdy_1_chprotons"] = "dNdy_1_chprotons";
+    Filenames["dNdy_1_chkaons"] = "dNdy_1_chkaons";
+    Filenames["dNdy_1_chpions"] = "dNdy_1_chpions";
+    Filenames["dNdy_1_charged"] = "dNdy_1_charged";
+
+    Filenames["dNdeta_1_chprotons"] = "dNdeta_1_chprotons";
+    Filenames["dNdeta_1_chkaons"] = "dNdeta_1_chkaons";
+    Filenames["dNdeta_1_chpions"] = "dNdeta_1_chpions";
+    Filenames["dNdeta_1_charged"] = "dNdeta_1_charged";
 
     Filenames["pt_chprotons"] = "pt_chprotons";
     Filenames["pt_chlambdas"] = "pt_chlambdas";
@@ -529,7 +553,8 @@ void DataContainer::InitialiseHistograms() {
 void DataContainer::AddParticle(Statistics::Block &block, Statistics::Line &line) {
     if (line.GetParticlePythiaID() == 211 | line.GetParticlePythiaID() == -211) {
         Histograms3D["pt_chpions"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
-        Histograms3D["yield_chpions"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["dNdy_1_chpions"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["dNdeta_1_chpions"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
         Histograms3D["meanpt_chpions"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetTransverseMomentum());
         Histograms3D["rap_chpions"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
         Histograms3D["psrap_chpions"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
@@ -549,7 +574,8 @@ void DataContainer::AddParticle(Statistics::Block &block, Statistics::Line &line
         Histograms3D["pt_ratio_chpions_to_chprotons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
     } else if (line.GetParticlePythiaID() == 321 | line.GetParticlePythiaID() == -321) {
         Histograms3D["pt_chkaons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
-        Histograms3D["yield_chkaons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["dNdy_1_chkaons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["dNdeta_1_chkaons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
         Histograms3D["meanpt_chkaons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetTransverseMomentum());
         Histograms3D["rap_chkaons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
         Histograms3D["psrap_chkaons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
@@ -567,7 +593,8 @@ void DataContainer::AddParticle(Statistics::Block &block, Statistics::Line &line
         Histograms3D["v5_3_chkaons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
     } else if (line.GetParticlePythiaID() == 2212 | line.GetParticlePythiaID() == -2212) {
         Histograms3D["pt_chprotons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
-        Histograms3D["yield_chprotons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["dNdy_1_chprotons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["dNdeta_1_chprotons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
         Histograms3D["meanpt_chprotons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetTransverseMomentum());
         Histograms3D["rap_chprotons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
         Histograms3D["psrap_chprotons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
@@ -590,7 +617,8 @@ void DataContainer::AddParticle(Statistics::Block &block, Statistics::Line &line
     }
     if (ChargeMap[line.GetParticlePythiaID()] != 0) {
         Histograms3D["pt_charged"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
-        Histograms3D["yield_charged"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["dNdy_1_charged"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["dNdeta_1_charged"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
         Histograms3D["meanpt_charged"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetTransverseMomentum());
         Histograms3D["rap_charged"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
         Histograms3D["psrap_charged"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
@@ -619,10 +647,14 @@ void DataContainer::AddEvent(Statistics::Block &block) {
     Histograms3D["pt_chkaons"]->AddEvent();
     Histograms3D["pt_chprotons"]->AddEvent();
     Histograms3D["pt_charged"]->AddEvent();
-    Histograms3D["yield_chpions"]->AddEvent();
-    Histograms3D["yield_chkaons"]->AddEvent();
-    Histograms3D["yield_chprotons"]->AddEvent();
-    Histograms3D["yield_charged"]->AddEvent();
+    Histograms3D["dNdy_1_chpions"]->AddEvent();
+    Histograms3D["dNdy_1_chkaons"]->AddEvent();
+    Histograms3D["dNdy_1_chprotons"]->AddEvent();
+    Histograms3D["dNdy_1_charged"]->AddEvent();
+    Histograms3D["dNdeta_1_chpions"]->AddEvent();
+    Histograms3D["dNdeta_1_chkaons"]->AddEvent();
+    Histograms3D["dNdeta_1_chprotons"]->AddEvent();
+    Histograms3D["dNdeta_1_charged"]->AddEvent();
     Histograms3D["rap_chpions"]->AddEvent();
     Histograms3D["rap_chkaons"]->AddEvent();
     Histograms3D["rap_chprotons"]->AddEvent();

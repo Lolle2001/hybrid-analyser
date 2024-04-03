@@ -15,6 +15,21 @@ void Progressbar::Initialize() {
 void Progressbar::SetFrontString(std::string front_string_) {
     front_string = front_string_;
 }
+void Progressbar::SetStartChar(std::string x) {
+    start_char = x;
+}
+void Progressbar::SetEndChar(std::string x) {
+    end_char = x;
+}
+void Progressbar::SetDoneChar(std::string x) {
+    done_char = x;
+}
+void Progressbar::SetTodoChar(std::string x) {
+    todo_char = x;
+}
+void Progressbar::SetBarWidth(int x) {
+    barwidth = x;
+}
 
 void Progressbar::Update() {
 #pragma omp atomic

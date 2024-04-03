@@ -210,7 +210,7 @@ void Main(int argc, char* argv[]) {
 };  // namespace iSS
 
 int main(int argc, char* argv[]) {
-        if (argc > 2) {
+    if (argc > 2) {
         if (std::string(argv[1]).compare("hydro") == 0) {
             iSS::Main(argc, argv);
         } else if (std::string(argv[1]).compare("transport") == 0) {

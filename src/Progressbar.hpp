@@ -30,6 +30,12 @@ class Progressbar {
     void Initialize();
     void SetFrontString(std::string front_string_);
 
+    void SetStartChar(std::string x);
+    void SetEndChar(std::string x);
+    void SetDoneChar(std::string x);
+    void SetTodoChar(std::string x);
+    void SetBarWidth(int x);
+
     void Update();
 
     void Print();

@@ -74,6 +74,10 @@ void ReadFiles(int NRun, int NBatchMin, int NBatchMax, std::string Directory, Pa
     std::string barstring = std::string(PP::BOLD) + std::string(PP::BLUE) + "[INFO] " + std::string(PP::RESET);
     Utilities::Progressbar pbar(BatchSize);
     pbar.SetFrontString(barstring);
+    pbar.SetDoneChar("█");
+    pbar.SetTodoChar("░");
+    pbar.SetStartChar("║");  //"▕");
+    pbar.SetEndChar("║");    //"▏");
 
     printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
     printf("%s\n", "Initializing histograms...");
@@ -244,6 +248,10 @@ void ReadFiles(int iSSRun, int IPGlasmaRun, int NEvent, std::string parameternam
     std::string barstring = std::string(PP::BOLD) + std::string(PP::BLUE) + "[INFO] " + std::string(PP::RESET);
     Utilities::Progressbar pbar(NEvent);
     pbar.SetFrontString(barstring);
+    pbar.SetDoneChar("█");
+    pbar.SetTodoChar("░");
+    pbar.SetStartChar("║");  //"▕");
+    pbar.SetEndChar("║");    //"▏");
 
     printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
     printf("%s\n", "Initializing histograms...");

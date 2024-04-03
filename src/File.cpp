@@ -104,7 +104,7 @@ void File_ampt::ParseLog() {
     if (File.is_open()) {
         std::string line;
         std::string dummy1, dummy2, dummy3, dummy4, dummy5;
-        Log templog;
+        Statistics::Log_ampt templog;
         int eventid;
         int eventiter;
         double impactpar;
@@ -127,7 +127,7 @@ void File_ampt::ParseLog() {
 
                 iss >> dummy1 >> eventid >> dummy2 >> eventiter;
                 templog.eventid = eventid;
-                std::shared_ptr<Log> block = std::make_shared<Log>(templog);
+                std::shared_ptr<Statistics::Log_ampt> block = std::make_shared<Statistics::Log_ampt>(templog);
                 EventInfo.push_back(std::move(block));
                 counter++;
             }
@@ -162,11 +162,11 @@ void File_ampt::Parse() {
         int counter = 0;
         while (File >> TempBlock) {
             TempBlock.SetNumberOfBinaryCollisions(EventInfo[counter]->ncoll.back());
+
             for (int i = 0; i < TempBlock.GetNumberOfParticles(); ++i) {
                 File >> TempLine;
 
                 TempLine.CalculateProperties(1, 5);
-
                 GetFileData().AddParticle(TempBlock, TempLine);
             }
 

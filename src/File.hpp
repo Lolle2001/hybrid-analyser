@@ -56,22 +56,7 @@ class File_iss : public File {
 
 class File_ampt : public File {
    private:
-    struct Log {
-        int eventid;
-        std::vector<int> eventiteration;
-        std::vector<double> impactparameter;
-        std::vector<int> ncoll;
-
-        friend std::ostream& operator<<(std::ostream& output, Log& obj) {
-            output << obj.eventid << " ";
-            output << obj.eventiteration.back() << " ";
-            output << obj.impactparameter.back() << " ";
-            output << obj.ncoll.back() << " ";
-            return output;
-        }
-    };
-
-    std::vector<std::shared_ptr<Log>> EventInfo;
+        std::vector<std::shared_ptr<Statistics::Log_ampt>> EventInfo;
 
     std::string LogDirectory;
 

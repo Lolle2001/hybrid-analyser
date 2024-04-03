@@ -36,7 +36,7 @@ class Histogram1D {
     // Histogram1D(int & nx_);
     Histogram1D(std::vector<double> EdgesX_);
 
-    Histogram1D(std::shared_ptr<BinContainer> bincontainerX);
+    // Histogram1D(std::shared_ptr<BinContainer> bincontainerX);
 
     void
     Resize(int& nx_);

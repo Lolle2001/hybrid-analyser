@@ -4,7 +4,7 @@
 #include <cmath>
 #include <iomanip>
 #include <istream>
-
+#include <vector>
 namespace Statistics {
 
 const unsigned int NUMBER_OF_HARMONICS = 5;
@@ -44,18 +44,7 @@ class Line {
     void CalculateTransverseMass();
     void CalculatePseudoRapidity();
     void CalculateRapidity();
-
     void CalculateProperties(int nharmonic_min, int nharmonic_max);
-
-    int& GetParticlePythiaID() { return ParticlePythiaID; }
-    double& GetMass() { return Mass; }
-    double& GetPosT() { return PosT; }
-    double& GetPosX() { return PosX; }
-    double& GetPosY() { return PosY; }
-    double& GetPosZ() { return PosZ; }
-    double& GetMomX() { return MomX; }
-    double& GetMomY() { return MomY; }
-    double& GetMomZ() { return MomZ; }
 
     void SetParticlePythiaID(int x) { ParticlePythiaID = x; }
     void SetMass(double x) { Mass = x; }
@@ -68,6 +57,15 @@ class Line {
     void SetMomY(double x) { MomY = x; }
     void SetMomZ(double x) { MomZ = x; }
 
+    int& GetParticlePythiaID() { return ParticlePythiaID; }
+    double& GetMass() { return Mass; }
+    double& GetPosT() { return PosT; }
+    double& GetPosX() { return PosX; }
+    double& GetPosY() { return PosY; }
+    double& GetPosZ() { return PosZ; }
+    double& GetMomX() { return MomX; }
+    double& GetMomY() { return MomY; }
+    double& GetMomZ() { return MomZ; }
     double& GetEnergy() { return Energy; }
     double& GetTransverseMomentum() { return TransverseMomentum; }
     double& GetTransverseMass() { return TransverseMass; }
@@ -75,9 +73,7 @@ class Line {
     double& GetRapidity() { return Rapidity; }
     double& GetMomentum() { return Momentum; }
     double& GetPhi() { return Phi; }
-    double& GetAnisotropicFlow(int nharmonic) {
-        return AnisotropicFlow[nharmonic];
-    }
+    double& GetAnisotropicFlow(int nharmonic) { return AnisotropicFlow[nharmonic]; }
 };
 
 class Line_ampt : public Line {
@@ -86,26 +82,13 @@ class Line_ampt : public Line {
 };
 
 std::istream& operator>>(std::istream& input, Line_ampt& obj);
+std::ostream& operator<<(std::ostream& output, Line_ampt& obj);
 
 class Line_iss : public Line {
-    // double elem;
    private:
    public:
     Line_iss() : Line(){};
-    Line_iss(int pid, float array[9]) {
-        SetParticlePythiaID(pid);
-        SetMass(array[0]);
-        SetPosT(array[1]);
-        SetPosX(array[2]);
-        SetPosY(array[3]);
-        SetPosZ(array[4]);
-        SetEnergy(array[5]);
-        SetMomX(array[6]);
-        SetMomY(array[7]);
-        SetMomZ(array[8]);
-    };
-
-    // void operator>>(double array[9]);
+    Line_iss(int pid, float array[9]);
 };
 
 class Block {
@@ -125,58 +108,30 @@ class Block {
         : EventID(eventID), NumberOfParticles(numParticles), NumberOfBinaryCollisions(numBinaryCollisions), ImpactParameter(impactParam), NumberOfParticipantNucleons(numParticipantNucleons), ReactionPlaneAngle(reactionPlaneAngle) {}
 
     void SetEventID(int EventID_) { EventID = EventID_; }
-    void SetNumberOfParticles(int NumberOfParticles_) {
-        NumberOfParticles = NumberOfParticles_;
-    }
-    void SetImpactParameter(double ImpactParameter_) {
-        ImpactParameter = ImpactParameter_;
-    }
-    void SetNumberOfParticipantNucleons(int NumberOfParticipantNucleons_) {
-        NumberOfParticipantNucleons = NumberOfParticipantNucleons_;
-    }
-    void SetReactionPlaneAngle(double ReactionPlaneAngle_) {
-        ReactionPlaneAngle = ReactionPlaneAngle_;
-    };
-    void SetNumberOfBinaryCollisions(int NumberOfBinaryCollisions_) {
-        NumberOfBinaryCollisions = NumberOfBinaryCollisions_;
-    }
+    void SetNumberOfParticles(int NumberOfParticles_) { NumberOfParticles = NumberOfParticles_; }
+    void SetImpactParameter(double ImpactParameter_) { ImpactParameter = ImpactParameter_; }
+    void SetNumberOfParticipantNucleons(int NumberOfParticipantNucleons_) { NumberOfParticipantNucleons = NumberOfParticipantNucleons_; }
+    void SetReactionPlaneAngle(double ReactionPlaneAngle_) { ReactionPlaneAngle = ReactionPlaneAngle_; };
+    void SetNumberOfBinaryCollisions(int NumberOfBinaryCollisions_) { NumberOfBinaryCollisions = NumberOfBinaryCollisions_; }
 
-    int GetEventID() const { return EventID; };
-    int GetNumberOfParticles() const { return NumberOfParticles; }
+    int& GetEventID() { return EventID; };
+    int& GetNumberOfParticles() { return NumberOfParticles; }
     double& GetImpactParameter() { return ImpactParameter; }
-    int GetNumberOfParticipantNucleons() const {
-        return NumberOfParticipantNucleons;
-    }
-    int GetNumberOfBinaryCollisions() const {
-        return NumberOfBinaryCollisions;
-    }
-    double GetReactionPlaneAngle() const { return ReactionPlaneAngle; }
+    int& GetNumberOfParticipantNucleons() { return NumberOfParticipantNucleons; }
+    int& GetNumberOfBinaryCollisions() { return NumberOfBinaryCollisions; }
+    double& GetReactionPlaneAngle() { return ReactionPlaneAngle; }
 
-    virtual void Write(std::ostream& output) const {
-        output << std::setw(6) << std::left << EventID << " "
-               << std::setw(9) << std::left << NumberOfParticles << " "
-               << std::scientific << std::setw(13) << std::left << ImpactParameter << " "
-               << std::setw(4) << std::left << NumberOfParticipantNucleons << " "
-               << std::setw(6) << std::left << NumberOfBinaryCollisions << " "
-               << std::scientific << std::setw(13) << ReactionPlaneAngle;
-    }
+    virtual void Write(std::ostream& output) const;
 };
-
-// std::istream& operator>>(std::istream& input, Block_particles & obj);
 
 class Block_iss : public Block {
    private:
-    // int NumberOfCollidingNucleons;
-
    public:
     Block_iss() : Block(){};
-    // void SetNumberOfCollidingNucleons(int NumberOfCollidingNucleons_) { NumberOfCollidingNucleons = NumberOfCollidingNucleons_; }
 
-    void Write(std::ostream& output) const override {
-        Block::Write(output);
-        // output << " "
-        //        << std::setw(4) << std::left << NumberOfCollidingNucleons;
-    }
+    // void Write(std::ostream& output) const override {
+    //     Block::Write(output);
+    // }
 };
 
 class Block_ampt : public Block {
@@ -193,73 +148,42 @@ class Block_ampt : public Block {
     Block_ampt() : Block(){};
 
     void SetEventIterationFlag(int x) { EventIterationFlag = x; }
-    void SetNumberOfParticipantNucleons_PROJ(int x) {
-        NumberOfParticipantNucleons_PROJ = x;
-    }
-    void SetNumberOfParticipantNucleons_TARG(int x) {
-        NumberOfParticipantNucleons_TARG = x;
-    }
-    void SetNumberOfParticipantNucleonsElastic_PROJ(int x) {
-        NumberOfParticipantNucleonsElastic_PROJ = x;
-    }
-    void SetNumberOfParticipantNucleonsInelastic_PROJ(int x) {
-        NumberOfParticipantNucleonsInelastic_PROJ = x;
-    }
-    void SetNumberOfParticipantNucleonsElastic_TARG(int x) {
-        NumberOfParticipantNucleonsElastic_TARG = x;
-    }
-    void SetNumberOfParticipantNucleonsInelastic_TARG(int x) {
-        NumberOfParticipantNucleonsInelastic_TARG = x;
-    }
+    void SetNumberOfParticipantNucleons_PROJ(int x) { NumberOfParticipantNucleons_PROJ = x; }
+    void SetNumberOfParticipantNucleons_TARG(int x) { NumberOfParticipantNucleons_TARG = x; }
+    void SetNumberOfParticipantNucleonsElastic_PROJ(int x) { NumberOfParticipantNucleonsElastic_PROJ = x; }
+    void SetNumberOfParticipantNucleonsInelastic_PROJ(int x) { NumberOfParticipantNucleonsInelastic_PROJ = x; }
+    void SetNumberOfParticipantNucleonsElastic_TARG(int x) { NumberOfParticipantNucleonsElastic_TARG = x; }
+    void SetNumberOfParticipantNucleonsInelastic_TARG(int x) { NumberOfParticipantNucleonsInelastic_TARG = x; }
 
-    int GetEventIterationFlag() const { return EventIterationFlag; }
+    int& GetEventIterationFlag() { return EventIterationFlag; }
 
-    int GetNumberOfParticipantNucleons_PROJ() const {
-        return NumberOfParticipantNucleons_PROJ;
-    }
+    int& GetNumberOfParticipantNucleons_PROJ() { return NumberOfParticipantNucleons_PROJ; }
 
-    int GetNumberOfParticipantNucleons_TARG() const {
-        return NumberOfParticipantNucleons_TARG;
-    }
+    int& GetNumberOfParticipantNucleons_TARG() { return NumberOfParticipantNucleons_TARG; }
 
-    int GetNumberOfParticipantNucleonsElastic_PROJ() const {
-        return NumberOfParticipantNucleonsElastic_PROJ;
-    }
+    int& GetNumberOfParticipantNucleonsElastic_PROJ() { return NumberOfParticipantNucleonsElastic_PROJ; }
 
-    int GetNumberOfParticipantNucleonsInelastic_PROJ() const {
-        return NumberOfParticipantNucleonsInelastic_PROJ;
-    }
+    int& GetNumberOfParticipantNucleonsInelastic_PROJ() { return NumberOfParticipantNucleonsInelastic_PROJ; }
 
-    int GetNumberOfParticipantNucleonsElastic_TARG() const {
-        return NumberOfParticipantNucleonsElastic_TARG;
-    }
+    int& GetNumberOfParticipantNucleonsElastic_TARG() { return NumberOfParticipantNucleonsElastic_TARG; }
 
-    int GetNumberOfParticipantNucleonsInelastic_TARG() const {
-        return NumberOfParticipantNucleonsInelastic_TARG;
-    }
-    void Write(std::ostream& output) const override {
-        Block::Write(output);
-        output << " "
-               << std::setw(3) << std::left << EventIterationFlag << " "
-               << std::setw(4) << std::left << NumberOfParticipantNucleons_PROJ << " "
-               << std::setw(4) << std::left << NumberOfParticipantNucleons_TARG << " "
-               << std::setw(4) << std::left << NumberOfParticipantNucleonsElastic_PROJ << " "
-               << std::setw(4) << std::left << NumberOfParticipantNucleonsInelastic_PROJ << " "
-               << std::setw(4) << std::left << NumberOfParticipantNucleonsElastic_TARG << " "
-               << std::setw(4) << std::left << NumberOfParticipantNucleonsInelastic_TARG;
-    }
-
-    // void SetEventIterationFlag
+    int& GetNumberOfParticipantNucleonsInelastic_TARG() { return NumberOfParticipantNucleonsInelastic_TARG; }
+    void Write(std::ostream& output) const override;
 };
 
 std::istream& operator>>(std::istream& input, Block_ampt& obj);
 
 std::ostream& operator<<(std::ostream& output, Block_ampt& obj);
 
-// void Line_iss::operator>>(double array[9]){
-//     this -> elem;
+struct Log_ampt {
+    int eventid;
+    std::vector<int> eventiteration;
+    std::vector<double> impactparameter;
+    std::vector<int> ncoll;
+};
 
-// }
+std::ostream& operator<<(std::ostream& output, Log_ampt& obj);
+
 }  // namespace Statistics
 
 #endif
