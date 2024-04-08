@@ -25,32 +25,14 @@ void File::WriteData(std::string DataDirectory) {
 }
 
 void File_iss::Parse() {
-    // #pragma omp critical
-    //     {
-    //         printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
-    //         printf("%-17s : %s\n", "Parsing data from", GetFileDirectory().c_str());
-    //         fflush(stdout);
-    //     }
-
     FILE* File = fopen(GetFileDirectory().c_str(), "rb");
-
     if (File) {
-        // Statistics::Block_iss TempBlock(InitialState);
         Statistics::Block_iss TempBlock(InitialState);
-
         Statistics::Line_iss TempLine;
         int total_particles;
         int pid;
         int eventid = 0;
         float array[9];
-        // #pragma omp critical
-        //         {
-        //             printf("%s%s%s%s ", PP::BOLD, PP::BLUE, "[INFO]", PP::RESET);
-        //             printf("EventID = %4d ; Psi = %.3f ; b = %.3f fm\n",
-        //                    TempBlock.GetEventID(), TempBlock.GetReactionPlaneAngle(),
-        //                    TempBlock.GetImpactParameter());
-        //             fflush(stdout);
-        //         }
         while (fread(&total_particles, sizeof(int), 1, File)) {
             eventid++;
             TempBlock.SetNumberOfParticles(total_particles);
@@ -68,8 +50,7 @@ void File_iss::Parse() {
                 TempLine.CalculateAnisotropicFlow(3);
                 TempLine.CalculateAnisotropicFlow(4);
                 TempLine.CalculateAnisotropicFlow(5);
-                // TempLine.CalculateAnisotropicFlowCos(2);
-                // TempLine.CalculateAnisotropicFlowSin(2);
+
                 TempLine.CalculatePseudoRapidity();
                 TempLine.CalculateRapidity();
                 GetFileData().AddParticle(TempBlock, TempLine);
@@ -79,14 +60,6 @@ void File_iss::Parse() {
             GetFileData().AddEventBlock(std::move(block));
         }
         GetFileData().ShrinkEventBlocks();
-
-        // #pragma omp critical
-        //         {
-        //             printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-        //             printf("%-17s : %s\n", "Parsed data from",
-        //                    GetFileDirectory().c_str());
-        //             fflush(stdout);
-        //         }
 
     } else {
 #pragma omp critical
@@ -268,6 +241,73 @@ void File_ampt::ParseFull() {
         }
     }
     File.close();
+}
+
+void File_iss::ParseFull() {
+    FILE* File = fopen(GetFileDirectory().c_str(), "rb");
+    if (File) {
+        Statistics::Block_iss TempBlock(InitialState);
+        Statistics::Line_iss TempLine;
+        int total_particles;
+        int pid;
+        int eventid = 0;
+        float array[9];
+        while (fread(&total_particles, sizeof(int), 1, File)) {
+            eventid++;
+            TempBlock.SetNumberOfParticles(total_particles);
+            TempBlock.SetEventID(eventid);
+            std::vector<Statistics::Line_iss> TempLineVector(total_particles);
+            double vncos[Statistics::NUMBER_OF_HARMONICS + 1] = {0};
+            double vnsin[Statistics::NUMBER_OF_HARMONICS + 1] = {0};
+            for (int i = 0; i < total_particles; ++i) {
+                fread(&pid, sizeof(int), 1, File);
+                fread(array, sizeof(float), 9, File);
+                TempLine = Statistics::Line_iss(pid, array);
+
+                TempLine.CalculateTransverseMomentum();
+                TempLine.CalculateMomentum();
+                TempLine.CalculatePhi();
+                for (int n = 1; n <= Statistics::NUMBER_OF_HARMONICS; n++) {
+                    TempLine.CalculateAnisotropicFlow(n);
+                    TempLine.CalculateAnisotropicFlowCos(n);
+                    TempLine.CalculateAnisotropicFlowSin(n);
+                    vncos[n] += TempLine.GetAnisotropicFlowCos(n) * TempLine.GetTransverseMomentum();
+                    vnsin[n] += TempLine.GetAnisotropicFlowSin(n) * TempLine.GetTransverseMomentum();
+                }
+
+                TempLine.CalculatePseudoRapidity();
+                TempLine.CalculateRapidity();
+                // std::cout << TempLine << std::endl;
+                TempLineVector[i] = TempLine;
+            }
+
+            for (int n = 1; n <= Statistics::NUMBER_OF_HARMONICS; n++) {
+                // TempBlock.CalculateEventPlaneAngle(n, vnsin[n], vncos[n]);
+                TempBlock.SetEventPlaneAngle(n, 1. / n * std::atan2(vnsin[n], vncos[n]));
+            }
+            for (int i = 0; i < total_particles; ++i) {
+                for (int n = 1; n <= Statistics::NUMBER_OF_HARMONICS; n++) {
+                    TempLineVector[i].CalculatePhi(TempBlock.GetEventPlaneAngle(n));
+                    TempLineVector[i].CalculateAnisotropicFlow(n);
+                }
+                GetFileData().AddParticle(TempBlock, TempLineVector[i]);
+            }
+            GetFileData().AddEvent(TempBlock);
+            std::shared_ptr<Statistics::Block_iss> block = std::make_shared<Statistics::Block_iss>(TempBlock);
+            GetFileData().AddEventBlock(std::move(block));
+        }
+        GetFileData().ShrinkEventBlocks();
+
+    } else {
+#pragma omp critical
+        {
+            printf("%s%s%s ", PP::WARNING, "[WARNING]", PP::RESET);
+            printf("%-17s : %s\n", "Cannot open file",
+                   GetFileDirectory().c_str());
+            fflush(stdout);
+        }
+    }
+    fclose(File);
 }
 
 }  // namespace Model

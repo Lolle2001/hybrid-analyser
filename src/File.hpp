@@ -51,6 +51,8 @@ class File_iss : public File {
 
     void Parse();
 
+    void ParseFull();
+
     void SetInitialState(Statistics::Block_iss& block);
 };
 

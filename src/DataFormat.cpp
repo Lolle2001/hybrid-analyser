@@ -117,6 +117,16 @@ std::ostream& operator<<(std::ostream& output, Line_ampt& obj) {
     return output;
 }
 
+std::ostream& operator<<(std::ostream& output, Line_iss& obj) {
+    output << std::setw(5) << std::left << obj.GetParticlePythiaID() << " ";
+    output << std::scientific << std::setw(13) << std::right << obj.GetPhi() << " ";
+    output << std::scientific << std::setw(13) << std::right << obj.GetTransverseMomentum() << " ";
+    output << std::scientific << std::setw(13) << std::right << obj.GetAnisotropicFlow(2) << " ";
+    output << std::scientific << std::setw(13) << std::right << obj.GetAnisotropicFlowCos(2) << " ";
+    output << std::scientific << std::setw(13) << std::right << obj.GetAnisotropicFlowSin(2) << " ";
+    return output;
+}
+
 void Block::Write(std::ostream& output) const {
     output << std::setw(6) << std::left << EventID << " "
            << std::setw(9) << std::left << NumberOfParticles << " "

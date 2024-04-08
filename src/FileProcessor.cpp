@@ -296,7 +296,7 @@ void ReadFiles(int iSSRun, int IPGlasmaRun, int NEvent, std::string parameternam
     {
 #pragma omp for
         for (int i = 0; i < NEvent; ++i) {
-            data[i]->Parse();
+            data[i]->ParseFull();
 
             pbar.Update();
 

@@ -100,6 +100,8 @@ class Line_iss : public Line {
     Line_iss(int pid, float array[9]);
 };
 
+std::ostream& operator<<(std::ostream& output, Line_iss& obj);
+
 class Block {
    private:
     int EventID;
