@@ -10,13 +10,28 @@ void StatisticsContainer::Add(long double value) {
 
 void StatisticsContainer::AddCurrent(long double value) {
     TotalCurrent += value;
-    EntryCount += 1;
+    EntryCountCurrent += 1;
 }
+
 void StatisticsContainer::AddEvent() {
     // std::cout << "here" << std::endl;
     Total += TotalCurrent;
     TotalSQR += TotalCurrent * TotalCurrent;
+    EntryCount += EntryCountCurrent;
     // std::cout << Total << std::endl;
+    TotalCurrent = 0;
+    EntryCountCurrent = 0;
+}
+
+void StatisticsContainer::AddEventSpecial() {
+    // std::cout << "here" << std::endl;
+    if (EntryCountCurrent > 0) {
+        Total += TotalCurrent / (double)EntryCountCurrent;
+        TotalSQR += TotalCurrent * TotalCurrent / (double)EntryCountCurrent;
+        EntryCount += EntryCountCurrent;
+    }
+
+    EntryCountCurrent = 0;
     TotalCurrent = 0;
 }
 
@@ -100,6 +115,7 @@ void StatisticsContainer::operator+=(StatisticsContainer const& rhs) {
     TotalSQR += rhs.TotalSQR;
     EntryCount += rhs.EntryCount;
     SampleCount += rhs.SampleCount;
+    Variance += rhs.Variance;
 }
 
 StatisticsContainer StatisticsContainer::operator+(StatisticsContainer const& rhs) {
@@ -107,6 +123,7 @@ StatisticsContainer StatisticsContainer::operator+(StatisticsContainer const& rh
     TotalSQR += rhs.TotalSQR;
     EntryCount += rhs.EntryCount;
     SampleCount += rhs.SampleCount;
+    Variance += rhs.Variance;
     return *this;
 }
 
@@ -115,6 +132,7 @@ void StatisticsContainer::operator-=(StatisticsContainer const& rhs) {
     TotalSQR -= rhs.TotalSQR;
     EntryCount -= rhs.EntryCount;
     SampleCount -= rhs.SampleCount;
+    Variance -= rhs.Variance;
 }
 
 StatisticsContainer StatisticsContainer::operator-(StatisticsContainer const& rhs) {
@@ -122,6 +140,7 @@ StatisticsContainer StatisticsContainer::operator-(StatisticsContainer const& rh
     TotalSQR -= rhs.TotalSQR;
     EntryCount -= rhs.EntryCount;
     SampleCount -= rhs.SampleCount;
+    Variance -= rhs.Variance;
     return *this;
 }
 

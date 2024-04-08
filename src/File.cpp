@@ -68,6 +68,8 @@ void File_iss::Parse() {
                 TempLine.CalculateAnisotropicFlow(3);
                 TempLine.CalculateAnisotropicFlow(4);
                 TempLine.CalculateAnisotropicFlow(5);
+                // TempLine.CalculateAnisotropicFlowCos(2);
+                // TempLine.CalculateAnisotropicFlowSin(2);
                 TempLine.CalculatePseudoRapidity();
                 TempLine.CalculateRapidity();
                 GetFileData().AddParticle(TempBlock, TempLine);
@@ -167,6 +169,8 @@ void File_ampt::Parse() {
                 File >> TempLine;
 
                 TempLine.CalculateProperties(1, 5);
+                // TempLine.CalculateAnisotropicFlowCos(2);
+                // TempLine.CalculateAnisotropicFlowSin(2);
                 GetFileData().AddParticle(TempBlock, TempLine);
             }
 
@@ -184,6 +188,75 @@ void File_ampt::Parse() {
         //                    GetFileDirectory().c_str());
         //             fflush(stdout);
         //         }
+
+    } else {
+#pragma omp critical
+        {
+            printf("%s%s%s ", PP::WARNING, "[WARNING]", PP::RESET);
+            printf("%-17s : %s\n", "Cannot open file",
+                   GetFileDirectory().c_str());
+            fflush(stdout);
+        }
+    }
+    File.close();
+}
+
+void File_ampt::ParseFull() {
+    ParseLog();
+
+    std::ifstream File;
+    File.open(GetFileDirectory().c_str(), std::ios::in);
+    if (File.is_open()) {
+        Statistics::Block_ampt TempBlock;
+        Statistics::Line_ampt TempLine;
+
+        int counter = 0;
+        while (File >> TempBlock) {
+            TempBlock.SetNumberOfBinaryCollisions(EventInfo[counter]->ncoll.back());
+
+            std::vector<Statistics::Line_ampt> TempLineVector;
+            double vncos[Statistics::NUMBER_OF_HARMONICS + 1] = {0};
+            double vnsin[Statistics::NUMBER_OF_HARMONICS + 1] = {0};
+
+            for (int i = 0; i < TempBlock.GetNumberOfParticles(); ++i) {
+                File >> TempLine;
+
+                // std::cout << TempLine << std::endl;
+
+                TempLine.CalculateProperties(1, Statistics::NUMBER_OF_HARMONICS);
+                for (int n = 1; n <= Statistics::NUMBER_OF_HARMONICS; n++) {
+                    TempLine.CalculateAnisotropicFlowCos(n);
+                    TempLine.CalculateAnisotropicFlowSin(n);
+                    vncos[n] += TempLine.GetAnisotropicFlowCos(n) * TempLine.GetTransverseMomentum();
+                    vnsin[n] += TempLine.GetAnisotropicFlowSin(n) * TempLine.GetTransverseMomentum();
+                }
+
+                TempLineVector.push_back(TempLine);
+            }
+            // std::cout << "vnsin = " << vnsin[2] << std::endl;
+            // std::cout << "vncos = " << vncos[2] << std::endl;
+
+            for (int n = 1; n <= Statistics::NUMBER_OF_HARMONICS; n++) {
+                // TempBlock.CalculateEventPlaneAngle(n, vnsin[n], vncos[n]);
+                TempBlock.SetEventPlaneAngle(n, 1. / n * std::atan2(vnsin[n], vncos[n]));
+            }
+            // std::cout << "Psi_EP = " << TempBlock.GetEventPlaneAngle(2) << std::endl;
+
+            for (int i = 0; i < TempBlock.GetNumberOfParticles(); ++i) {
+                for (int n = 1; n <= Statistics::NUMBER_OF_HARMONICS; n++) {
+                    TempLineVector[i].CalculatePhi(TempBlock.GetEventPlaneAngle(n));
+                    TempLineVector[i].CalculateAnisotropicFlow(n);
+                }
+                // std::cout << TempLineVector[i] << std::endl;
+                GetFileData().AddParticle(TempBlock, TempLineVector[i]);
+            }
+
+            GetFileData().AddEvent(TempBlock);
+            std::shared_ptr<Statistics::Block_ampt> block = std::make_shared<Statistics::Block_ampt>(TempBlock);
+            GetFileData().AddEventBlock(std::move(block));
+            counter++;
+        }
+        GetFileData().ShrinkEventBlocks();
 
     } else {
 #pragma omp critical

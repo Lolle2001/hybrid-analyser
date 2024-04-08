@@ -77,6 +77,20 @@ void DataContainer::WriteData(std::string DataDirectory) {
         Filename.clear();
 
         Filename << DataDirectory << "/" << Filenames[entry.first] << "_"
+                 << "VARIANCE"
+                 << "." << DEFAULT_EXTENSION_HISTOGRAM;
+        File.open(Filename.str(), std::ios::out);
+        Histograms3D[entry.first]->PrintVariance(File);
+        File.close();
+        // Filesize = Utilities::GetFileSize(Filename.str(), 1);
+        // printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
+        // printf("%s[%07.3fKB]%s ", PP::HIGHLIGHT, Filesize, PP::RESET);
+        // printf("%-14s : %s\n", "Writen data to", Filename.str().c_str());
+        // fflush(stdout);
+        Filename.str("");
+        Filename.clear();
+
+        Filename << DataDirectory << "/" << Filenames[entry.first] << "_"
                  << "SETTINGS"
                  << "." << DEFAULT_EXTENSION_HISTOGRAM;
         File.open(Filename.str(), std::ios::out);
@@ -389,6 +403,8 @@ void DataContainer::InitialiseHistograms() {
     Histograms3D["v2_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:K+_K-"], EdgesRap["2:K+_K-"]);
     Histograms3D["v2_chpions"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:pi+_pi-"], EdgesRap["2:pi+_pi-"]);
     Histograms3D["v2_charged"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:charged"], EdgesRap["2:charged"]);
+    // Histograms3D["v2_charged_sin"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:charged"], EdgesRap["2:charged"]);
+    // Histograms3D["v2_charged_cos"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:charged"], EdgesRap["2:charged"]);
 
     Histograms3D["v3_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:p_pbar"], EdgesRap["2:p_pbar"]);
     Histograms3D["v3_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["2:K+_K-"], EdgesRap["2:K+_K-"]);
@@ -461,6 +477,7 @@ void DataContainer::InitialiseHistograms() {
     Histograms1D["impactparameter"] = std::make_unique<Histogram1D>(EdgesC[centrality_type]);
     Histograms1D["participation"] = std::make_unique<Histogram1D>(EdgesC[centrality_type]);
     Histograms1D["binarycollisions"] = std::make_unique<Histogram1D>(EdgesC[centrality_type]);
+
     // Histograms1D["participation_2"]   = std::make_unique<Histogram1D>(EdgesC["2:PbPb5020"]);
 
     Filenames["meanpt_chprotons"] = "meanpt_chprotons";
@@ -622,7 +639,7 @@ void DataContainer::AddParticle(Statistics::Block &block, Statistics::Line &line
         Histograms3D["meanpt_charged"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetTransverseMomentum());
         Histograms3D["rap_charged"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
         Histograms3D["psrap_charged"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
-        Histograms3D["v2_charged"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
+        Histograms3D["v2_charged"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
         Histograms3D["v3_charged"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
         Histograms3D["v4_charged"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
         Histograms3D["v5_charged"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
@@ -634,6 +651,8 @@ void DataContainer::AddParticle(Statistics::Block &block, Statistics::Line &line
         Histograms3D["v3_3_charged"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
         Histograms3D["v4_3_charged"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
         Histograms3D["v5_3_charged"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        // Histograms3D["v2_charged_sin"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlowSin(2));
+        // Histograms3D["v2_charged_cos"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlowCos(2));
     }
 };
 
@@ -663,6 +682,7 @@ void DataContainer::AddEvent(Statistics::Block &block) {
     Histograms3D["psrap_chkaons"]->AddEvent();
     Histograms3D["psrap_chprotons"]->AddEvent();
     Histograms3D["psrap_charged"]->AddEvent();
+    Histograms3D["v2_charged"]->AddEventSpecial();
 };
 
 void DataContainer::AddEventBlock(std::shared_ptr<Statistics::Block> block) {

@@ -56,7 +56,7 @@ class File_iss : public File {
 
 class File_ampt : public File {
    private:
-        std::vector<std::shared_ptr<Statistics::Log_ampt>> EventInfo;
+    std::vector<std::shared_ptr<Statistics::Log_ampt>> EventInfo;
 
     std::string LogDirectory;
 
@@ -71,6 +71,8 @@ class File_ampt : public File {
 
     void Parse();
     void ParseLog();
+
+    void ParseFull();
 };
 
 };  // namespace Model

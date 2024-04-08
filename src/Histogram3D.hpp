@@ -65,6 +65,7 @@ class Histogram3D {
     void InitializeIndexMap();
 
     void AddEvent();
+    void AddEventSpecial();
     void Add(double& valx, double& valy, double& valz, double valcontent);
     void AddCurrent(double& valx, double& valy, double& valz, double valcontent);
 
@@ -73,6 +74,7 @@ class Histogram3D {
     void PrintTotalSQR(std::ostream& output);
     void PrintTotal(std::ostream& output);
     void PrintCount(std::ostream& output);
+    void PrintVariance(std::ostream& output);
 
     void ReadEdges(std::string filename);
     void ReadTotalSQR(std::string filename);

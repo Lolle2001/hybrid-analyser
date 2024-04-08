@@ -30,6 +30,16 @@ void Line::CalculateAnisotropicFlow(int nharmonic) {
     AnisotropicFlow[nharmonic] = std::cos(nharmonic * Phi);
 }
 
+void Line::CalculateAnisotropicFlowSin(int nharmonic) {
+    // Needs phi
+    AnisotropicFlowSin[nharmonic] = std::sin(nharmonic * Phi);
+}
+
+void Line::CalculateAnisotropicFlowCos(int nharmonic) {
+    // Needs phi
+    AnisotropicFlowCos[nharmonic] = std::cos(nharmonic * Phi);
+}
+
 void Line::CalculateTransverseMass() {
     // Needs transverse momentum
     TransverseMass = std::sqrt(Mass * Mass + TransverseMomentumSQR);
@@ -98,8 +108,12 @@ std::istream& operator>>(std::istream& input, Line_ampt& obj) {
 }
 
 std::ostream& operator<<(std::ostream& output, Line_ampt& obj) {
-    output << obj.GetParticlePythiaID() << " ";
-    output << obj.GetRapidity();
+    output << std::setw(5) << std::left << obj.GetParticlePythiaID() << " ";
+    output << std::scientific << std::setw(13) << std::right << obj.GetPhi() << " ";
+    output << std::scientific << std::setw(13) << std::right << obj.GetTransverseMomentum() << " ";
+    output << std::scientific << std::setw(13) << std::right << obj.GetAnisotropicFlow(2) << " ";
+    output << std::scientific << std::setw(13) << std::right << obj.GetAnisotropicFlowCos(2) << " ";
+    output << std::scientific << std::setw(13) << std::right << obj.GetAnisotropicFlowSin(2) << " ";
     return output;
 }
 
@@ -108,13 +122,17 @@ void Block::Write(std::ostream& output) const {
            << std::setw(9) << std::left << NumberOfParticles << " "
            << std::scientific << std::setw(13) << std::left << ImpactParameter << " "
            << std::setw(4) << std::left << NumberOfParticipantNucleons << " "
-           << std::setw(6) << std::left << NumberOfBinaryCollisions << " "
-           << std::scientific << std::setw(13) << ReactionPlaneAngle;
+           << std::setw(6) << std::left << NumberOfBinaryCollisions << " ";
+    for (int n = 1; n <= NUMBER_OF_HARMONICS; ++n) {
+        output << std::scientific << std::setw(13) << std::right << EventPlaneAngle[n] << " ";
+    }
+
+    output << std::scientific << std::setw(13) << std::right << ReactionPlaneAngle;
 }
 
 void Block_ampt::Write(std::ostream& output) const {
     Block::Write(output);
-    output << " "
+    output << " <> "
            << std::setw(3) << std::left << EventIterationFlag << " "
            << std::setw(4) << std::left << NumberOfParticipantNucleons_PROJ << " "
            << std::setw(4) << std::left << NumberOfParticipantNucleons_TARG << " "

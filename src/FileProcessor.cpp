@@ -118,7 +118,7 @@ void ReadFiles(int NRun, int NBatchMin, int NBatchMax, std::string Directory, Pa
     {
 #pragma omp for
         for (int i = 0; i < BatchSize; ++i) {
-            data[i]->Parse();
+            data[i]->ParseFull();
 
             pbar.Update();
 #pragma omp critical

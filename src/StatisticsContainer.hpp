@@ -1,66 +1,70 @@
- #ifndef STATISTICSCONTAINER_HPP
- #define STATISTICSCONTAINER_HPP
+#ifndef STATISTICSCONTAINER_HPP
+#define STATISTICSCONTAINER_HPP
 
 #include <cmath>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 //  namespace AMPT {
-    namespace Statistics {
- 
- 
- struct StatisticsContainer  {
-        long double Total             = 0;
-        long double TotalSQR          = 0;
-        long int    EntryCount        = 0;
-        long double Average           = 0;
-        long double AverageSQR        = 0;
-        long double Variance          = 0;
-        long double StandardDeviation = 0;
-        long double StandardError     = 0;
-        long int    SampleCount       = 0;
-        long double TotalCurrent      = 0;
-        
-        // StatisticsContainer();
-       
+namespace Statistics {
 
-        void Add(long double value);
+struct StatisticsContainer {
+    long double Total = 0;
+    long double TotalSQR = 0;
+    unsigned long int EntryCount = 0;
+    long double Average = 0;
+    long double AverageSQR = 0;
+    long double Variance = 0;
+    long double StandardDeviation = 0;
+    long double StandardError = 0;
+    unsigned long int SampleCount = 0;
+    long double TotalCurrent = 0;
+    long double TotalSQRCurrent = 0;
+    long double AverageCurrent = 0;
+    long double AverageSQRCurrnet = 0;
+    unsigned long int EntryCountCurrent = 0;
 
-        void AddCurrent(long double value);
+    // StatisticsContainer();
 
-        void AddEvent();
+    void Add(long double value);
 
-        void RedefineTotalSQR();
-        void SetVariance(long double Variance_);
-        void SetStandardError(long double StandardError_);
-        void CalculatePoissonError();
-        void CalculateAverage();
-        void CalculateAverageSQR();
-        void CalculateVariance();
-        void CalculateStandardDeviation();
-        void CalculateStandardError();
-        void CalculateStatistics();
+    void AddCurrent(long double value);
 
-        long double GetAverage();
-        long double GetAverageSQR();
-        long double GetVariance();
-        long double GetStandardDeviation();
-        long double GetStandardError();
-        long int GetSampleCount();
-        long int GetEntryCount();
+    void AddEvent();
 
-        void operator+=(StatisticsContainer const& rhs);
+    void AddCurrentSpecial(long double value);
 
-        StatisticsContainer operator+(StatisticsContainer const& rhs);
+    void AddEventSpecial();
 
-        void operator-=(StatisticsContainer const& rhs);
+    void RedefineTotalSQR();
+    void SetVariance(long double Variance_);
+    void SetStandardError(long double StandardError_);
+    void CalculatePoissonError();
+    void CalculateAverage();
+    void CalculateAverageSQR();
+    void CalculateVariance();
+    void CalculateStandardDeviation();
+    void CalculateStandardError();
+    void CalculateStatistics();
 
-        StatisticsContainer operator-(StatisticsContainer const& rhs);
+    long double GetAverage();
+    long double GetAverageSQR();
+    long double GetVariance();
+    long double GetStandardDeviation();
+    long double GetStandardError();
+    long int GetSampleCount();
+    long int GetEntryCount();
 
-       
-    };
-    
-    }
-//  }
+    void operator+=(StatisticsContainer const& rhs);
 
- #endif
+    StatisticsContainer operator+(StatisticsContainer const& rhs);
+
+    void operator-=(StatisticsContainer const& rhs);
+
+    StatisticsContainer operator-(StatisticsContainer const& rhs);
+};
+
+}  // namespace Statistics
+   //  }
+
+#endif

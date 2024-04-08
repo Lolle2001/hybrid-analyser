@@ -27,10 +27,13 @@ class Line {
     double MomentumSQR;
     double Energy;
     double TransverseMass;
-    double AnisotropicFlow[NUMBER_OF_HARMONICS];
+    double AnisotropicFlow[NUMBER_OF_HARMONICS + 1] = {0};
     double Phi;
     double PseudoRapidity;
     double Rapidity;
+
+    double AnisotropicFlowSin[NUMBER_OF_HARMONICS + 1] = {0};
+    double AnisotropicFlowCos[NUMBER_OF_HARMONICS + 1] = {0};
 
    public:
     Line(){};
@@ -45,6 +48,9 @@ class Line {
     void CalculatePseudoRapidity();
     void CalculateRapidity();
     void CalculateProperties(int nharmonic_min, int nharmonic_max);
+
+    void CalculateAnisotropicFlowSin(int nharmonic);
+    void CalculateAnisotropicFlowCos(int nharmonic);
 
     void SetParticlePythiaID(int x) { ParticlePythiaID = x; }
     void SetMass(double x) { Mass = x; }
@@ -74,6 +80,9 @@ class Line {
     double& GetMomentum() { return Momentum; }
     double& GetPhi() { return Phi; }
     double& GetAnisotropicFlow(int nharmonic) { return AnisotropicFlow[nharmonic]; }
+
+    double GetAnisotropicFlowSin(int nharmonic) { return AnisotropicFlowSin[nharmonic]; };
+    double GetAnisotropicFlowCos(int nharmonic) { return AnisotropicFlowCos[nharmonic]; };
 };
 
 class Line_ampt : public Line {
@@ -99,6 +108,7 @@ class Block {
     int NumberOfParticipantNucleons;
     int NumberOfBinaryCollisions;
     double ReactionPlaneAngle;
+    double EventPlaneAngle[NUMBER_OF_HARMONICS + 1] = {0};
 
    public:
     Block() : EventID(0), NumberOfParticles(0), ImpactParameter(0.0), NumberOfParticipantNucleons(0), NumberOfBinaryCollisions(0), ReactionPlaneAngle(0.0){};
@@ -120,6 +130,21 @@ class Block {
     int& GetNumberOfParticipantNucleons() { return NumberOfParticipantNucleons; }
     int& GetNumberOfBinaryCollisions() { return NumberOfBinaryCollisions; }
     double& GetReactionPlaneAngle() { return ReactionPlaneAngle; }
+
+    void SetEventPlaneAngle(int n, double x) { EventPlaneAngle[n] = x; }
+
+    void CalculateEventPlaneAngle(int n, double& vnsin, double& vncos) {
+        if (vncos > 0) {
+            double angle = (1. / (double)n) * std::atan(vnsin / vncos);
+            if (angle < 0) {
+                angle += 2 * M_PI;
+            }
+            EventPlaneAngle[n] = angle;
+        } else {
+            EventPlaneAngle[n] = M_PI_2;
+        }
+    }
+    double GetEventPlaneAngle(int n) { return EventPlaneAngle[n]; };
 
     virtual void Write(std::ostream& output) const;
 };

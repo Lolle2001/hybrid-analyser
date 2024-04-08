@@ -25,26 +25,22 @@ void Histogram3D::Resize(int& nx_, int& ny_, int& nz_) {
 }
 
 void Histogram3D::AddEvent() {
-    // std::cout << "#" << Contents[10][0][0][211].Total << std::endl;
     for (int ix = 0; ix < nx; ++ix) {
         for (int iy = 0; iy < ny; ++iy) {
             for (int iz = 0; iz < nz; ++iz) {
                 Contents[ix][iy][iz].AddEvent();
-                // entry.second.Total += entry.second.TotalCurrent;
-                // entry.second.TotalSQR += entry.second.TotalCurrent * entry.second.TotalCurrent;
-                // entry.second.TotalCurrent = 0;
             }
         }
     }
-    // std::cout << "!" << Contents[10][0][0][211].Total << std::endl;
 }
 
-void Histogram3D::Add(double& valx, double& valy, double& valz, double valcontent) {
-    if (valx >= x_min && valx < x_max && valy >= y_min && valy < y_max && valz >= z_min && valz < z_max) {
-        int ix = IndexMapX[(int)((valx - x_min) / (x_width))];
-        int iy = IndexMapY[(int)((valy - y_min) / (y_width))];
-        int iz = IndexMapZ[(int)((valz - z_min) / (z_width))];
-        Contents[ix][iy][iz].Add(valcontent);
+void Histogram3D::AddEventSpecial() {
+    for (int ix = 0; ix < nx; ++ix) {
+        for (int iy = 0; iy < ny; ++iy) {
+            for (int iz = 0; iz < nz; ++iz) {
+                Contents[ix][iy][iz].AddEventSpecial();
+            }
+        }
     }
 }
 
@@ -54,6 +50,15 @@ void Histogram3D::AddCurrent(double& valx, double& valy, double& valz, double va
         int iy = IndexMapY[(int)((valy - y_min) / (y_width))];
         int iz = IndexMapZ[(int)((valz - z_min) / (z_width))];
         Contents[ix][iy][iz].AddCurrent(valcontent);
+    }
+}
+
+void Histogram3D::Add(double& valx, double& valy, double& valz, double valcontent) {
+    if (valx >= x_min && valx < x_max && valy >= y_min && valy < y_max && valz >= z_min && valz < z_max) {
+        int ix = IndexMapX[(int)((valx - x_min) / (x_width))];
+        int iy = IndexMapY[(int)((valy - y_min) / (y_width))];
+        int iz = IndexMapZ[(int)((valz - z_min) / (z_width))];
+        Contents[ix][iy][iz].Add(valcontent);
     }
 }
 
@@ -211,6 +216,18 @@ void Histogram3D::PrintTotal(std::ostream& output) {
         for (int iy = 0; iy < ny; ++iy) {
             for (int iz = 0; iz < nz; ++iz) {
                 output << Contents[ix][iy][iz].Total << " ";
+            }
+            output << "\n";
+        }
+    }
+}
+
+void Histogram3D::PrintVariance(std::ostream& output) {
+    for (int ix = 0; ix < nx; ++ix) {
+        output << "# " << ix << "\n";
+        for (int iy = 0; iy < ny; ++iy) {
+            for (int iz = 0; iz < nz; ++iz) {
+                output << Contents[ix][iy][iz].Variance << " ";
             }
             output << "\n";
         }
