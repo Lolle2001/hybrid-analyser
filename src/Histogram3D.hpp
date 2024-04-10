@@ -55,6 +55,8 @@ class Histogram3D {
     std::vector<double> EdgesY;
     std::vector<double> EdgesZ;
 
+    bool is_reversed = false;
+
    public:
     Histogram3D(){};
     // Histogram3D(int & nx_, int & ny_, int & nz_);
@@ -75,6 +77,8 @@ class Histogram3D {
     void PrintTotal(std::ostream& output);
     void PrintCount(std::ostream& output);
     void PrintVariance(std::ostream& output);
+
+    void ReverseEdges();
 
     void ReadEdges(std::string filename);
     void ReadTotalSQR(std::string filename);

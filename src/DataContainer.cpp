@@ -17,12 +17,16 @@ void DataContainer::ShrinkEventBlocks(){
 };
 
 void DataContainer::SetCentralityType(int collisiontype) {
+    funcptr = &Statistics::Block::GetImpactParameter;
     if (collisiontype == 0) {
         centrality_type = "1:PbPb5020";
     } else if (collisiontype == 1) {
         centrality_type = "1:pPb5020";
     } else if (collisiontype == 2) {
         centrality_type = "1:pp5020";
+    } else if (collisiontype == 3) {
+        centrality_type = "ncharged";
+        funcptr = &Statistics::Block::GetNumberOfChargedParticles;
     } else {
         centrality_type = "1:PbPb5020";
     }
@@ -312,6 +316,23 @@ void DataContainer::operator+=(DataContainer const &obj) {
     Add(obj);
 };
 
+void DataContainer::InitialiseBinning(bool use_impactparameter, int collisiontype) {
+    if (use_impactparameter) {
+        if (collisiontype == 0) {
+            centrality_type = "1:PbPb5020";
+        } else if (collisiontype == 1) {
+            centrality_type = "1:pPb5020";
+        } else if (collisiontype == 2) {
+            centrality_type = "1:pp5020";
+
+        } else {
+            centrality_type = "1:PbPb5020";
+        }
+    } else {
+        centrality_type = "ncharged";
+    }
+}
+
 void DataContainer::InitialiseHistograms() {
     // centrality_type = "1:PbPb5020";
     // std::cout << centrality_type << std::endl;
@@ -321,6 +342,8 @@ void DataContainer::InitialiseHistograms() {
     // EdgesC["2:PbPb5020"] = (std::vector<double>){0.00,3.49,4.93,6.04,6.98,7.80,8.55,9.23,9.87,10.50,11.00,11.60,12.10,12.60,13.10,13.50,14.00,14.40,14.90,15.60,20.00};
     EdgesC["1:pPb5020"] = (std::vector<double>){0.00, 1.82, 2.58, 3.65, 4.47, 5.16, 5.77, 6.32, 6.84, 7.36, 7.99, 14.70};
     EdgesC["1:pp5020"] = (std::vector<double>){0.00, 20.00};
+
+    // EdgesC["ncharged"] = (std::vector<double>){0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
     EdgesRap["1:p_pbar"] = (std::vector<double>){-0.5, 0.5};
     EdgesMom["1:p_pbar"] = (std::vector<double>){0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1., 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2., 2.2, 2.4, 2.6, 2.8, 3., 3.2, 3.4, 3.6, 3.8, 4., 4.5, 5., 5.5, 6., 6.5, 7., 8., 9., 10., 11., 12., 13., 14., 15., 16., 18., 20.};
@@ -377,6 +400,29 @@ void DataContainer::InitialiseHistograms() {
 
     // HISTOGRAMS
     // std::shared_ptr<BinContainer> bincontainer = std::make_shared<BinContainer>(EdgesC[centrality_type]);
+    // std::cout << EdgesC["ncharged"].size() << std::endl;
+    // for (auto elem : EdgesC["ncharged"]) {
+    //     std::cout << elem << " ";
+    // }
+    // std::cout << std::endl;
+    // std::cout << "hello" << std::endl;
+    Histograms3D["dNdy_2_chprotons"] = std::make_unique<Histogram3D>(EdgesC["ncharged"], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+    // std::cout << "hello" << std::endl;
+
+    Histograms3D["dNdy_2_chkaons"] = std::make_unique<Histogram3D>(EdgesC["ncharged"], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+    Histograms3D["dNdy_2_chpions"] = std::make_unique<Histogram3D>(EdgesC["ncharged"], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+    Histograms3D["dNdy_2_charged"] = std::make_unique<Histogram3D>(EdgesC["ncharged"], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+    Histograms1D["impactparameter_2"] = std::make_unique<Histogram1D>(EdgesC["ncharged"]);
+    Histograms1D["participation_2"] = std::make_unique<Histogram1D>(EdgesC["ncharged"]);
+    Histograms1D["binarycollisions_2"] = std::make_unique<Histogram1D>(EdgesC["ncharged"]);
+    // std::cout << "hello" << std::endl;
+    // Histograms3D["dNdy_2_chprotons"]->ReverseEdges();
+    // Histograms3D["dNdy_2_chkaons"]->ReverseEdges();
+    // Histograms3D["dNdy_2_chpions"]->ReverseEdges();
+    // Histograms3D["dNdy_2_charged"]->ReverseEdges();
+    // Histograms1D["impactparameter_2"]->ReverseEdges();
+    // Histograms1D["participation_2"]->ReverseEdges();
+    // Histograms1D["binarycollisions_2"]->ReverseEdges();
 
     Histograms3D["meanpt_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
     Histograms3D["meanpt_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
@@ -491,6 +537,11 @@ void DataContainer::InitialiseHistograms() {
     Filenames["dNdy_1_chpions"] = "dNdy_1_chpions";
     Filenames["dNdy_1_charged"] = "dNdy_1_charged";
 
+    Filenames["dNdy_2_chprotons"] = "dNdy_2_chprotons";
+    Filenames["dNdy_2_chkaons"] = "dNdy_2_chkaons";
+    Filenames["dNdy_2_chpions"] = "dNdy_2_chpions";
+    Filenames["dNdy_2_charged"] = "dNdy_2_charged";
+
     Filenames["dNdeta_1_chprotons"] = "dNdeta_1_chprotons";
     Filenames["dNdeta_1_chkaons"] = "dNdeta_1_chkaons";
     Filenames["dNdeta_1_chpions"] = "dNdeta_1_chpions";
@@ -524,6 +575,10 @@ void DataContainer::InitialiseHistograms() {
     Filenames["impactparameter"] = "impactparameter";
     Filenames["participation"] = "participation";
     Filenames["binarycollisions"] = "binarycollisions";
+
+    Filenames["impactparameter_2"] = "impactparameter_2";
+    Filenames["participation_2"] = "participation_2";
+    Filenames["binarycollisions_2"] = "binarycollisions_2";
     // Filenames["participation_2"]    = "participation_2";
 
     Filenames["rap_chprotons"] = "rap_chprotons";
@@ -570,97 +625,107 @@ void DataContainer::InitialiseHistograms() {
 
 void DataContainer::AddParticle(Statistics::Block &block, Statistics::Line &line) {
     if (line.GetParticlePythiaID() == 211 | line.GetParticlePythiaID() == -211) {
-        Histograms3D["pt_chpions"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
-        Histograms3D["dNdy_1_chpions"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
-        Histograms3D["dNdeta_1_chpions"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
-        Histograms3D["meanpt_chpions"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetTransverseMomentum());
-        Histograms3D["rap_chpions"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
-        Histograms3D["psrap_chpions"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
-        Histograms3D["v2_chpions"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
-        Histograms3D["v3_chpions"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
-        Histograms3D["v4_chpions"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
-        Histograms3D["v5_chpions"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
-        Histograms3D["v2_2_chpions"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
-        Histograms3D["v3_2_chpions"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
-        Histograms3D["v4_2_chpions"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
-        Histograms3D["v5_2_chpions"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
-        Histograms3D["v2_3_chpions"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
-        Histograms3D["v3_3_chpions"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
-        Histograms3D["v4_3_chpions"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
-        Histograms3D["v5_3_chpions"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
-        Histograms3D["pt_ratio_chpions_to_chkaons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
-        Histograms3D["pt_ratio_chpions_to_chprotons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["pt_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["dNdy_1_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        // std::cout << block.GetNumberOfChargedParticles() << std::endl;
+        Histograms3D["dNdy_2_chpions"]->AddCurrent(block.GetNumberOfChargedParticles(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["dNdeta_1_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
+        Histograms3D["meanpt_chpions"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetTransverseMomentum());
+        Histograms3D["rap_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["psrap_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
+        Histograms3D["v2_chpions"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
+        Histograms3D["v3_chpions"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        Histograms3D["v4_chpions"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        Histograms3D["v5_chpions"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        Histograms3D["v2_2_chpions"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
+        Histograms3D["v3_2_chpions"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        Histograms3D["v4_2_chpions"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        Histograms3D["v5_2_chpions"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        Histograms3D["v2_3_chpions"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
+        Histograms3D["v3_3_chpions"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        Histograms3D["v4_3_chpions"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        Histograms3D["v5_3_chpions"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        Histograms3D["pt_ratio_chpions_to_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["pt_ratio_chpions_to_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
     } else if (line.GetParticlePythiaID() == 321 | line.GetParticlePythiaID() == -321) {
-        Histograms3D["pt_chkaons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
-        Histograms3D["dNdy_1_chkaons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
-        Histograms3D["dNdeta_1_chkaons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
-        Histograms3D["meanpt_chkaons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetTransverseMomentum());
-        Histograms3D["rap_chkaons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
-        Histograms3D["psrap_chkaons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
-        Histograms3D["v2_chkaons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
-        Histograms3D["v3_chkaons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
-        Histograms3D["v4_chkaons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
-        Histograms3D["v5_chkaons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
-        Histograms3D["v2_2_chkaons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
-        Histograms3D["v3_2_chkaons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
-        Histograms3D["v4_2_chkaons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
-        Histograms3D["v5_2_chkaons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
-        Histograms3D["v2_3_chkaons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
-        Histograms3D["v3_3_chkaons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
-        Histograms3D["v4_3_chkaons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
-        Histograms3D["v5_3_chkaons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        Histograms3D["pt_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["dNdy_1_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["dNdy_2_chkaons"]->AddCurrent(block.GetNumberOfChargedParticles(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["dNdeta_1_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
+        Histograms3D["meanpt_chkaons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetTransverseMomentum());
+        Histograms3D["rap_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["psrap_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
+        Histograms3D["v2_chkaons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
+        Histograms3D["v3_chkaons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        Histograms3D["v4_chkaons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        Histograms3D["v5_chkaons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        Histograms3D["v2_2_chkaons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
+        Histograms3D["v3_2_chkaons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        Histograms3D["v4_2_chkaons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        Histograms3D["v5_2_chkaons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        Histograms3D["v2_3_chkaons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
+        Histograms3D["v3_3_chkaons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        Histograms3D["v4_3_chkaons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        Histograms3D["v5_3_chkaons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
     } else if (line.GetParticlePythiaID() == 2212 | line.GetParticlePythiaID() == -2212) {
-        Histograms3D["pt_chprotons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
-        Histograms3D["dNdy_1_chprotons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
-        Histograms3D["dNdeta_1_chprotons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
-        Histograms3D["meanpt_chprotons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetTransverseMomentum());
-        Histograms3D["rap_chprotons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
-        Histograms3D["psrap_chprotons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
-        Histograms3D["v2_chprotons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
-        Histograms3D["v3_chprotons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
-        Histograms3D["v4_chprotons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
-        Histograms3D["v5_chprotons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
-        Histograms3D["v2_2_chprotons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
-        Histograms3D["v3_2_chprotons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
-        Histograms3D["v4_2_chprotons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
-        Histograms3D["v5_2_chprotons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
-        Histograms3D["v2_3_chprotons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
-        Histograms3D["v3_3_chprotons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
-        Histograms3D["v4_3_chprotons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
-        Histograms3D["v5_3_chprotons"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        Histograms3D["pt_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["dNdy_1_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["dNdy_2_chprotons"]->AddCurrent(block.GetNumberOfChargedParticles(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["dNdeta_1_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
+        Histograms3D["meanpt_chprotons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetTransverseMomentum());
+        Histograms3D["rap_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["psrap_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
+        Histograms3D["v2_chprotons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
+        Histograms3D["v3_chprotons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        Histograms3D["v4_chprotons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        Histograms3D["v5_chprotons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        Histograms3D["v2_2_chprotons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
+        Histograms3D["v3_2_chprotons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        Histograms3D["v4_2_chprotons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        Histograms3D["v5_2_chprotons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        Histograms3D["v2_3_chprotons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
+        Histograms3D["v3_3_chprotons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        Histograms3D["v4_3_chprotons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        Histograms3D["v5_3_chprotons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
     } else if (line.GetParticlePythiaID() == 2112 | line.GetParticlePythiaID() == -2112) {
-        Histograms3D["pt_chneutrons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["pt_chneutrons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
     } else if (line.GetParticlePythiaID() == 3122 | line.GetParticlePythiaID() == -3122) {
-        Histograms3D["pt_chlambdas"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["pt_chlambdas"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
     }
     if (ChargeMap[line.GetParticlePythiaID()] != 0) {
-        Histograms3D["pt_charged"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
-        Histograms3D["dNdy_1_charged"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
-        Histograms3D["dNdeta_1_charged"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
-        Histograms3D["meanpt_charged"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetTransverseMomentum());
-        Histograms3D["rap_charged"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
-        Histograms3D["psrap_charged"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
-        Histograms3D["v2_charged"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
-        Histograms3D["v3_charged"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
-        Histograms3D["v4_charged"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
-        Histograms3D["v5_charged"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
-        Histograms3D["v2_2_charged"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
-        Histograms3D["v3_2_charged"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
-        Histograms3D["v4_2_charged"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
-        Histograms3D["v5_2_charged"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
-        Histograms3D["v2_3_charged"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
-        Histograms3D["v3_3_charged"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
-        Histograms3D["v4_3_charged"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
-        Histograms3D["v5_3_charged"]->Add(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        Histograms3D["pt_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["dNdy_1_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["dNdy_2_charged"]->AddCurrent(block.GetNumberOfChargedParticles(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["dNdeta_1_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
+        Histograms3D["meanpt_charged"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetTransverseMomentum());
+        Histograms3D["rap_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms3D["psrap_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
+        Histograms3D["v2_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
+        Histograms3D["v3_charged"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        Histograms3D["v4_charged"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        Histograms3D["v5_charged"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        Histograms3D["v2_2_charged"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
+        Histograms3D["v3_2_charged"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        Histograms3D["v4_2_charged"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        Histograms3D["v5_2_charged"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        Histograms3D["v2_3_charged"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
+        Histograms3D["v3_3_charged"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        Histograms3D["v4_3_charged"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        Histograms3D["v5_3_charged"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
         // Histograms3D["v2_charged_sin"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlowSin(2));
         // Histograms3D["v2_charged_cos"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlowCos(2));
     }
 };
 
 void DataContainer::AddEvent(Statistics::Block &block) {
-    Histograms1D["impactparameter"]->Add(block.GetImpactParameter(), block.GetImpactParameter());
-    Histograms1D["participation"]->Add(block.GetImpactParameter(), block.GetNumberOfParticipantNucleons());
-    Histograms1D["binarycollisions"]->Add(block.GetImpactParameter(), block.GetNumberOfBinaryCollisions());
+    Histograms1D["impactparameter"]->Add((block.*funcptr)(), block.GetImpactParameter());
+    Histograms1D["participation"]->Add((block.*funcptr)(), block.GetNumberOfParticipantNucleons());
+    Histograms1D["binarycollisions"]->Add((block.*funcptr)(), block.GetNumberOfBinaryCollisions());
+
+    Histograms1D["impactparameter_2"]->Add(block.GetNumberOfChargedParticles(), block.GetImpactParameter());
+    Histograms1D["participation_2"]->Add(block.GetNumberOfChargedParticles(), block.GetNumberOfParticipantNucleons());
+    Histograms1D["binarycollisions_2"]->Add(block.GetNumberOfChargedParticles(), block.GetNumberOfBinaryCollisions());
+
     Histograms3D["pt_chpions"]->AddEvent();
     Histograms3D["pt_ratio_chpions_to_chkaons"]->AddEvent();
     Histograms3D["pt_ratio_chpions_to_chprotons"]->AddEvent();
@@ -671,6 +736,11 @@ void DataContainer::AddEvent(Statistics::Block &block) {
     Histograms3D["dNdy_1_chkaons"]->AddEvent();
     Histograms3D["dNdy_1_chprotons"]->AddEvent();
     Histograms3D["dNdy_1_charged"]->AddEvent();
+
+    Histograms3D["dNdy_2_chpions"]->AddEvent();
+    Histograms3D["dNdy_2_chkaons"]->AddEvent();
+    Histograms3D["dNdy_2_chprotons"]->AddEvent();
+    Histograms3D["dNdy_2_charged"]->AddEvent();
     Histograms3D["dNdeta_1_chpions"]->AddEvent();
     Histograms3D["dNdeta_1_chkaons"]->AddEvent();
     Histograms3D["dNdeta_1_chprotons"]->AddEvent();
@@ -689,6 +759,37 @@ void DataContainer::AddEvent(Statistics::Block &block) {
 void DataContainer::AddEventBlock(std::shared_ptr<Statistics::Block> block) {
     EventBlocks.push_back(std::move(block));
     NumberOfBlocks++;
+}
+
+void DataContainer::CalculateCentralityClasses() {
+    std::vector<double> ncharged;
+    for (auto entry : EventBlocks) {
+        ncharged.push_back(entry->GetNumberOfChargedParticles());
+    }
+    // std::cout << "ihello" << std::endl;
+    std::sort(ncharged.begin(), ncharged.end());
+    // std::cout << "ihello" << std::endl;
+    std::vector<int> centrality_cut_list = {0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
+    std::vector<double> temp(centrality_cut_list.size(), 0);
+    for (size_t icen = 0; icen < centrality_cut_list.size() - 1; ++icen) {
+        int lower_percentile = centrality_cut_list[icen];
+        int upper_percentile = centrality_cut_list[icen + 1];
+
+        // Calculate the lower and upper values for the specified percentiles
+        size_t lower_index = static_cast<size_t>(ncharged.size() * lower_percentile / 100);
+        size_t upper_index = static_cast<size_t>(ncharged.size() * upper_percentile / 100);
+
+        int dN_dy_cut_low = ncharged[lower_index];
+        int dN_dy_cut_high = ncharged[upper_index - 1];
+        temp[icen + 1] = (double)dN_dy_cut_high;
+    }
+    // std::cout << "ihello" << std::endl;
+    std::reverse(temp.begin(), temp.end());
+    EdgesC["ncharged"] = temp;
+
+    // for (int i = 0; i < temp.size(); ++i) {
+    //     EdgesC["ncharged"].push_back(temp[i]);
+    // }
 }
 
 };  // namespace Statistics

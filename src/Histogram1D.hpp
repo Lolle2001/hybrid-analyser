@@ -57,6 +57,8 @@ class Histogram1D {
 
     void PrintEdges(std::ostream& output);
 
+    void ReverseEdges();
+
     void ReadEdges(std::string filename);
     void ReadTotalSQR(std::string filename);
     void ReadTotal(std::string filename);

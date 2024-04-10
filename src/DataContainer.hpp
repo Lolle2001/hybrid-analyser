@@ -45,8 +45,13 @@ class DataContainer {
 
     std::string centrality_type;
 
+    bool use_impactparameter_classification = false;
+
     int nharmonic_min = 1;
     int nharmonic_max = NUMBER_OF_HARMONICS;
+
+    typedef double& (Statistics::Block::*FunctionPointer)();
+    FunctionPointer funcptr;
 
    public:
     DataContainer(){
@@ -54,6 +59,9 @@ class DataContainer {
     };
 
     // In derived classes this can be specified further.
+
+    void InitialiseBinning(bool use_impactparameter, int collisiontype);
+
     void InitialiseHistograms();
 
     void SetCentralityType(int collisiontype);
@@ -66,6 +74,10 @@ class DataContainer {
 
     void AddEventBlock(std::shared_ptr<Statistics::Block> block);
 
+    std::shared_ptr<Statistics::Block> GetEventBlock(int index) {
+        return EventBlocks[index];
+    }
+
     void ReserveEventBlocks(int reservesize);
 
     void ShrinkEventBlocks();
@@ -75,6 +87,24 @@ class DataContainer {
     void WriteEventData(std::string DataDirectory);
 
     void Add(DataContainer const& obj);
+
+    void CalculateCentralityClasses();
+
+    void SetCentralityEdges(std::string name, std::vector<double> edges) {
+        // std::cout << edges.size() << std::endl;
+        EdgesC[name] = edges;
+    };
+    std::vector<double> GetCentralityEdges(std::string name) {
+        return EdgesC[name];
+    };
+
+    void InsertBlocks(DataContainer const& obj) {
+        EventBlocks.insert(std::end(EventBlocks), std::begin(obj.EventBlocks), std::end(obj.EventBlocks));
+        NumberOfBlocks += obj.NumberOfBlocks;
+        // for (const auto& block : obj.EventBlocks) {
+        //     EventBlocks.push_back(std::make_shared<Statistics::Block>(*block));
+        // }
+    }
 
     void operator+=(DataContainer const& obj);
 };

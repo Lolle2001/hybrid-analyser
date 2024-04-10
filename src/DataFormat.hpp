@@ -106,6 +106,7 @@ class Block {
    private:
     int EventID;
     int NumberOfParticles;
+    double NumberOfChargedParticles = 0;
     double ImpactParameter;
     int NumberOfParticipantNucleons;
     int NumberOfBinaryCollisions;
@@ -125,6 +126,9 @@ class Block {
     void SetNumberOfParticipantNucleons(int NumberOfParticipantNucleons_) { NumberOfParticipantNucleons = NumberOfParticipantNucleons_; }
     void SetReactionPlaneAngle(double ReactionPlaneAngle_) { ReactionPlaneAngle = ReactionPlaneAngle_; };
     void SetNumberOfBinaryCollisions(int NumberOfBinaryCollisions_) { NumberOfBinaryCollisions = NumberOfBinaryCollisions_; }
+
+    void SetNumberOfChargedParticles(int x) { NumberOfChargedParticles = x; };
+    double& GetNumberOfChargedParticles() { return NumberOfChargedParticles; };
 
     int& GetEventID() { return EventID; };
     int& GetNumberOfParticles() { return NumberOfParticles; }
@@ -153,12 +157,22 @@ class Block {
 
 class Block_iss : public Block {
    private:
+    unsigned int OriginalEventID;
+
    public:
     Block_iss() : Block(){};
 
-    // void Write(std::ostream& output) const override {
-    //     Block::Write(output);
-    // }
+    void Write(std::ostream& output) const override {
+        Block::Write(output);
+        output << " <> "
+               << std::setw(6) << std::left << OriginalEventID;
+    }
+    void SetOriginalEventID(unsigned int x) {
+        OriginalEventID = x;
+    }
+    unsigned int& GetOriginalEventID() {
+        return OriginalEventID;
+    }
 };
 
 class Block_ampt : public Block {

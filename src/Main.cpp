@@ -85,6 +85,9 @@ void Main(int argc, char* argv[]) {
     if (collisiontype == 2) {
         centralitybinningname = "p-p at 5.02 TeV (0-100)";
     }
+    if (collisiontype == 3) {
+        centralitybinningname = "dNch/deta based centrality classification (0-5-10-20-..90-100)";
+    }
     // std::cout << collisiontype << std::endl;
     // std::cout << "hallo" << std::endl;
     // std::cout << "\033[1;48;2;0;111;184";

@@ -48,7 +48,7 @@ void ReadFiles(int NRun, int NBatchMin, int NBatchMax, std::string Directory, Pa
 
     std::unique_ptr<Model::File_ampt> campt = std::make_unique<Model::File_ampt>(collisiontype);
 
-    campt->InitializeDataContainer();
+    // campt->InitializeDataContainer();
     std::vector<std::unique_ptr<Model::File_ampt>> data;
 
     int BatchSize = NBatchMax - NBatchMin + 1;
@@ -80,7 +80,7 @@ void ReadFiles(int NRun, int NBatchMin, int NBatchMax, std::string Directory, Pa
     pbar.SetEndChar("║");    //"▏");
 
     printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
-    printf("%s\n", "Initializing histograms...");
+    printf("%s\n", "Initializing file objects...");
     fflush(stdout);
 
     pbar.Print();
@@ -94,7 +94,7 @@ void ReadFiles(int NRun, int NBatchMin, int NBatchMax, std::string Directory, Pa
             FileDirectory << Directory << "/" << NRun << "/" << NRun << "_" << i + NBatchMin << "/ana/ampt.dat";
             LogDirectory << Directory << "/" << NRun << "/" << NRun << "_" << i + NBatchMin << "/" << NRun << "_" << i + NBatchMin << ".log";
             data[i] = std::make_unique<Model::File_ampt>(LogDirectory.str(), FileDirectory.str(), collisiontype);
-            data[i]->InitializeDataContainer();
+            // data[i]->InitializeDataContainer();
             // data[i]->ParseLog();
             pbar.Update();
 #pragma omp critical
@@ -108,9 +108,10 @@ void ReadFiles(int NRun, int NBatchMin, int NBatchMax, std::string Directory, Pa
     Clock.Start();
     printf("\n");
     fflush(stdout);
+
     pbar.Reset();
     printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
-    printf("%s\n", "Reading files...");
+    printf("%s\n", "Parsing event statistics...");
     fflush(stdout);
     pbar.Print();
 
@@ -118,7 +119,71 @@ void ReadFiles(int NRun, int NBatchMin, int NBatchMax, std::string Directory, Pa
     {
 #pragma omp for
         for (int i = 0; i < BatchSize; ++i) {
-            data[i]->ParseFull();
+            // data[i]->ParseFull();
+            data[i]->ParseEventStatistics();
+            // data[i]->ParseParticleStatistics();
+
+            pbar.Update();
+#pragma omp critical
+            {
+                pbar.Print();
+            }
+        }
+    }
+    printf("\n");
+    fflush(stdout);
+
+    std::unique_ptr<Model::File_ampt> dummy = std::make_unique<Model::File_ampt>(collisiontype);
+    for (int i = 0; i < BatchSize; ++i) {
+        dummy->GetFileData().InsertBlocks(data[i]->GetFileData());
+    }
+    // std::cout << "hello" << std::endl;
+    dummy->GetFileData().CalculateCentralityClasses();
+    // std::cout << "hello" << std::endl;
+    for (int i = 0; i < BatchSize; ++i) {
+        data[i]->GetFileData().SetCentralityEdges("ncharged", dummy->GetFileData().GetCentralityEdges("ncharged"));
+    }
+    campt->GetFileData().SetCentralityEdges("ncharged", dummy->GetFileData().GetCentralityEdges("ncharged"));
+    pbar.Reset();
+    printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
+    printf("%s\n", "Initializing data containers...");
+    fflush(stdout);
+    pbar.Print();
+    // std::cout << "hello" << std::endl;
+    campt->InitializeDataContainer();
+    // std::cout << "hello" << std::endl;
+#pragma omp parallel
+    {
+#pragma omp for
+        for (int i = 0; i < BatchSize; ++i) {
+            // data[i]->ParseFull();
+
+            data[i]->InitializeDataContainer();
+            // data[i]->ParseParticleStatistics();
+
+            pbar.Update();
+#pragma omp critical
+            {
+                pbar.Print();
+            }
+        }
+    }
+    printf("\n");
+    fflush(stdout);
+
+    pbar.Reset();
+    printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
+    printf("%s\n", "Parsing particle statistics...");
+    fflush(stdout);
+    pbar.Print();
+
+#pragma omp parallel
+    {
+#pragma omp for
+        for (int i = 0; i < BatchSize; ++i) {
+            // data[i]->ParseFull();
+            // data[i]->ParseEventStatistics();
+            data[i]->ParseParticleStatistics();
 
             pbar.Update();
 #pragma omp critical
@@ -226,7 +291,7 @@ void ReadFiles(int iSSRun, int IPGlasmaRun, int NEvent, std::string parameternam
     ReadSettings(parameters, parametername);
 
     std::unique_ptr<Model::File_iss> ciss = std::make_unique<Model::File_iss>(collisiontype);
-    ciss->InitializeDataContainer();
+    // ciss->InitializeDataContainer();
     std::vector<std::unique_ptr<Model::File_iss>> data;
 
     data.resize(NEvent);
@@ -254,7 +319,7 @@ void ReadFiles(int iSSRun, int IPGlasmaRun, int NEvent, std::string parameternam
     pbar.SetEndChar("║");    //"▏");
 
     printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
-    printf("%s\n", "Initializing histograms...");
+    printf("%s\n", "Initializing file objects...");
     fflush(stdout);
 
     pbar.Print();
@@ -266,12 +331,13 @@ void ReadFiles(int iSSRun, int IPGlasmaRun, int NEvent, std::string parameternam
             Statistics::Block_iss block = GetInitialStateInfo(IPGlasmaRun, i, parameters);
 
             block.SetEventID(i);
+            block.SetOriginalEventID(i + 1);
             std::stringstream directory;
             directory << parameters.iss_data_folder << "/" << iSSRun << "/" << iSSRun << "_" << std::to_string(i) << "/particle_samples.bin";
 
             data[i] = std::make_unique<Model::File_iss>(directory.str(), collisiontype);
             data[i]->SetInitialState(block);
-            data[i]->InitializeDataContainer();
+            // data[i]->InitializeDataContainer();
 
             pbar.Update();
 #pragma omp critical
@@ -287,19 +353,81 @@ void ReadFiles(int iSSRun, int IPGlasmaRun, int NEvent, std::string parameternam
     fflush(stdout);
     pbar.Reset();
     printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
-    printf("%s\n", "Reading files...");
+    printf("%s\n", "Parsing event statistics...");
     fflush(stdout);
-
     pbar.Print();
 
 #pragma omp parallel
     {
 #pragma omp for
         for (int i = 0; i < NEvent; ++i) {
-            data[i]->ParseFull();
+            // data[i]->ParseFull();
+            data[i]->ParseEventStatistics();
+            // data[i]->ParseParticleStatistics();
 
             pbar.Update();
+#pragma omp critical
+            {
+                pbar.Print();
+            }
+        }
+    }
+    printf("\n");
+    fflush(stdout);
 
+    std::unique_ptr<Model::File_iss> dummy = std::make_unique<Model::File_iss>(collisiontype);
+    for (int i = 0; i < NEvent; ++i) {
+        dummy->GetFileData().InsertBlocks(data[i]->GetFileData());
+    }
+    // std::cout << "hello" << std::endl;
+    dummy->GetFileData().CalculateCentralityClasses();
+    // std::cout << "hello" << std::endl;
+    for (int i = 0; i < NEvent; ++i) {
+        data[i]->GetFileData().SetCentralityEdges("ncharged", dummy->GetFileData().GetCentralityEdges("ncharged"));
+    }
+    ciss->GetFileData().SetCentralityEdges("ncharged", dummy->GetFileData().GetCentralityEdges("ncharged"));
+    pbar.Reset();
+    printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
+    printf("%s\n", "Initializing data containers...");
+    fflush(stdout);
+    pbar.Print();
+
+    ciss->InitializeDataContainer();
+
+#pragma omp parallel
+    {
+#pragma omp for
+        for (int i = 0; i < NEvent; ++i) {
+            // data[i]->ParseFull();
+
+            data[i]->InitializeDataContainer();
+            // data[i]->ParseParticleStatistics();
+
+            pbar.Update();
+#pragma omp critical
+            {
+                pbar.Print();
+            }
+        }
+    }
+    printf("\n");
+    fflush(stdout);
+
+    pbar.Reset();
+    printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
+    printf("%s\n", "Parsing particle statistics...");
+    fflush(stdout);
+    pbar.Print();
+
+#pragma omp parallel
+    {
+#pragma omp for
+        for (int i = 0; i < NEvent; ++i) {
+            // data[i]->ParseFull();
+            // data[i]->ParseEventStatistics();
+            data[i]->ParseParticleStatistics();
+
+            pbar.Update();
 #pragma omp critical
             {
                 pbar.Print();

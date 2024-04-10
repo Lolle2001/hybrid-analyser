@@ -6,6 +6,7 @@
 
 #include "DataContainer.hpp"
 #include "DataFormat.hpp"
+#include "ParticleProperties.hpp"
 
 namespace Model {
 
@@ -53,6 +54,9 @@ class File_iss : public File {
 
     void ParseFull();
 
+    void ParseEventStatistics();
+    void ParseParticleStatistics();
+
     void SetInitialState(Statistics::Block_iss& block);
 };
 
@@ -72,9 +76,23 @@ class File_ampt : public File {
     File_ampt(std::string LogDirectory_, std::string FileDirectory_, int collisiontype) : LogDirectory(LogDirectory_), File(FileDirectory_, collisiontype){};
 
     void Parse();
+    void ParseEventStatistics();
+    void ParseParticleStatistics();
+    void ParseLogStatistics();
     void ParseLog();
 
     void ParseFull();
+
+    // void StackBlocks(std::vector<std::unique_ptr<File_ampt>> files) {
+
+    // int StartIndex = NumberOfBlocks - obj.NumberOfBlocks;
+    // // std::cout << EventBlocks.size() << std::endl;
+    // // std::cout << StartIndex << std::endl;
+
+    // for (int i = StartIndex; i < NumberOfBlocks; ++i) {
+    //     EventBlocks[i]->SetEventID(EventBlocks[i]->GetEventID() + StartIndex);
+    // }
+    // };
 };
 
 };  // namespace Model

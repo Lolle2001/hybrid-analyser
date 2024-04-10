@@ -130,6 +130,7 @@ std::ostream& operator<<(std::ostream& output, Line_iss& obj) {
 void Block::Write(std::ostream& output) const {
     output << std::setw(6) << std::left << EventID << " "
            << std::setw(9) << std::left << NumberOfParticles << " "
+           << std::scientific << std::setw(13) << std::left << NumberOfChargedParticles << " "
            << std::scientific << std::setw(13) << std::left << ImpactParameter << " "
            << std::setw(4) << std::left << NumberOfParticipantNucleons << " "
            << std::setw(6) << std::left << NumberOfBinaryCollisions << " ";
