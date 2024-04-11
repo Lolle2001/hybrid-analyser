@@ -166,6 +166,7 @@ void DataContainer::WriteData(std::string DataDirectory) {
         Filename.clear();
     }
     for (const auto &entry : HistogramMaps3D) {
+        HistogramMaps3D[entry.first]->Convert();
         Filename << DataDirectory << "/" << Filenames[entry.first] << "_"
                  << "COUNT"
                  << "." << DEFAULT_EXTENSION_HISTOGRAM;
@@ -423,6 +424,7 @@ void DataContainer::InitialiseHistograms() {
     // Histograms1D["impactparameter_2"]->ReverseEdges();
     // Histograms1D["participation_2"]->ReverseEdges();
     // Histograms1D["binarycollisions_2"]->ReverseEdges();
+    HistogramMaps3D["yield_1_map"] = std::make_unique<HistogramMap3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
 
     Histograms3D["meanpt_chprotons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
     Histograms3D["meanpt_chkaons"] = std::make_unique<Histogram3D>(EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
@@ -526,7 +528,7 @@ void DataContainer::InitialiseHistograms() {
     Histograms1D["binarycollisions"] = std::make_unique<Histogram1D>(EdgesC[centrality_type]);
 
     // Histograms1D["participation_2"]   = std::make_unique<Histogram1D>(EdgesC["2:PbPb5020"]);
-
+    Filenames["yield_1_map"] = "yield_1_map";
     Filenames["meanpt_chprotons"] = "meanpt_chprotons";
     Filenames["meanpt_chkaons"] = "meanpt_chkaons";
     Filenames["meanpt_chpions"] = "meanpt_chpions";
@@ -715,6 +717,7 @@ void DataContainer::AddParticle(Statistics::Block &block, Statistics::Line &line
         // Histograms3D["v2_charged_sin"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlowSin(2));
         // Histograms3D["v2_charged_cos"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlowCos(2));
     }
+    HistogramMaps3D["yield_1_map"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetParticlePythiaID(), 1.0);
 };
 
 void DataContainer::AddEvent(Statistics::Block &block) {
@@ -725,6 +728,8 @@ void DataContainer::AddEvent(Statistics::Block &block) {
     Histograms1D["impactparameter_2"]->Add(block.GetNumberOfChargedParticles(), block.GetImpactParameter());
     Histograms1D["participation_2"]->Add(block.GetNumberOfChargedParticles(), block.GetNumberOfParticipantNucleons());
     Histograms1D["binarycollisions_2"]->Add(block.GetNumberOfChargedParticles(), block.GetNumberOfBinaryCollisions());
+
+    HistogramMaps3D["yield_1_map"]->AddEvent();
 
     Histograms3D["pt_chpions"]->AddEvent();
     Histograms3D["pt_ratio_chpions_to_chkaons"]->AddEvent();

@@ -27,7 +27,7 @@ void StatisticsContainer::AddEventSpecial() {
     // std::cout << "here" << std::endl;
     if (EntryCountCurrent > 0) {
         Total += TotalCurrent / (double)EntryCountCurrent;
-        TotalSQR += TotalCurrent * TotalCurrent / (double)EntryCountCurrent;
+        TotalSQR += TotalCurrent * TotalCurrent / ((double)EntryCountCurrent * (double)EntryCountCurrent);
         EntryCount += EntryCountCurrent;
     }
 
