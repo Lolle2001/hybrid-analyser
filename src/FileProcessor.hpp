@@ -32,7 +32,6 @@ struct RunInfo {
     int NBatchMax;
     size_t BatchSize;
 };
-void ReadFiles(int NRun, int NBatchMin, int NBatchMax, std::string Directory, Parameters& parameters, int collisiontype);
 void ReadFiles(std::vector<AMPT::RunInfo> runinfo, std::string Directory, std::string OutputDirectory, Parameters& parameters, int collisiontype);
 }  // namespace AMPT
 namespace iSS {
@@ -42,7 +41,6 @@ struct RunInfo {
     int NEvent;
 };
 Statistics::Block_iss GetInitialStateInfo(int NRun, int eventid, Parameters& parameters);
-void ReadFiles(int iSSRun, int IPGlasmaRun, int NEvent, std::string parametername, int collisiontype);
 void ReadFiles(std::vector<iSS::RunInfo> runinfo, std::string OutputDirectory, std::string parametername, int collisiontype);
 }  // namespace iSS
 
