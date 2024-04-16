@@ -175,32 +175,35 @@ void ReadFiles(std::vector<RunInfo> runinfo, std::string Directory, std::string 
         data[i]->GetFileData().SetCentralityEdges("ncharged", dummy->GetFileData().GetCentralityEdges("ncharged"));
     }
     campt->GetFileData().SetCentralityEdges("ncharged", dummy->GetFileData().GetCentralityEdges("ncharged"));
-    pbar.Reset();
-    printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
-    printf("%s\n", "Initializing data containers...");
-    fflush(stdout);
-    pbar.Print();
-    // std::cout << "hello" << std::endl;
+
     campt->InitializeDataContainer();
+
+    // pbar.Reset();
+    // printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
+    // printf("%s\n", "Initializing data containers...");
+    // fflush(stdout);
+    // pbar.Print();
     // std::cout << "hello" << std::endl;
-#pragma omp parallel
-    {
-#pragma omp for
-        for (int i = 0; i < BatchSize; ++i) {
-            // data[i]->ParseFull();
 
-            data[i]->InitializeDataContainer();
-            // data[i]->ParseParticleStatistics();
+    // std::cout << "hello" << std::endl;
+    // #pragma omp parallel
+    //     {
+    // #pragma omp for
+    //         for (int i = 0; i < BatchSize; ++i) {
+    //             // data[i]->ParseFull();
 
-            pbar.Update();
-#pragma omp critical
-            {
-                pbar.Print();
-            }
-        }
-    }
-    printf("\n");
-    fflush(stdout);
+    //             data[i]->InitializeDataContainer();
+    //             // data[i]->ParseParticleStatistics();
+
+    //             pbar.Update();
+    // #pragma omp critical
+    //             {
+    //                 pbar.Print();
+    //             }
+    //         }
+    //     }
+    //     printf("\n");
+    //     fflush(stdout);
 
     pbar.Reset();
     printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
@@ -214,12 +217,12 @@ void ReadFiles(std::vector<RunInfo> runinfo, std::string Directory, std::string 
         for (int i = 0; i < BatchSize; ++i) {
             // data[i]->ParseFull();
             // data[i]->ParseEventStatistics();
+            data[i]->InitializeDataContainer();
             data[i]->ParseParticleStatistics();
 
             pbar.Update();
 #pragma omp critical
             {
-                *campt += *data[i];
                 pbar.Print();
             }
         }
@@ -227,9 +230,9 @@ void ReadFiles(std::vector<RunInfo> runinfo, std::string Directory, std::string 
     printf("\n");
     fflush(stdout);
 
-    // for (int i = 0; i < BatchSize; ++i) {
-
-    // }
+    for (int i = 0; i < BatchSize; ++i) {
+        *campt += *data[i];
+    }
 
     Clock.Stop();
 
@@ -664,32 +667,32 @@ void ReadFiles(std::vector<iSS::RunInfo> runinfo, std::string OutputDirectory, s
         data[i]->GetFileData().SetCentralityEdges("ncharged", dummy->GetFileData().GetCentralityEdges("ncharged"));
     }
     cdata->GetFileData().SetCentralityEdges("ncharged", dummy->GetFileData().GetCentralityEdges("ncharged"));
-    pbar.Reset();
-    printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
-    printf("%s\n", "Initializing data containers...");
-    fflush(stdout);
-    pbar.Print();
-
     cdata->InitializeDataContainer();
 
-#pragma omp parallel
-    {
-#pragma omp for
-        for (int i = 0; i < BatchSize; ++i) {
-            // data[i]->ParseFull();
+    //     pbar.Reset();
+    //     printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
+    //     printf("%s\n", "Initializing data containers...");
+    //     fflush(stdout);
+    //     pbar.Print();
 
-            data[i]->InitializeDataContainer();
-            // data[i]->ParseParticleStatistics();
+    // #pragma omp parallel
+    //     {
+    // #pragma omp for
+    //         for (int i = 0; i < BatchSize; ++i) {
+    //             // data[i]->ParseFull();
 
-            pbar.Update();
-#pragma omp critical
-            {
-                pbar.Print();
-            }
-        }
-    }
-    printf("\n");
-    fflush(stdout);
+    //             data[i]->InitializeDataContainer();
+    //             // data[i]->ParseParticleStatistics();
+
+    //             pbar.Update();
+    // #pragma omp critical
+    //             {
+    //                 pbar.Print();
+    //             }
+    //         }
+    //     }
+    //     printf("\n");
+    //     fflush(stdout);
 
     pbar.Reset();
     printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
@@ -703,6 +706,7 @@ void ReadFiles(std::vector<iSS::RunInfo> runinfo, std::string OutputDirectory, s
         for (int i = 0; i < BatchSize; ++i) {
             // data[i]->ParseFull();
             // data[i]->ParseEventStatistics();
+            data[i]->InitializeDataContainer();
             data[i]->ParseParticleStatistics();
 
             pbar.Update();

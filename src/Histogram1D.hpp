@@ -21,7 +21,7 @@ class Histogram1D {
    private:
     Vector1D Contents;
 
-    int nx;
+    int nx, ny, nz;
 
     std::map<int, int> IndexMapX;
 
@@ -31,11 +31,26 @@ class Histogram1D {
 
     std::vector<double> EdgesX;
 
+    double y_max;
+    double y_min;
+    double z_max;
+    double z_min;
+
+    bool thirdaxis = false;
+    bool secondaxis = false;
+
+    std::vector<double> EdgesY;
+
+    std::vector<double> EdgesZ;
+
+    std::string Name;
+
    public:
     Histogram1D(){};
     // Histogram1D(int & nx_);
-    Histogram1D(std::vector<double> EdgesX_);
-
+    Histogram1D(std::string Name_, std::vector<double> EdgesX_);
+    Histogram1D(std::string Name_, std::vector<double> EdgesX_, std::vector<double> EdgesY_);
+    Histogram1D(std::string Name_, std::vector<double> EdgesX_, std::vector<double> EdgesY_, std::vector<double> EdgesZ_);
     // Histogram1D(std::shared_ptr<BinContainer> bincontainerX);
 
     void
@@ -44,10 +59,16 @@ class Histogram1D {
     void InitializeIndexMap();
 
     void AddEvent();
+    void AddEventAverage();
 
     void Add(double& valx, double valcontent);
-
+    void Add(double& valx, double& valy, double valcontent);
+    void Add(double& valx, double& valy, double& valz, double valcontent);
     void AddCurrent(double& valx, double valcontent);
+    void AddCurrent(double& valx, double& valy, double valcontent);
+    void AddCurrent(double& valx, double& valy, double& valz, double valcontent);
+
+    std::string& GetName();
 
     void PrintCount(std::ostream& output);
 

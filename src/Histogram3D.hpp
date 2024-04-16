@@ -56,18 +56,21 @@ class Histogram3D {
     std::vector<double> EdgesZ;
 
     bool is_reversed = false;
+    std::string Name;
 
    public:
     Histogram3D(){};
     // Histogram3D(int & nx_, int & ny_, int & nz_);
-    Histogram3D(std::vector<double> EdgesX_, std::vector<double> EdgesY_, std::vector<double> EdgesZ_);
+    Histogram3D(std::string Name_, std::vector<double> EdgesX_, std::vector<double> EdgesY_, std::vector<double> EdgesZ_);
 
     void Resize(int& nx_, int& ny_, int& nz_);
 
     void InitializeIndexMap();
 
+    std::string& GetName();
+
     void AddEvent();
-    void AddEventSpecial();
+    void AddEventAverage();
     void Add(double& valx, double& valy, double& valz, double valcontent);
     void AddCurrent(double& valx, double& valy, double& valz, double valcontent);
 

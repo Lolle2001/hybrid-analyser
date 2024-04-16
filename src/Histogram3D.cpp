@@ -8,16 +8,19 @@ namespace Statistics {
 // };
 
 Histogram3D::Histogram3D(
+    std::string Name_,
     std::vector<double> EdgesX_,
     std::vector<double> EdgesY_,
-    std::vector<double> EdgesZ_) : EdgesX(EdgesX_),
-                                   EdgesY(EdgesY_),
-                                   EdgesZ(EdgesZ_) {
+    std::vector<double> EdgesZ_) : Name(Name_), EdgesX(EdgesX_), EdgesY(EdgesY_), EdgesZ(EdgesZ_) {
     nx = EdgesX.size() - 1;
     ny = EdgesY.size() - 1;
     nz = EdgesZ.size() - 1;
     Resize(nx, ny, nz);
     InitializeIndexMap();
+}
+
+std::string& Histogram3D::GetName() {
+    return Name;
 }
 
 void Histogram3D::Resize(int& nx_, int& ny_, int& nz_) {
@@ -34,7 +37,7 @@ void Histogram3D::AddEvent() {
     }
 }
 
-void Histogram3D::AddEventSpecial() {
+void Histogram3D::AddEventAverage() {
     for (int ix = 0; ix < nx; ++ix) {
         for (int iy = 0; iy < ny; ++iy) {
             for (int iz = 0; iz < nz; ++iz) {

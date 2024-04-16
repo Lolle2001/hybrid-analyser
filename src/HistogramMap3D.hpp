@@ -51,21 +51,26 @@ class HistogramMap3D {
     std::vector<double> EdgesY;
     std::vector<double> EdgesZ;
 
+    std::string Name;
+
    public:
     HistogramMap3D(){};
     // HistogramMap3D(int & nx_, int & ny_, int & nz_);
-    HistogramMap3D(std::vector<double> EdgesX_, std::vector<double> EdgesY_, std::vector<double> EdgesZ_);
+    HistogramMap3D(std::string Name_, std::vector<double> EdgesX_, std::vector<double> EdgesY_, std::vector<double> EdgesZ_);
 
     void Resize(int& nx_, int& ny_, int& nz_);
 
     void InitializeIndexMap();
 
     void AddEvent();
+    void AddEventAverage();
 
     void Add(double& valx, double& valy, double& valz, int& key, double valcontent);
     void AddCurrent(double& valx, double& valy, double& valz, int& key, double valcontent);
 
     void Convert();
+
+    std::string& GetName();
 
     void PrintEdges(std::ostream& output);
     void PrintTotalSQR(std::ostream& output);

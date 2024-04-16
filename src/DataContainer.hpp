@@ -10,6 +10,7 @@
 #include "BinContainer.hpp"
 #include "DataFormat.hpp"
 #include "Histogram1D.hpp"
+#include "Histogram2D.hpp"
 #include "Histogram3D.hpp"
 #include "HistogramMap3D.hpp"
 #include "Utilities.hpp"
@@ -28,6 +29,7 @@ class DataContainer {
    private:
     // Histogram definitions here.
     PointerMap<Statistics::Histogram1D> Histograms1D;
+    PointerMap<Statistics::Histogram2D> Histograms2D;
     PointerMap<Statistics::Histogram3D> Histograms3D;
     PointerMap<Statistics::HistogramMap3D> HistogramMaps3D;
 
@@ -37,9 +39,7 @@ class DataContainer {
     VectorMap<std::vector<double>> EdgesPsR;  // Pseudorapidity
     VectorMap<std::vector<double>> EdgesMom;  // Transverse Momentum
 
-    std::map<std::string, std::string> Filenames;
-
-    std::vector<std::shared_ptr<Statistics::Block>> EventBlocks;
+        std::vector<std::shared_ptr<Statistics::Block>> EventBlocks;
 
     unsigned int NumberOfBlocks = 0;
 

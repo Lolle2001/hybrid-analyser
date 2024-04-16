@@ -8,11 +8,10 @@ namespace Statistics {
 // };
 
 HistogramMap3D::HistogramMap3D(
+    std::string Name_,
     std::vector<double> EdgesX_,
     std::vector<double> EdgesY_,
-    std::vector<double> EdgesZ_) : EdgesX(EdgesX_),
-                                   EdgesY(EdgesY_),
-                                   EdgesZ(EdgesZ_) {
+    std::vector<double> EdgesZ_) : Name(Name_), EdgesX(EdgesX_), EdgesY(EdgesY_), EdgesZ(EdgesZ_) {
     nx = EdgesX.size() - 1;
     ny = EdgesY.size() - 1;
     nz = EdgesZ.size() - 1;
@@ -22,6 +21,10 @@ HistogramMap3D::HistogramMap3D(
 
 void HistogramMap3D::Resize(int& nx_, int& ny_, int& nz_) {
     Contents.resize(nx_, Vector2DMap(ny_, Vector1DMap(nz_)));
+}
+
+std::string& HistogramMap3D::GetName() {
+    return Name;
 }
 
 void HistogramMap3D::AddEvent() {
@@ -39,6 +42,18 @@ void HistogramMap3D::AddEvent() {
         }
     }
     // std::cout << "!" << Contents[10][0][0][211].Total << std::endl;
+}
+
+void HistogramMap3D::AddEventAverage() {
+    for (int ix = 0; ix < nx; ++ix) {
+        for (int iy = 0; iy < ny; ++iy) {
+            for (int iz = 0; iz < nz; ++iz) {
+                for (auto& entry : Contents[ix][iy][iz]) {
+                    entry.second.AddEventSpecial();
+                }
+            }
+        }
+    }
 }
 
 void HistogramMap3D::Add(double& valx, double& valy, double& valz, int& key, double valcontent) {

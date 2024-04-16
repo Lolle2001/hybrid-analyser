@@ -36,7 +36,7 @@ class Histogram2D {
    private:
     Vector2D Contents;
 
-    int nx, ny;
+    int nx, ny, nz;
 
     std::map<int, int> IndexMapX;
     std::map<int, int> IndexMapY;
@@ -47,22 +47,33 @@ class Histogram2D {
     double y_max;
     double y_min;
     double y_width;
+    double z_max;
+    double z_min;
 
     std::vector<double> EdgesX;
     std::vector<double> EdgesY;
+    bool thirdaxis = false;
+    std::vector<double> EdgesZ;
+    std::string Name;
 
    public:
     Histogram2D(){};
     // Histogram3D(int & nx_, int & ny_, int & nz_);
     Histogram2D(std::vector<double> EdgesX_, std::vector<double> EdgesY_);
-
+    Histogram2D(std::vector<double> EdgesX_, std::vector<double> EdgesY_, std::vector<double> EdgesZ_);
+    Histogram2D(std::string Name_, std::vector<double> EdgesX_, std::vector<double> EdgesY_, std::vector<double> EdgesZ_);
     void Resize(int& nx_, int& ny_);
 
     void InitializeIndexMap();
 
     void AddEvent();
+    void AddEventAverage();
     void Add(double& valx, double& valy, double valcontent);
+    void Add(double& valx, double& valy, double& valz, double valcontent);
     void AddCurrent(double& valx, double& valy, double valcontent);
+    void AddCurrent(double& valx, double& valy, double& valz, double valcontent);
+
+    std::string& GetName();
 
     // void Convert();
     void PrintEdges(std::ostream& output);

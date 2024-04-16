@@ -18,8 +18,38 @@ Histogram2D::Histogram2D(
     InitializeIndexMap();
 }
 
+Histogram2D::Histogram2D(
+    std::vector<double> EdgesX_,
+    std::vector<double> EdgesY_,
+    std::vector<double> EdgesZ_) : EdgesX(EdgesX_),
+                                   EdgesY(EdgesY_),
+                                   EdgesZ(EdgesZ_) {
+    nx = EdgesX.size() - 1;
+    ny = EdgesY.size() - 1;
+    thirdaxis = true;
+    nz = 2;
+    Resize(nx, ny);
+    InitializeIndexMap();
+}
+
+Histogram2D::Histogram2D(std::string Name_,
+                         std::vector<double> EdgesX_,
+                         std::vector<double> EdgesY_,
+                         std::vector<double> EdgesZ_) : Name(Name_), EdgesX(EdgesX_), EdgesY(EdgesY_), EdgesZ(EdgesZ_) {
+    nx = EdgesX.size() - 1;
+    ny = EdgesY.size() - 1;
+    thirdaxis = true;
+    nz = 2;
+    Resize(nx, ny);
+    InitializeIndexMap();
+}
+
 void Histogram2D::Resize(int& nx_, int& ny_) {
     Contents.resize(nx_, Vector1D(ny_));
+}
+
+std::string& Histogram2D::GetName() {
+    return Name;
 }
 
 void Histogram2D::AddEvent() {
@@ -33,6 +63,14 @@ void Histogram2D::AddEvent() {
         }
     }
     // std::cout << "!" << Contents[10][0][0][211].Total << std::endl;
+}
+
+void Histogram2D::AddEventAverage() {
+    for (int ix = 0; ix < nx; ++ix) {
+        for (int iy = 0; iy < ny; ++iy) {
+            Contents[ix][iy].AddEventSpecial();
+        }
+    }
 }
 
 void Histogram2D::Add(double& valx, double& valy, double valcontent) {
@@ -53,11 +91,33 @@ void Histogram2D::AddCurrent(double& valx, double& valy, double valcontent) {
     }
 }
 
+void Histogram2D::Add(double& valx, double& valy, double& valz, double valcontent) {
+    if (valx >= x_min && valx < x_max && valy >= y_min && valy < y_max && valz >= z_min && valz < z_max) {
+        int ix = IndexMapX[(int)((valx - x_min) / (x_width))];
+        int iy = IndexMapY[(int)((valy - y_min) / (y_width))];
+
+        Contents[ix][iy].Add(valcontent);
+    }
+}
+
+void Histogram2D::AddCurrent(double& valx, double& valy, double& valz, double valcontent) {
+    if (valx >= x_min && valx < x_max && valy >= y_min && valy < y_max && valz >= z_min && valz < z_max) {
+        int ix = IndexMapX[(int)((valx - x_min) / (x_width))];
+        int iy = IndexMapY[(int)((valy - y_min) / (y_width))];
+
+        Contents[ix][iy].AddCurrent(valcontent);
+    }
+}
+
 void Histogram2D::InitializeIndexMap() {
     x_max = EdgesX.back();
     x_min = EdgesX.front();
     y_max = EdgesY.back();
     y_min = EdgesY.front();
+    if (thirdaxis) {
+        z_max = EdgesY.back();
+        z_min = EdgesY.front();
+    }
 
     std::vector<double> xwidths(nx);
     std::vector<double> ywidths(ny);
@@ -140,14 +200,21 @@ void Histogram2D::PrintEdges(std::ostream& output) {
         output << EdgesY[iy] << " ";
     }
     output << "\n";
+    if (thirdaxis) {
+        output << "nbins(z) = " << nz << "\n";
+        output << "edges(z) = ";
+        for (int iz = 0; iz <= nz; ++iz) {
+            output << EdgesZ[iz] << " ";
+        }
+        output << "\n";
+    }
 }
 
 void Histogram2D::PrintCount(std::ostream& output) {
     // std::cout << nx << " " << ny << " " << nz << std::endl;
     for (int ix = 0; ix < nx; ++ix) {
-        output << "# " << ix << "\n";
         for (int iy = 0; iy < ny; ++iy) {
-            output << Contents[ix][iy].EntryCount << " ";
+            output << std::setw(13) << std::right << Contents[ix][iy].EntryCount << " ";
             // std::cout << Contents[ix][iy][iz].EntryCount << std::endl;
         }
         output << "\n";
@@ -155,9 +222,8 @@ void Histogram2D::PrintCount(std::ostream& output) {
 }
 void Histogram2D::PrintTotalSQR(std::ostream& output) {
     for (int ix = 0; ix < nx; ++ix) {
-        output << "# " << ix << "\n";
         for (int iy = 0; iy < ny; ++iy) {
-            output << Contents[ix][iy].TotalSQR << " ";
+            output << std::setw(13) << std::right << Contents[ix][iy].TotalSQR << " ";
         }
         output << "\n";
     }
@@ -165,9 +231,8 @@ void Histogram2D::PrintTotalSQR(std::ostream& output) {
 
 void Histogram2D::PrintTotal(std::ostream& output) {
     for (int ix = 0; ix < nx; ++ix) {
-        output << "# " << ix << "\n";
         for (int iy = 0; iy < ny; ++iy) {
-            output << Contents[ix][iy].Total << " ";
+            output << std::setw(13) << std::right << Contents[ix][iy].Total << " ";
         }
         output << "\n";
     }
