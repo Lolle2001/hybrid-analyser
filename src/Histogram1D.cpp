@@ -22,7 +22,7 @@ Histogram1D::Histogram1D(std::string Name_,
     nx = EdgesX.size() - 1;
     secondaxis = true;
 
-    ny = 2;
+    ny = 1;
     Resize(nx);
     InitializeIndexMap();
 }
@@ -34,8 +34,8 @@ Histogram1D::Histogram1D(std::string Name_,
     nx = EdgesX.size() - 1;
     secondaxis = true;
     thirdaxis = true;
-    ny = 2;
-    nz = 2;
+    ny = 1;
+    nz = 1;
     Resize(nx);
     InitializeIndexMap();
 }

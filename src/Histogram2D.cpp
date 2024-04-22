@@ -7,27 +7,12 @@ namespace Statistics {
 //     Resize(nx, ny, nz);
 // };
 
-Histogram2D::Histogram2D(
-    std::vector<double> EdgesX_,
-    std::vector<double> EdgesY_) : EdgesX(EdgesX_),
-                                   EdgesY(EdgesY_) {
+Histogram2D::Histogram2D(std::string Name_,
+                         std::vector<double> EdgesX_,
+                         std::vector<double> EdgesY_) : Name(Name_), EdgesX(EdgesX_), EdgesY(EdgesY_) {
     nx = EdgesX.size() - 1;
     ny = EdgesY.size() - 1;
 
-    Resize(nx, ny);
-    InitializeIndexMap();
-}
-
-Histogram2D::Histogram2D(
-    std::vector<double> EdgesX_,
-    std::vector<double> EdgesY_,
-    std::vector<double> EdgesZ_) : EdgesX(EdgesX_),
-                                   EdgesY(EdgesY_),
-                                   EdgesZ(EdgesZ_) {
-    nx = EdgesX.size() - 1;
-    ny = EdgesY.size() - 1;
-    thirdaxis = true;
-    nz = 2;
     Resize(nx, ny);
     InitializeIndexMap();
 }
@@ -39,7 +24,7 @@ Histogram2D::Histogram2D(std::string Name_,
     nx = EdgesX.size() - 1;
     ny = EdgesY.size() - 1;
     thirdaxis = true;
-    nz = 2;
+    nz = 1;
     Resize(nx, ny);
     InitializeIndexMap();
 }
@@ -74,6 +59,7 @@ void Histogram2D::AddEventAverage() {
 }
 
 void Histogram2D::Add(double& valx, double& valy, double valcontent) {
+    // std::cout << valx << " " << valy << " " << valcontent << std::endl;
     if (valx >= x_min && valx < x_max && valy >= y_min && valy < y_max) {
         int ix = IndexMapX[(int)((valx - x_min) / (x_width))];
         int iy = IndexMapY[(int)((valy - y_min) / (y_width))];
@@ -115,8 +101,8 @@ void Histogram2D::InitializeIndexMap() {
     y_max = EdgesY.back();
     y_min = EdgesY.front();
     if (thirdaxis) {
-        z_max = EdgesY.back();
-        z_min = EdgesY.front();
+        z_max = EdgesZ.back();
+        z_min = EdgesZ.front();
     }
 
     std::vector<double> xwidths(nx);
