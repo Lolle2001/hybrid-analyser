@@ -402,6 +402,7 @@ void File_ampt::ParseParticleStatistics() {
                 for (int n = 1; n <= Statistics::NUMBER_OF_HARMONICS; n++) {
                     TempLine.CalculatePhi(GetFileData().GetEventBlock(counter)->GetEventPlaneAngle(n));
                     TempLine.CalculateAnisotropicFlow(n);
+                    TempLine.CalculateAnisotropicFlowOld(n);
                 }
 
                 GetFileData().AddParticle(TempBlock, TempLine);
@@ -516,6 +517,7 @@ void File_iss::ParseParticleStatistics() {
                 for (int n = 1; n <= Statistics::NUMBER_OF_HARMONICS; n++) {
                     TempLine.CalculatePhi(GetFileData().GetEventBlock(counter)->GetEventPlaneAngle(n));
                     TempLine.CalculateAnisotropicFlow(n);
+                    TempLine.CalculateAnisotropicFlowOld(n);
                 }
 
                 TempLine.CalculatePseudoRapidity();

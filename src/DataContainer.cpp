@@ -367,6 +367,16 @@ void DataContainer::InitialiseHistograms() {
     Histograms1D["meanpt_1_chpions"] = std::make_unique<Histogram1D>("meanpt_1_chpions", EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
     Histograms1D["meanpt_1_charged"] = std::make_unique<Histogram1D>("meanpt_1_charged", EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
 
+    Histograms1D["meanpt_2_chprotons"] = std::make_unique<Histogram1D>("meanpt_2_chprotons", EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+    Histograms1D["meanpt_2_chkaons"] = std::make_unique<Histogram1D>("meanpt_2_chkaons", EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+    Histograms1D["meanpt_2_chpions"] = std::make_unique<Histogram1D>("meanpt_2_chpions", EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+    Histograms1D["meanpt_2_charged"] = std::make_unique<Histogram1D>("meanpt_2_charged", EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+
+    Histograms1D["meanpt_3_chprotons"] = std::make_unique<Histogram1D>("meanpt_2_chprotons", EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+    Histograms1D["meanpt_3_chkaons"] = std::make_unique<Histogram1D>("meanpt_2_chkaons", EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+    Histograms1D["meanpt_3_chpions"] = std::make_unique<Histogram1D>("meanpt_2_chpions", EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+    Histograms1D["meanpt_3_charged"] = std::make_unique<Histogram1D>("meanpt_2_charged", EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+
     // Average yield for low pT
     EdgesRap["1:meanyield"] = (std::vector<double>){-0.5, 0.5};
     EdgesMom["1:meanyield"] = (std::vector<double>){0., 3.};
@@ -386,6 +396,10 @@ void DataContainer::InitialiseHistograms() {
     Histograms1D["meanyield_3_chpions"] = std::make_unique<Histogram1D>("meanyield_3_chpions", EdgesC["1:PbPb5020"], EdgesMom["1:meanyield"], EdgesRap["1:meanyield"]);
     Histograms1D["meanyield_3_charged"] = std::make_unique<Histogram1D>("meanyield_3_charged", EdgesC["1:PbPb5020"], EdgesMom["1:meanyield"], EdgesRap["1:meanyield"]);
 
+    Histograms1D["meanyieldeta_1_chprotons"] = std::make_unique<Histogram1D>("meanyieldeta_1_chprotons", EdgesC[centrality_type], EdgesMom["1:meanyield"], EdgesRap["1:meanyield"]);
+    Histograms1D["meanyieldeta_1_chkaons"] = std::make_unique<Histogram1D>("meanyieldeta_1_chkaons", EdgesC[centrality_type], EdgesMom["1:meanyield"], EdgesRap["1:meanyield"]);
+    Histograms1D["meanyieldeta_1_chpions"] = std::make_unique<Histogram1D>("meanyieldeta_1_chpions", EdgesC[centrality_type], EdgesMom["1:meanyield"], EdgesRap["1:meanyield"]);
+    Histograms1D["meanyieldeta_1_charged"] = std::make_unique<Histogram1D>("meanyieldeta_1_charged", EdgesC[centrality_type], EdgesMom["1:meanyield"], EdgesRap["1:meanyield"]);
     // Rapidity spectra as function of y and centrality for all pT and low pT
     EdgesRap["3:p_pbar"] = (std::vector<double>){-10.0, -9.5, -9.0, -8.5, -8.0, -7.5, -7.0, -6.5, -6.0, -5.5, -5.0, -4.5, -4.0, -3.5, -3.0, -2.5, -2.0, -1.5, -1.0, -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0};
     EdgesMom["3:p_pbar"] = (std::vector<double>){0.01, 20.};
@@ -436,20 +450,66 @@ void DataContainer::InitialiseHistograms() {
     Histograms2D["v2pT_1_chkaons"] = std::make_unique<Histogram2D>("v2pT_1_chkaons", EdgesC[centrality_type], EdgesMom["5:K+_K-"], EdgesRap["5:K+_K-"]);
     Histograms2D["v2pT_1_charged"] = std::make_unique<Histogram2D>("v2pT_1_charged", EdgesC[centrality_type], EdgesMom["5:charged"], EdgesRap["5:charged"]);
 
-    Histograms2D["v3pT_1_chprotons"] = std::make_unique<Histogram2D>("v3pT_1_chprotons", EdgesC[centrality_type], EdgesMom["5:p_pbar"], EdgesRap["5:p_pbar"]);
-    Histograms2D["v3pT_1_chpions"] = std::make_unique<Histogram2D>("v3pT_1_chpions", EdgesC[centrality_type], EdgesMom["5:pi+_pi-"], EdgesRap["5:pi+_pi-"]);
-    Histograms2D["v3pT_1_chkaons"] = std::make_unique<Histogram2D>("v3pT_1_chkaons", EdgesC[centrality_type], EdgesMom["5:K+_K-"], EdgesRap["5:K+_K-"]);
-    Histograms2D["v3pT_1_charged"] = std::make_unique<Histogram2D>("v3pT_1_charged", EdgesC[centrality_type], EdgesMom["5:charged"], EdgesRap["5:charged"]);
+    // Histograms2D["v3pT_1_chprotons"] = std::make_unique<Histogram2D>("v3pT_1_chprotons", EdgesC[centrality_type], EdgesMom["5:p_pbar"], EdgesRap["5:p_pbar"]);
+    // Histograms2D["v3pT_1_chpions"] = std::make_unique<Histogram2D>("v3pT_1_chpions", EdgesC[centrality_type], EdgesMom["5:pi+_pi-"], EdgesRap["5:pi+_pi-"]);
+    // Histograms2D["v3pT_1_chkaons"] = std::make_unique<Histogram2D>("v3pT_1_chkaons", EdgesC[centrality_type], EdgesMom["5:K+_K-"], EdgesRap["5:K+_K-"]);
+    // Histograms2D["v3pT_1_charged"] = std::make_unique<Histogram2D>("v3pT_1_charged", EdgesC[centrality_type], EdgesMom["5:charged"], EdgesRap["5:charged"]);
 
-    Histograms2D["v4pT_1_chprotons"] = std::make_unique<Histogram2D>("v4pT_1_chprotons", EdgesC[centrality_type], EdgesMom["5:p_pbar"], EdgesRap["5:p_pbar"]);
-    Histograms2D["v4pT_1_chpions"] = std::make_unique<Histogram2D>("v4pT_1_chpions", EdgesC[centrality_type], EdgesMom["5:pi+_pi-"], EdgesRap["5:pi+_pi-"]);
-    Histograms2D["v4pT_1_chkaons"] = std::make_unique<Histogram2D>("v4pT_1_chkaons", EdgesC[centrality_type], EdgesMom["5:K+_K-"], EdgesRap["5:K+_K-"]);
-    Histograms2D["v4pT_1_charged"] = std::make_unique<Histogram2D>("v4pT_1_charged", EdgesC[centrality_type], EdgesMom["5:charged"], EdgesRap["5:charged"]);
+    // Histograms2D["v4pT_1_chprotons"] = std::make_unique<Histogram2D>("v4pT_1_chprotons", EdgesC[centrality_type], EdgesMom["5:p_pbar"], EdgesRap["5:p_pbar"]);
+    // Histograms2D["v4pT_1_chpions"] = std::make_unique<Histogram2D>("v4pT_1_chpions", EdgesC[centrality_type], EdgesMom["5:pi+_pi-"], EdgesRap["5:pi+_pi-"]);
+    // Histograms2D["v4pT_1_chkaons"] = std::make_unique<Histogram2D>("v4pT_1_chkaons", EdgesC[centrality_type], EdgesMom["5:K+_K-"], EdgesRap["5:K+_K-"]);
+    // Histograms2D["v4pT_1_charged"] = std::make_unique<Histogram2D>("v4pT_1_charged", EdgesC[centrality_type], EdgesMom["5:charged"], EdgesRap["5:charged"]);
 
-    Histograms2D["v5pT_1_chprotons"] = std::make_unique<Histogram2D>("v5pT_1_chprotons", EdgesC[centrality_type], EdgesMom["5:p_pbar"], EdgesRap["5:p_pbar"]);
-    Histograms2D["v5pT_1_chpions"] = std::make_unique<Histogram2D>("v5pT_1_chpions", EdgesC[centrality_type], EdgesMom["5:pi+_pi-"], EdgesRap["5:pi+_pi-"]);
-    Histograms2D["v5pT_1_chkaons"] = std::make_unique<Histogram2D>("v5pT_1_chkaons", EdgesC[centrality_type], EdgesMom["5:K+_K-"], EdgesRap["5:K+_K-"]);
-    Histograms2D["v5pT_1_charged"] = std::make_unique<Histogram2D>("v5pT_1_charged", EdgesC[centrality_type], EdgesMom["5:charged"], EdgesRap["5:charged"]);
+    // Histograms2D["v5pT_1_chprotons"] = std::make_unique<Histogram2D>("v5pT_1_chprotons", EdgesC[centrality_type], EdgesMom["5:p_pbar"], EdgesRap["5:p_pbar"]);
+    // Histograms2D["v5pT_1_chpions"] = std::make_unique<Histogram2D>("v5pT_1_chpions", EdgesC[centrality_type], EdgesMom["5:pi+_pi-"], EdgesRap["5:pi+_pi-"]);
+    // Histograms2D["v5pT_1_chkaons"] = std::make_unique<Histogram2D>("v5pT_1_chkaons", EdgesC[centrality_type], EdgesMom["5:K+_K-"], EdgesRap["5:K+_K-"]);
+    // Histograms2D["v5pT_1_charged"] = std::make_unique<Histogram2D>("v5pT_1_charged", EdgesC[centrality_type], EdgesMom["5:charged"], EdgesRap["5:charged"]);
+
+    EdgesRap["v2pT:2:p_pbar"] = (std::vector<double>){-1, 1};
+    EdgesMom["v2pT:2:p_pbar"] = (std::vector<double>){0, 0.25, 0.5, 0.75, 1., 1.25, 1.5, 1.75, 2., 2.25, 2.5, 2.75, 3., 3.25, 3.5, 3.75, 4., 5., 6.};
+    EdgesRap["v2pT:2:K+_K-"] = (std::vector<double>){-1, 1};
+    EdgesMom["v2pT:2:K+_K-"] = (std::vector<double>){0, 0.25, 0.5, 0.75, 1., 1.25, 1.5, 1.75, 2., 2.25, 2.5, 2.75, 3., 3.25, 3.5, 3.75, 4., 5., 6.};
+    EdgesRap["v2pT:2:pi+_pi-"] = (std::vector<double>){-1, 1};
+    EdgesMom["v2pT:2:pi+_pi-"] = (std::vector<double>){0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1., 1.25, 1.5, 1.75, 2., 2.25, 2.5, 2.75, 3., 3.25, 3.5, 3.75, 4., 5., 6., 8., 10.};
+    EdgesRap["v2pT:2:charged"] = (std::vector<double>){-1, 1};
+    EdgesMom["v2pT:2:charged"] = (std::vector<double>){0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1., 1.25, 1.5, 1.75, 2., 2.25, 2.5, 2.75, 3., 3.25, 3.5, 3.75, 4., 5., 6., 8., 10.};
+
+    Histograms2D["v2pT_2_chprotons"] = std::make_unique<Histogram2D>("v2pT_2_chprotons", EdgesC[centrality_type], EdgesMom["v2pT:2:p_pbar"], EdgesRap["v2pT:2:p_pbar"]);
+    Histograms2D["v2pT_2_chpions"] = std::make_unique<Histogram2D>("v2pT_2_chpions", EdgesC[centrality_type], EdgesMom["v2pT:2:pi+_pi-"], EdgesRap["v2pT:2:pi+_pi-"]);
+    Histograms2D["v2pT_2_chkaons"] = std::make_unique<Histogram2D>("v2pT_2_chkaons", EdgesC[centrality_type], EdgesMom["v2pT:2:K+_K-"], EdgesRap["v2pT:2:K+_K-"]);
+    Histograms2D["v2pT_2_charged"] = std::make_unique<Histogram2D>("v2pT_2_charged", EdgesC[centrality_type], EdgesMom["v2pT:2:charged"], EdgesRap["v2pT:2:charged"]);
+
+    // Histograms2D["v3pT_2_chprotons"] = std::make_unique<Histogram2D>("v3pT_2_chprotons", EdgesC[centrality_type], EdgesMom["v2pT:2:p_pbar"], EdgesRap["v2pT:2:p_pbar"]);
+    // Histograms2D["v3pT_2_chpions"] = std::make_unique<Histogram2D>("v3pT_2_chpions", EdgesC[centrality_type], EdgesMom["v2pT:2:pi+_pi-"], EdgesRap["v2pT:2:pi+_pi-"]);
+    // Histograms2D["v3pT_2_chkaons"] = std::make_unique<Histogram2D>("v3pT_2_chkaons", EdgesC[centrality_type], EdgesMom["v2pT:2:K+_K-"], EdgesRap["v2pT:2:K+_K-"]);
+    // Histograms2D["v3pT_2_charged"] = std::make_unique<Histogram2D>("v3pT_2_charged", EdgesC[centrality_type], EdgesMom["v2pT:2:charged"], EdgesRap["v2pT:2:charged"]);
+
+    // Histograms2D["v4pT_2_chprotons"] = std::make_unique<Histogram2D>("v4pT_2_chprotons", EdgesC[centrality_type], EdgesMom["v2pT:2:p_pbar"], EdgesRap["v2pT:2:p_pbar"]);
+    // Histograms2D["v4pT_2_chpions"] = std::make_unique<Histogram2D>("v4pT_2_chpions", EdgesC[centrality_type], EdgesMom["v2pT:2:pi+_pi-"], EdgesRap["v2pT:2:pi+_pi-"]);
+    // Histograms2D["v4pT_2_chkaons"] = std::make_unique<Histogram2D>("v4pT_2_chkaons", EdgesC[centrality_type], EdgesMom["v2pT:2:K+_K-"], EdgesRap["v2pT:2:K+_K-"]);
+    // Histograms2D["v4pT_2_charged"] = std::make_unique<Histogram2D>("v4pT_2_charged", EdgesC[centrality_type], EdgesMom["v2pT:2:charged"], EdgesRap["v2pT:2:charged"]);
+
+    // Histograms2D["v5pT_2_chprotons"] = std::make_unique<Histogram2D>("v5pT_2_chprotons", EdgesC[centrality_type], EdgesMom["v2pT:2:p_pbar"], EdgesRap["v2pT:2:p_pbar"]);
+    // Histograms2D["v5pT_2_chpions"] = std::make_unique<Histogram2D>("v5pT_2_chpions", EdgesC[centrality_type], EdgesMom["v2pT:2:pi+_pi-"], EdgesRap["v2pT:2:pi+_pi-"]);
+    // Histograms2D["v5pT_2_chkaons"] = std::make_unique<Histogram2D>("v5pT_2_chkaons", EdgesC[centrality_type], EdgesMom["v2pT:2:K+_K-"], EdgesRap["v2pT:2:K+_K-"]);
+    // Histograms2D["v5pT_2_charged"] = std::make_unique<Histogram2D>("v5pT_2_charged", EdgesC[centrality_type], EdgesMom["v2pT:2:charged"], EdgesRap["v2pT:2:charged"]);
+
+    Histograms2D["v2pT_3_chprotons"] = std::make_unique<Histogram2D>("v2pT_3_chprotons", EdgesC[centrality_type], EdgesMom["v2pT:2:p_pbar"], EdgesRap["v2pT:2:p_pbar"]);
+    Histograms2D["v2pT_3_chpions"] = std::make_unique<Histogram2D>("v2pT_3_chpions", EdgesC[centrality_type], EdgesMom["v2pT:2:pi+_pi-"], EdgesRap["v2pT:2:pi+_pi-"]);
+    Histograms2D["v2pT_3_chkaons"] = std::make_unique<Histogram2D>("v2pT_3_chkaons", EdgesC[centrality_type], EdgesMom["v2pT:2:K+_K-"], EdgesRap["v2pT:2:K+_K-"]);
+    Histograms2D["v2pT_3_charged"] = std::make_unique<Histogram2D>("v2pT_3_charged", EdgesC[centrality_type], EdgesMom["v2pT:2:charged"], EdgesRap["v2pT:2:charged"]);
+    // Histograms2D["v3pT_3_chprotons"] = std::make_unique<Histogram2D>("v3pT_3_chprotons", EdgesC[centrality_type], EdgesMom["v2pT:2:p_pbar"], EdgesRap["v2pT:2:p_pbar"]);
+    // Histograms2D["v3pT_3_chpions"] = std::make_unique<Histogram2D>("v3pT_3_chpions", EdgesC[centrality_type], EdgesMom["v2pT:2:pi+_pi-"], EdgesRap["v2pT:2:pi+_pi-"]);
+    // Histograms2D["v3pT_3_chkaons"] = std::make_unique<Histogram2D>("v3pT_3_chkaons", EdgesC[centrality_type], EdgesMom["v2pT:2:K+_K-"], EdgesRap["v2pT:2:K+_K-"]);
+    // Histograms2D["v3pT_3_charged"] = std::make_unique<Histogram2D>("v3pT_3_charged", EdgesC[centrality_type], EdgesMom["v2pT:2:charged"], EdgesRap["v2pT:2:charged"]);
+    // Histograms2D["v4pT_3_chprotons"] = std::make_unique<Histogram2D>("v4pT_3_chprotons", EdgesC[centrality_type], EdgesMom["v2pT:2:p_pbar"], EdgesRap["v2pT:2:p_pbar"]);
+    // Histograms2D["v4pT_3_chpions"] = std::make_unique<Histogram2D>("v4pT_3_chpions", EdgesC[centrality_type], EdgesMom["v2pT:2:pi+_pi-"], EdgesRap["v2pT:2:pi+_pi-"]);
+    // Histograms2D["v4pT_3_chkaons"] = std::make_unique<Histogram2D>("v4pT_3_chkaons", EdgesC[centrality_type], EdgesMom["v2pT:2:K+_K-"], EdgesRap["v2pT:2:K+_K-"]);
+    // Histograms2D["v4pT_3_charged"] = std::make_unique<Histogram2D>("v4pT_3_charged", EdgesC[centrality_type], EdgesMom["v2pT:2:charged"], EdgesRap["v2pT:2:charged"]);
+    // Histograms2D["v5pT_3_chprotons"] = std::make_unique<Histogram2D>("v5pT_3_chprotons", EdgesC[centrality_type], EdgesMom["v2pT:2:p_pbar"], EdgesRap["v2pT:2:p_pbar"]);
+    // Histograms2D["v5pT_3_chpions"] = std::make_unique<Histogram2D>("v5pT_3_chpions", EdgesC[centrality_type], EdgesMom["v2pT:2:pi+_pi-"], EdgesRap["v2pT:2:pi+_pi-"]);
+    // Histograms2D["v5pT_3_chkaons"] = std::make_unique<Histogram2D>("v5pT_3_chkaons", EdgesC[centrality_type], EdgesMom["v2pT:2:K+_K-"], EdgesRap["v2pT:2:K+_K-"]);
+    // Histograms2D["v5pT_3_charged"] = std::make_unique<Histogram2D>("v5pT_3_charged", EdgesC[centrality_type], EdgesMom["v2pT:2:charged"], EdgesRap["v2pT:2:charged"]);
 
     // Average anisotropic flow as function of centrality for low pT and mid rapidity
     EdgesRap["6:p_pbar"] = (std::vector<double>){-0.5, 0.5};
@@ -466,20 +526,40 @@ void DataContainer::InitialiseHistograms() {
     Histograms1D["v2_1_chkaons"] = std::make_unique<Histogram1D>("v2_1_chkaons", EdgesC[centrality_type], EdgesMom["6:K+_K-"], EdgesRap["6:K+_K-"]);
     Histograms1D["v2_1_charged"] = std::make_unique<Histogram1D>("v2_1_charged", EdgesC[centrality_type], EdgesMom["6:charged"], EdgesRap["6:charged"]);
 
-    Histograms1D["v3_1_chprotons"] = std::make_unique<Histogram1D>("v3_1_chprotons", EdgesC[centrality_type], EdgesMom["6:p_pbar"], EdgesRap["6:p_pbar"]);
-    Histograms1D["v3_1_chpions"] = std::make_unique<Histogram1D>("v3_1_chpions", EdgesC[centrality_type], EdgesMom["6:pi+_pi-"], EdgesRap["6:pi+_pi-"]);
-    Histograms1D["v3_1_chkaons"] = std::make_unique<Histogram1D>("v3_1_chkaons", EdgesC[centrality_type], EdgesMom["6:K+_K-"], EdgesRap["6:K+_K-"]);
-    Histograms1D["v3_1_charged"] = std::make_unique<Histogram1D>("v3_1_charged", EdgesC[centrality_type], EdgesMom["6:charged"], EdgesRap["6:charged"]);
+    // Histograms1D["v3_1_chprotons"] = std::make_unique<Histogram1D>("v3_1_chprotons", EdgesC[centrality_type], EdgesMom["6:p_pbar"], EdgesRap["6:p_pbar"]);
+    // Histograms1D["v3_1_chpions"] = std::make_unique<Histogram1D>("v3_1_chpions", EdgesC[centrality_type], EdgesMom["6:pi+_pi-"], EdgesRap["6:pi+_pi-"]);
+    // Histograms1D["v3_1_chkaons"] = std::make_unique<Histogram1D>("v3_1_chkaons", EdgesC[centrality_type], EdgesMom["6:K+_K-"], EdgesRap["6:K+_K-"]);
+    // Histograms1D["v3_1_charged"] = std::make_unique<Histogram1D>("v3_1_charged", EdgesC[centrality_type], EdgesMom["6:charged"], EdgesRap["6:charged"]);
 
-    Histograms1D["v4_1_chprotons"] = std::make_unique<Histogram1D>("v4_1_chprotons", EdgesC[centrality_type], EdgesMom["6:p_pbar"], EdgesRap["6:p_pbar"]);
-    Histograms1D["v4_1_chpions"] = std::make_unique<Histogram1D>("v4_1_chpions", EdgesC[centrality_type], EdgesMom["6:pi+_pi-"], EdgesRap["6:pi+_pi-"]);
-    Histograms1D["v4_1_chkaons"] = std::make_unique<Histogram1D>("v4_1_chkaons", EdgesC[centrality_type], EdgesMom["6:K+_K-"], EdgesRap["6:K+_K-"]);
-    Histograms1D["v4_1_charged"] = std::make_unique<Histogram1D>("v4_1_charged", EdgesC[centrality_type], EdgesMom["6:charged"], EdgesRap["6:charged"]);
+    // Histograms1D["v4_1_chprotons"] = std::make_unique<Histogram1D>("v4_1_chprotons", EdgesC[centrality_type], EdgesMom["6:p_pbar"], EdgesRap["6:p_pbar"]);
+    // Histograms1D["v4_1_chpions"] = std::make_unique<Histogram1D>("v4_1_chpions", EdgesC[centrality_type], EdgesMom["6:pi+_pi-"], EdgesRap["6:pi+_pi-"]);
+    // Histograms1D["v4_1_chkaons"] = std::make_unique<Histogram1D>("v4_1_chkaons", EdgesC[centrality_type], EdgesMom["6:K+_K-"], EdgesRap["6:K+_K-"]);
+    // Histograms1D["v4_1_charged"] = std::make_unique<Histogram1D>("v4_1_charged", EdgesC[centrality_type], EdgesMom["6:charged"], EdgesRap["6:charged"]);
 
-    Histograms1D["v5_1_chprotons"] = std::make_unique<Histogram1D>("v5_1_chprotons", EdgesC[centrality_type], EdgesMom["6:p_pbar"], EdgesRap["6:p_pbar"]);
-    Histograms1D["v5_1_chpions"] = std::make_unique<Histogram1D>("v5_1_chpions", EdgesC[centrality_type], EdgesMom["6:pi+_pi-"], EdgesRap["6:pi+_pi-"]);
-    Histograms1D["v5_1_chkaons"] = std::make_unique<Histogram1D>("v5_1_chkaons", EdgesC[centrality_type], EdgesMom["6:K+_K-"], EdgesRap["6:K+_K-"]);
-    Histograms1D["v5_1_charged"] = std::make_unique<Histogram1D>("v5_1_charged", EdgesC[centrality_type], EdgesMom["6:charged"], EdgesRap["6:charged"]);
+    // Histograms1D["v5_1_chprotons"] = std::make_unique<Histogram1D>("v5_1_chprotons", EdgesC[centrality_type], EdgesMom["6:p_pbar"], EdgesRap["6:p_pbar"]);
+    // Histograms1D["v5_1_chpions"] = std::make_unique<Histogram1D>("v5_1_chpions", EdgesC[centrality_type], EdgesMom["6:pi+_pi-"], EdgesRap["6:pi+_pi-"]);
+    // Histograms1D["v5_1_chkaons"] = std::make_unique<Histogram1D>("v5_1_chkaons", EdgesC[centrality_type], EdgesMom["6:K+_K-"], EdgesRap["6:K+_K-"]);
+    // Histograms1D["v5_1_charged"] = std::make_unique<Histogram1D>("v5_1_charged", EdgesC[centrality_type], EdgesMom["6:charged"], EdgesRap["6:charged"]);
+
+    Histograms1D["v2_2_chprotons"] = std::make_unique<Histogram1D>("v2_2_chprotons", EdgesC[centrality_type], EdgesMom["6:p_pbar"], EdgesRap["6:p_pbar"]);
+    Histograms1D["v2_2_chpions"] = std::make_unique<Histogram1D>("v2_2_chpions", EdgesC[centrality_type], EdgesMom["6:pi+_pi-"], EdgesRap["6:pi+_pi-"]);
+    Histograms1D["v2_2_chkaons"] = std::make_unique<Histogram1D>("v2_2_chkaons", EdgesC[centrality_type], EdgesMom["6:K+_K-"], EdgesRap["6:K+_K-"]);
+    Histograms1D["v2_2_charged"] = std::make_unique<Histogram1D>("v2_2_charged", EdgesC[centrality_type], EdgesMom["6:charged"], EdgesRap["6:charged"]);
+
+    // Histograms1D["v3_2_chprotons"] = std::make_unique<Histogram1D>("v3_2_chprotons", EdgesC[centrality_type], EdgesMom["6:p_pbar"], EdgesRap["6:p_pbar"]);
+    // Histograms1D["v3_2_chpions"] = std::make_unique<Histogram1D>("v3_2_chpions", EdgesC[centrality_type], EdgesMom["6:pi+_pi-"], EdgesRap["6:pi+_pi-"]);
+    // Histograms1D["v3_2_chkaons"] = std::make_unique<Histogram1D>("v3_2_chkaons", EdgesC[centrality_type], EdgesMom["6:K+_K-"], EdgesRap["6:K+_K-"]);
+    // Histograms1D["v3_2_charged"] = std::make_unique<Histogram1D>("v3_2_charged", EdgesC[centrality_type], EdgesMom["6:charged"], EdgesRap["6:charged"]);
+
+    // Histograms1D["v4_2_chprotons"] = std::make_unique<Histogram1D>("v4_2_chprotons", EdgesC[centrality_type], EdgesMom["6:p_pbar"], EdgesRap["6:p_pbar"]);
+    // Histograms1D["v4_2_chpions"] = std::make_unique<Histogram1D>("v4_2_chpions", EdgesC[centrality_type], EdgesMom["6:pi+_pi-"], EdgesRap["6:pi+_pi-"]);
+    // Histograms1D["v4_2_chkaons"] = std::make_unique<Histogram1D>("v4_2_chkaons", EdgesC[centrality_type], EdgesMom["6:K+_K-"], EdgesRap["6:K+_K-"]);
+    // Histograms1D["v4_2_charged"] = std::make_unique<Histogram1D>("v4_2_charged", EdgesC[centrality_type], EdgesMom["6:charged"], EdgesRap["6:charged"]);
+
+    // Histograms1D["v5_2_chprotons"] = std::make_unique<Histogram1D>("v5_2_chprotons", EdgesC[centrality_type], EdgesMom["6:p_pbar"], EdgesRap["6:p_pbar"]);
+    // Histograms1D["v5_2_chpions"] = std::make_unique<Histogram1D>("v5_2_chpions", EdgesC[centrality_type], EdgesMom["6:pi+_pi-"], EdgesRap["6:pi+_pi-"]);
+    // Histograms1D["v5_2_chkaons"] = std::make_unique<Histogram1D>("v5_2_chkaons", EdgesC[centrality_type], EdgesMom["6:K+_K-"], EdgesRap["6:K+_K-"]);
+    // Histograms1D["v5_2_charged"] = std::make_unique<Histogram1D>("v5_2_charged", EdgesC[centrality_type], EdgesMom["6:charged"], EdgesRap["6:charged"]);
 
     // Histograms for THERMAL-FIST
     EdgesRap["1:thermalfist"] = (std::vector<double>){-0.5, 0.5};
@@ -494,8 +574,11 @@ void DataContainer::AddParticle(Statistics::Block &block, Statistics::Line &line
         Histograms2D["dNdptdeta_1_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
 
         Histograms1D["meanpt_1_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetTransverseMomentum());
+        Histograms1D["meanpt_3_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), line.GetTransverseMomentum());
+        Histograms1D["meanpt_2_chpions"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetTransverseMomentum());
 
         Histograms1D["meanyield_1_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms1D["meanyieldeta_1_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
         Histograms1D["meanyield_2_chpions"]->AddCurrent(block.GetNumberOfChargedParticles(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
         Histograms1D["meanyield_3_chpions"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
 
@@ -506,22 +589,31 @@ void DataContainer::AddParticle(Statistics::Block &block, Statistics::Line &line
         Histograms2D["dNdeta_2_chpions"]->AddCurrent((block.*funcptr)(), line.GetPseudoRapidity(), line.GetTransverseMomentum(), 1.0);
 
         Histograms2D["v2pT_1_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
-        Histograms2D["v3pT_1_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
-        Histograms2D["v4pT_1_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
-        Histograms2D["v5pT_1_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        Histograms2D["v2pT_2_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
+        Histograms2D["v2pT_3_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlowOld(2));
+        // Histograms2D["v3pT_1_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        // Histograms2D["v3pT_2_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        // Histograms2D["v4pT_1_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        // Histograms2D["v4pT_2_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        // Histograms2D["v5pT_1_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        // Histograms2D["v5pT_2_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
 
         Histograms1D["v2_1_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
-        Histograms1D["v3_1_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
-        Histograms1D["v4_1_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
-        Histograms1D["v5_1_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        Histograms1D["v2_2_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlowOld(2));
+        // Histograms1D["v3_1_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        // Histograms1D["v4_1_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        // Histograms1D["v5_1_chpions"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
     } else if (line.GetParticlePythiaID() == 321 | line.GetParticlePythiaID() == -321) {
         Histograms2D["dNdptdy_1_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
 
         Histograms2D["dNdptdeta_1_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
 
         Histograms1D["meanpt_1_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetTransverseMomentum());
+        Histograms1D["meanpt_3_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), line.GetTransverseMomentum());
+        Histograms1D["meanpt_2_chkaons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetTransverseMomentum());
 
         Histograms1D["meanyield_1_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms1D["meanyieldeta_1_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
         Histograms1D["meanyield_2_chkaons"]->AddCurrent(block.GetNumberOfChargedParticles(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
         Histograms1D["meanyield_3_chkaons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
 
@@ -532,22 +624,31 @@ void DataContainer::AddParticle(Statistics::Block &block, Statistics::Line &line
         Histograms2D["dNdeta_2_chkaons"]->AddCurrent((block.*funcptr)(), line.GetPseudoRapidity(), line.GetTransverseMomentum(), 1.0);
 
         Histograms2D["v2pT_1_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
-        Histograms2D["v3pT_1_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
-        Histograms2D["v4pT_1_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
-        Histograms2D["v5pT_1_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        Histograms2D["v2pT_2_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
+        Histograms2D["v2pT_3_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlowOld(2));
+        // Histograms2D["v3pT_1_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        // Histograms2D["v3pT_2_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        // Histograms2D["v4pT_1_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        // Histograms2D["v4pT_2_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        // Histograms2D["v5pT_1_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        // Histograms2D["v5pT_2_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
 
         Histograms1D["v2_1_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
-        Histograms1D["v3_1_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
-        Histograms1D["v4_1_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
-        Histograms1D["v5_1_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        Histograms1D["v2_2_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlowOld(2));
+        // Histograms1D["v3_1_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        // Histograms1D["v4_1_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        // Histograms1D["v5_1_chkaons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
     } else if (line.GetParticlePythiaID() == 2212 | line.GetParticlePythiaID() == -2212) {
         Histograms2D["dNdptdy_1_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
 
         Histograms2D["dNdptdeta_1_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
 
         Histograms1D["meanpt_1_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetTransverseMomentum());
+        Histograms1D["meanpt_3_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), line.GetTransverseMomentum());
+        Histograms1D["meanpt_2_chprotons"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetTransverseMomentum());
 
         Histograms1D["meanyield_1_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms1D["meanyieldeta_1_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
         Histograms1D["meanyield_2_chprotons"]->AddCurrent(block.GetNumberOfChargedParticles(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
         Histograms1D["meanyield_3_chprotons"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
 
@@ -558,14 +659,20 @@ void DataContainer::AddParticle(Statistics::Block &block, Statistics::Line &line
         Histograms2D["dNdeta_2_chprotons"]->AddCurrent((block.*funcptr)(), line.GetPseudoRapidity(), line.GetTransverseMomentum(), 1.0);
 
         Histograms2D["v2pT_1_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
-        Histograms2D["v3pT_1_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
-        Histograms2D["v4pT_1_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
-        Histograms2D["v5pT_1_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        Histograms2D["v2pT_2_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
+        Histograms2D["v2pT_3_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlowOld(2));
+        // Histograms2D["v3pT_1_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        // Histograms2D["v3pT_2_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        // Histograms2D["v4pT_1_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        // Histograms2D["v4pT_2_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        // Histograms2D["v5pT_1_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        // Histograms2D["v5pT_2_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
 
         Histograms1D["v2_1_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
-        Histograms1D["v3_1_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
-        Histograms1D["v4_1_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
-        Histograms1D["v5_1_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        Histograms1D["v2_2_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlowOld(2));
+        // Histograms1D["v3_1_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        // Histograms1D["v4_1_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        // Histograms1D["v5_1_chprotons"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
     }
     if (ChargeMap[line.GetParticlePythiaID()] != 0) {
         Histograms2D["dNdptdy_1_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
@@ -573,8 +680,11 @@ void DataContainer::AddParticle(Statistics::Block &block, Statistics::Line &line
         Histograms2D["dNdptdeta_1_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
 
         Histograms1D["meanpt_1_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetTransverseMomentum());
+        Histograms1D["meanpt_3_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), line.GetTransverseMomentum());
+        Histograms1D["meanpt_2_charged"]->Add((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetTransverseMomentum());
 
         Histograms1D["meanyield_1_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
+        Histograms1D["meanyieldeta_1_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetPseudoRapidity(), 1.0);
         Histograms1D["meanyield_2_charged"]->AddCurrent(block.GetNumberOfChargedParticles(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
         Histograms1D["meanyield_3_charged"]->AddCurrent(block.GetImpactParameter(), line.GetTransverseMomentum(), line.GetRapidity(), 1.0);
 
@@ -585,14 +695,20 @@ void DataContainer::AddParticle(Statistics::Block &block, Statistics::Line &line
         Histograms2D["dNdeta_2_charged"]->AddCurrent((block.*funcptr)(), line.GetPseudoRapidity(), line.GetTransverseMomentum(), 1.0);
 
         Histograms2D["v2pT_1_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
-        Histograms2D["v3pT_1_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
-        Histograms2D["v4pT_1_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
-        Histograms2D["v5pT_1_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        Histograms2D["v2pT_2_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
+        Histograms2D["v2pT_3_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlowOld(2));
+        // Histograms2D["v3pT_1_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        // Histograms2D["v3pT_2_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        // Histograms2D["v4pT_1_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        // Histograms2D["v4pT_2_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        // Histograms2D["v5pT_1_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        // Histograms2D["v5pT_2_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
 
         Histograms1D["v2_1_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(2));
-        Histograms1D["v3_1_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
-        Histograms1D["v4_1_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
-        Histograms1D["v5_1_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
+        Histograms1D["v2_2_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlowOld(2));
+        // Histograms1D["v3_1_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(3));
+        // Histograms1D["v4_1_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(4));
+        // Histograms1D["v5_1_charged"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetAnisotropicFlow(5));
     }
     HistogramMaps3D["yield_1_map"]->AddCurrent((block.*funcptr)(), line.GetTransverseMomentum(), line.GetRapidity(), line.GetParticlePythiaID(), 1.0);
 };
@@ -615,23 +731,31 @@ void DataContainer::AddEvent(Statistics::Block &block) {
     Histograms1D["meanpt_1_chpions"]->AddEventAverage();
 
     Histograms1D["meanyield_1_chpions"]->AddEvent();
+    Histograms1D["meanyieldeta_1_chpions"]->AddEvent();
     Histograms1D["meanyield_3_chpions"]->AddEvent();
     Histograms1D["meanyield_2_chpions"]->AddEvent();
     Histograms2D["dNdy_2_chpions"]->AddEvent();
     Histograms2D["dNdy_1_chpions"]->AddEvent();
     Histograms2D["dNdeta_2_chpions"]->AddEvent();
     Histograms2D["dNdeta_1_chpions"]->AddEvent();
-    Histograms2D["v3pT_1_chpions"]->AddEventAverage();
+    // Histograms2D["v3pT_1_chpions"]->AddEventAverage();
+    // Histograms2D["v3pT_2_chpions"]->AddEventAverage();
     Histograms2D["v2pT_1_chpions"]->AddEventAverage();
-    Histograms2D["v5pT_1_chpions"]->AddEventAverage();
-    Histograms2D["v4pT_1_chpions"]->AddEventAverage();
-    Histograms1D["v3_1_chpions"]->AddEventAverage();
+    Histograms2D["v2pT_2_chpions"]->AddEventAverage();
+    Histograms2D["v2pT_3_chpions"]->AddEventAverage();
+    // Histograms2D["v5pT_1_chpions"]->AddEventAverage();
+    // Histograms2D["v5pT_2_chpions"]->AddEventAverage();
+    // Histograms2D["v4pT_1_chpions"]->AddEventAverage();
+    // Histograms2D["v4pT_2_chpions"]->AddEventAverage();
+    // Histograms1D["v3_1_chpions"]->AddEventAverage();
     Histograms1D["v2_1_chpions"]->AddEventAverage();
-    Histograms1D["v5_1_chpions"]->AddEventAverage();
-    Histograms1D["v4_1_chpions"]->AddEventAverage();
+    Histograms1D["v2_2_chpions"]->AddEventAverage();
+    // Histograms1D["v5_1_chpions"]->AddEventAverage();
+    // Histograms1D["v4_1_chpions"]->AddEventAverage();
     Histograms2D["dNdptdeta_1_chkaons"]->AddEvent();
     Histograms2D["dNdptdy_1_chkaons"]->AddEvent();
     Histograms1D["meanyield_1_chkaons"]->AddEvent();
+    Histograms1D["meanyieldeta_1_chkaons"]->AddEvent();
     Histograms1D["meanpt_1_chkaons"]->AddEventAverage();
     Histograms1D["meanyield_3_chkaons"]->AddEvent();
     Histograms1D["meanyield_2_chkaons"]->AddEvent();
@@ -639,17 +763,24 @@ void DataContainer::AddEvent(Statistics::Block &block) {
     Histograms2D["dNdy_1_chkaons"]->AddEvent();
     Histograms2D["dNdeta_2_chkaons"]->AddEvent();
     Histograms2D["dNdeta_1_chkaons"]->AddEvent();
-    Histograms2D["v3pT_1_chkaons"]->AddEventAverage();
+    // Histograms2D["v3pT_1_chkaons"]->AddEventAverage();
+    // Histograms2D["v3pT_2_chkaons"]->AddEventAverage();
     Histograms2D["v2pT_1_chkaons"]->AddEventAverage();
-    Histograms2D["v5pT_1_chkaons"]->AddEventAverage();
-    Histograms2D["v4pT_1_chkaons"]->AddEventAverage();
-    Histograms1D["v3_1_chkaons"]->AddEventAverage();
+    Histograms2D["v2pT_2_chkaons"]->AddEventAverage();
+    Histograms2D["v2pT_3_chkaons"]->AddEventAverage();
+    // Histograms2D["v5pT_1_chkaons"]->AddEventAverage();
+    // Histograms2D["v5pT_2_chkaons"]->AddEventAverage();
+    // Histograms2D["v4pT_1_chkaons"]->AddEventAverage();
+    // Histograms2D["v4pT_2_chkaons"]->AddEventAverage();
+    // Histograms1D["v3_1_chkaons"]->AddEventAverage();
     Histograms1D["v2_1_chkaons"]->AddEventAverage();
-    Histograms1D["v5_1_chkaons"]->AddEventAverage();
-    Histograms1D["v4_1_chkaons"]->AddEventAverage();
+    Histograms1D["v2_2_chkaons"]->AddEventAverage();
+    // Histograms1D["v5_1_chkaons"]->AddEventAverage();
+    // Histograms1D["v4_1_chkaons"]->AddEventAverage();
     Histograms2D["dNdptdeta_1_chprotons"]->AddEvent();
     Histograms2D["dNdptdy_1_chprotons"]->AddEvent();
     Histograms1D["meanyield_1_chprotons"]->AddEvent();
+    Histograms1D["meanyieldeta_1_chprotons"]->AddEvent();
     Histograms1D["meanpt_1_chprotons"]->AddEventAverage();
     Histograms1D["meanyield_3_chprotons"]->AddEvent();
     Histograms1D["meanyield_2_chprotons"]->AddEvent();
@@ -657,17 +788,24 @@ void DataContainer::AddEvent(Statistics::Block &block) {
     Histograms2D["dNdy_1_chprotons"]->AddEvent();
     Histograms2D["dNdeta_2_chprotons"]->AddEvent();
     Histograms2D["dNdeta_1_chprotons"]->AddEvent();
-    Histograms2D["v3pT_1_chprotons"]->AddEventAverage();
+    // Histograms2D["v3pT_1_chprotons"]->AddEventAverage();
+    // Histograms2D["v3pT_2_chprotons"]->AddEventAverage();
     Histograms2D["v2pT_1_chprotons"]->AddEventAverage();
-    Histograms2D["v5pT_1_chprotons"]->AddEventAverage();
-    Histograms2D["v4pT_1_chprotons"]->AddEventAverage();
-    Histograms1D["v3_1_chprotons"]->AddEventAverage();
+    Histograms2D["v2pT_2_chprotons"]->AddEventAverage();
+    Histograms2D["v2pT_3_chprotons"]->AddEventAverage();
+    // Histograms2D["v5pT_1_chprotons"]->AddEventAverage();
+    // Histograms2D["v5pT_2_chprotons"]->AddEventAverage();
+    // Histograms2D["v4pT_1_chprotons"]->AddEventAverage();
+    // Histograms2D["v4pT_2_chprotons"]->AddEventAverage();
+    // Histograms1D["v3_1_chprotons"]->AddEventAverage();
     Histograms1D["v2_1_chprotons"]->AddEventAverage();
-    Histograms1D["v5_1_chprotons"]->AddEventAverage();
-    Histograms1D["v4_1_chprotons"]->AddEventAverage();
+    Histograms1D["v2_2_chprotons"]->AddEventAverage();
+    // Histograms1D["v5_1_chprotons"]->AddEventAverage();
+    // Histograms1D["v4_1_chprotons"]->AddEventAverage();
     Histograms2D["dNdptdeta_1_charged"]->AddEvent();
     Histograms2D["dNdptdy_1_charged"]->AddEvent();
     Histograms1D["meanyield_1_charged"]->AddEvent();
+    Histograms1D["meanyieldeta_1_charged"]->AddEvent();
     Histograms1D["meanpt_1_charged"]->AddEventAverage();
     Histograms1D["meanyield_3_charged"]->AddEvent();
     Histograms1D["meanyield_2_charged"]->AddEvent();
@@ -675,14 +813,20 @@ void DataContainer::AddEvent(Statistics::Block &block) {
     Histograms2D["dNdy_1_charged"]->AddEvent();
     Histograms2D["dNdeta_2_charged"]->AddEvent();
     Histograms2D["dNdeta_1_charged"]->AddEvent();
-    Histograms2D["v3pT_1_charged"]->AddEventAverage();
+    // Histograms2D["v3pT_1_charged"]->AddEventAverage();
+    // Histograms2D["v3pT_2_charged"]->AddEventAverage();
     Histograms2D["v2pT_1_charged"]->AddEventAverage();
-    Histograms2D["v5pT_1_charged"]->AddEventAverage();
-    Histograms2D["v4pT_1_charged"]->AddEventAverage();
-    Histograms1D["v3_1_charged"]->AddEventAverage();
+    Histograms2D["v2pT_2_charged"]->AddEventAverage();
+    Histograms2D["v2pT_3_charged"]->AddEventAverage();
+    // Histograms2D["v5pT_1_charged"]->AddEventAverage();
+    // Histograms2D["v5pT_2_charged"]->AddEventAverage();
+    // Histograms2D["v4pT_1_charged"]->AddEventAverage();
+    // Histograms2D["v4pT_2_charged"]->AddEventAverage();
+    // Histograms1D["v3_1_charged"]->AddEventAverage();
     Histograms1D["v2_1_charged"]->AddEventAverage();
-    Histograms1D["v5_1_charged"]->AddEventAverage();
-    Histograms1D["v4_1_charged"]->AddEventAverage();
+    Histograms1D["v2_2_charged"]->AddEventAverage();
+    // Histograms1D["v5_1_charged"]->AddEventAverage();
+    // Histograms1D["v4_1_charged"]->AddEventAverage();
 };
 
 void DataContainer::AddEventBlock(std::shared_ptr<Statistics::Block> block) {

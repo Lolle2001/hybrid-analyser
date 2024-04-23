@@ -1,9 +1,10 @@
+#include <sys/stat.h>
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
-
 // #include "../Histogram2D.hpp"
 // Assuming the same data types and parameters as in the writing function
 
@@ -135,13 +136,15 @@ void read_evolution_file(const std::string& filename, std::string outputname) {
 
     fclose(in_file_xyeta);
     std::stringstream name;
-    name << "test/" << outputname << "_temp.dat";
+    name << outputname << "/"
+         << "surface-temperature.dat";
     std::ofstream file(name.str());
     histograms_temp.Write(file);
     file.close();
     name.str("");
     name.clear();
-    name << "test/" << outputname << "_energy.dat";
+    name << outputname << "/"
+         << "surface-energy-density.dat";
     file = std::ofstream(name.str());
     histograms_energy.Write(file);
     file.close();
@@ -150,12 +153,18 @@ void read_evolution_file(const std::string& filename, std::string outputname) {
 int main(int argc, char** argv) {
     std::string runnumber = argv[1];
     std::string runbatch = argv[2];
-    std::string name = argv[3];
+
     std::string datadirectory = "/home/lieuwe/Documents/Software/MUSIC/data";
+    if (argc > 3) {
+        datadirectory = argv[3];
+    }
     std::string filename = "evolution_for_movie_xyeta.dat";
     std::stringstream directory;
     directory << datadirectory << "/" << runnumber << "/" << runnumber << "_" << runbatch << "/" << filename;
-
-    read_evolution_file(directory.str(), name);
+    std::stringstream outputdirectory;
+    outputdirectory << datadirectory << "/" << runnumber << "/" << runnumber << "_" << runbatch << "/"
+                    << "evolution";
+    mkdir(outputdirectory.str().c_str(), 0777);
+    read_evolution_file(directory.str(), outputdirectory.str());
     return 0;
 }

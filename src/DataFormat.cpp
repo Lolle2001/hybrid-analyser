@@ -17,7 +17,12 @@ void Line::CalculatePhi() {
     Phi = std::atan2(MomY, MomX);
 }
 void Line::CalculatePhi(double RPA) {
-    Phi = std::atan2(MomY, MomX) - RPA;
+    PhiOld = std::atan2(MomY, MomX);
+    Phi = PhiOld - RPA;
+}
+
+void Line::CalculateAnisotropicFlowOld(int nharmonic) {
+    AnisotropicFlowOld[nharmonic] = std::cos(nharmonic * PhiOld);
 }
 
 void Line::CalculateTransverseMomentum() {
@@ -53,7 +58,8 @@ void Line::CalculatePseudoRapidity() {
 void Line::CalculateRapidity() {
     // Needs momentum and energy
     // Energy = std::sqrt(Mass * Mass + MomentumSQR);
-    Rapidity = 0.5 * std::log((Energy + MomZ) / (Energy - MomZ));
+    Rapidity = std::atanh(MomZ / Energy);
+    // Rapidity = 0.5 * std::log((Energy + MomZ) / (Energy - MomZ));
 }
 
 void Line::CalculateProperties(int nharmonic_min, int nharmonic_max) {

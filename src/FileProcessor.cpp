@@ -148,7 +148,28 @@ void ReadFiles(std::vector<RunInfo> runinfo, std::string Directory, std::string 
     }
     campt->GetFileData().SetCentralityEdges("ncharged", dummy->GetFileData().GetCentralityEdges("ncharged"));
 
+    pbar.Reset();
+    printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
+    printf("%s\n", "Initializing histogram objects...");
+    fflush(stdout);
+    pbar.Print();
     campt->InitializeDataContainer();
+#pragma omp parallel
+    {
+#pragma omp for
+        for (int i = 0; i < BatchSize; ++i) {
+            data[i]->InitializeDataContainer();
+            // data[i]->ParseParticleStatistics();
+
+            pbar.Update();
+#pragma omp critical
+            {
+                pbar.Print();
+            }
+        }
+    }
+    printf("\n");
+    fflush(stdout);
 
     pbar.Reset();
     printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
@@ -160,7 +181,7 @@ void ReadFiles(std::vector<RunInfo> runinfo, std::string Directory, std::string 
     {
 #pragma omp for
         for (int i = 0; i < BatchSize; ++i) {
-            data[i]->InitializeDataContainer();
+            // data[i]->InitializeDataContainer();
             data[i]->ParseParticleStatistics();
 
             pbar.Update();

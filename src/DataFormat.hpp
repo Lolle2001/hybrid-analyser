@@ -7,7 +7,7 @@
 #include <vector>
 namespace Statistics {
 
-const unsigned int NUMBER_OF_HARMONICS = 5;
+const unsigned int NUMBER_OF_HARMONICS = 2;
 
 class Line {
    private:
@@ -28,7 +28,9 @@ class Line {
     double Energy;
     double TransverseMass;
     double AnisotropicFlow[NUMBER_OF_HARMONICS + 1] = {0};
+    double AnisotropicFlowOld[NUMBER_OF_HARMONICS + 1] = {0};
     double Phi;
+    double PhiOld;
     double PseudoRapidity;
     double Rapidity;
 
@@ -44,6 +46,7 @@ class Line {
     void CalculatePhi();
     void CalculatePhi(double RPA);
     void CalculateAnisotropicFlow(int nharmonic);
+    void CalculateAnisotropicFlowOld(int nharmonic);
     void CalculateTransverseMass();
     void CalculatePseudoRapidity();
     void CalculateRapidity();
@@ -80,7 +83,7 @@ class Line {
     double& GetMomentum() { return Momentum; }
     double& GetPhi() { return Phi; }
     double& GetAnisotropicFlow(int nharmonic) { return AnisotropicFlow[nharmonic]; }
-
+    double& GetAnisotropicFlowOld(int nharmonic) { return AnisotropicFlowOld[nharmonic]; }
     double GetAnisotropicFlowSin(int nharmonic) { return AnisotropicFlowSin[nharmonic]; };
     double GetAnisotropicFlowCos(int nharmonic) { return AnisotropicFlowCos[nharmonic]; };
 };
