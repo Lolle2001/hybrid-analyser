@@ -372,10 +372,10 @@ void DataContainer::InitialiseHistograms() {
     Histograms1D["meanpt_2_chpions"] = std::make_unique<Histogram1D>("meanpt_2_chpions", EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
     Histograms1D["meanpt_2_charged"] = std::make_unique<Histogram1D>("meanpt_2_charged", EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
 
-    Histograms1D["meanpt_3_chprotons"] = std::make_unique<Histogram1D>("meanpt_2_chprotons", EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
-    Histograms1D["meanpt_3_chkaons"] = std::make_unique<Histogram1D>("meanpt_2_chkaons", EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
-    Histograms1D["meanpt_3_chpions"] = std::make_unique<Histogram1D>("meanpt_2_chpions", EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
-    Histograms1D["meanpt_3_charged"] = std::make_unique<Histogram1D>("meanpt_2_charged", EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+    Histograms1D["meanpt_3_chprotons"] = std::make_unique<Histogram1D>("meanpt_3_chprotons", EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+    Histograms1D["meanpt_3_chkaons"] = std::make_unique<Histogram1D>("meanpt_3_chkaons", EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+    Histograms1D["meanpt_3_chpions"] = std::make_unique<Histogram1D>("meanpt_3_chpions", EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
+    Histograms1D["meanpt_3_charged"] = std::make_unique<Histogram1D>("meanpt_3_charged", EdgesC[centrality_type], EdgesMom["1:meanpt"], EdgesRap["1:meanpt"]);
 
     // Average yield for low pT
     EdgesRap["1:meanyield"] = (std::vector<double>){-0.5, 0.5};
@@ -729,6 +729,7 @@ void DataContainer::AddEvent(Statistics::Block &block) {
     Histograms2D["dNdptdeta_1_chpions"]->AddEvent();
 
     Histograms1D["meanpt_1_chpions"]->AddEventAverage();
+    Histograms1D["meanpt_3_chpions"]->AddEventAverage();
 
     Histograms1D["meanyield_1_chpions"]->AddEvent();
     Histograms1D["meanyieldeta_1_chpions"]->AddEvent();
@@ -757,6 +758,7 @@ void DataContainer::AddEvent(Statistics::Block &block) {
     Histograms1D["meanyield_1_chkaons"]->AddEvent();
     Histograms1D["meanyieldeta_1_chkaons"]->AddEvent();
     Histograms1D["meanpt_1_chkaons"]->AddEventAverage();
+    Histograms1D["meanpt_3_chkaons"]->AddEventAverage();
     Histograms1D["meanyield_3_chkaons"]->AddEvent();
     Histograms1D["meanyield_2_chkaons"]->AddEvent();
     Histograms2D["dNdy_2_chkaons"]->AddEvent();
@@ -782,6 +784,7 @@ void DataContainer::AddEvent(Statistics::Block &block) {
     Histograms1D["meanyield_1_chprotons"]->AddEvent();
     Histograms1D["meanyieldeta_1_chprotons"]->AddEvent();
     Histograms1D["meanpt_1_chprotons"]->AddEventAverage();
+    Histograms1D["meanpt_3_chprotons"]->AddEventAverage();
     Histograms1D["meanyield_3_chprotons"]->AddEvent();
     Histograms1D["meanyield_2_chprotons"]->AddEvent();
     Histograms2D["dNdy_2_chprotons"]->AddEvent();
@@ -807,6 +810,7 @@ void DataContainer::AddEvent(Statistics::Block &block) {
     Histograms1D["meanyield_1_charged"]->AddEvent();
     Histograms1D["meanyieldeta_1_charged"]->AddEvent();
     Histograms1D["meanpt_1_charged"]->AddEventAverage();
+    Histograms1D["meanpt_3_charged"]->AddEventAverage();
     Histograms1D["meanyield_3_charged"]->AddEvent();
     Histograms1D["meanyield_2_charged"]->AddEvent();
     Histograms2D["dNdy_2_charged"]->AddEvent();

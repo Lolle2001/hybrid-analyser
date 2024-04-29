@@ -1,6 +1,6 @@
 #include "FileProcessor.hpp"
 
-void ReadSettings(Parameters& parameters, std::string filename) {
+void Parameters::ReadSettings(std::string filename) {
     std::ifstream file;
 
     // std::cout << filename.str() << std::endl;
@@ -14,21 +14,21 @@ void ReadSettings(Parameters& parameters, std::string filename) {
 
             if (line.find("ipglasma_data_folder") != std::string::npos) {
                 std::istringstream iss(line);
-                iss >> dummy2 >> dummy3 >> parameters.ipglasma_data_folder;
+                iss >> dummy2 >> dummy3 >> ipglasma_data_folder;
             }
 
             if (line.find("iss_data_folder") != std::string::npos) {
                 std::istringstream iss(line);
-                iss >> dummy2 >> dummy3 >> parameters.iss_data_folder;
+                iss >> dummy2 >> dummy3 >> iss_data_folder;
             }
 
             if (line.find("result_folder") != std::string::npos) {
                 std::istringstream iss(line);
-                iss >> dummy2 >> dummy3 >> parameters.result_folder;
+                iss >> dummy2 >> dummy3 >> result_folder;
             }
             if (line.find("ampt_data_folder") != std::string::npos) {
                 std::istringstream iss(line);
-                iss >> dummy2 >> dummy3 >> parameters.ampt_data_folder;
+                iss >> dummy2 >> dummy3 >> ampt_data_folder;
             }
         }
     } else {
@@ -36,6 +36,38 @@ void ReadSettings(Parameters& parameters, std::string filename) {
     }
 
     file.close();
+}
+
+void Parameters::ReadSettingsJSON(std::string filename) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        printf("%s%s%s ", PP::WARNING, "[WARNING]", PP::RESET);
+        printf("%s\n", "Cannot open parameter file!");
+        fflush(stderr);
+        return;
+    }
+
+    try {
+        file >> jsonmap;
+    } catch (nlohmann::json::parse_error& e) {
+        printf("%s%s%s ", PP::WARNING, "[ERROR]", PP::RESET);
+        printf("%s\n", "Cannot parse parameter file!");
+        fflush(stderr);
+        return;
+    }
+
+    if (jsonmap.contains("ipglasma_data_folder")) {
+        ipglasma_data_folder = jsonmap["ipglasma_data_folder"];
+    }
+    if (jsonmap.contains("iss_data_folder")) {
+        iss_data_folder = jsonmap["iss_data_folder"];
+    }
+    if (jsonmap.contains("result_folder")) {
+        result_folder = jsonmap["result_folder"];
+    }
+    if (jsonmap.contains("ampt_data_folder")) {
+        ampt_data_folder = jsonmap["ampt_data_folder"];
+    }
 }
 
 namespace AMPT {
@@ -313,7 +345,7 @@ Statistics::Block_iss GetInitialStateInfo(std::string filename) {
     return block;
 }
 
-void ReadFiles(std::vector<iSS::RunInfo> runinfo, std::string OutputDirectory, std::string parametername, int collisiontype) {
+void ReadFiles(std::vector<iSS::RunInfo> runinfo, std::string OutputDirectory, Parameters& parameters, int collisiontype) {
     size_t BatchSize = 0;
     std::stringstream infostring;
     for (iSS::RunInfo& entry : runinfo) {
@@ -323,9 +355,6 @@ void ReadFiles(std::vector<iSS::RunInfo> runinfo, std::string OutputDirectory, s
         infostring << entry.iSSRun << "(" << tempsize << ")"
                    << " ";
     }
-
-    Parameters parameters;
-    ReadSettings(parameters, parametername);
 
     printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
     printf("%s : %s\n", "Reading data from run (size)", infostring.str().c_str());
@@ -349,6 +378,7 @@ void ReadFiles(std::vector<iSS::RunInfo> runinfo, std::string OutputDirectory, s
             FileDirectories_iss[counter] = FileDirectory_iss.str();
             FileDirectories_ipglasma[counter] = FileDirectory_ipglasma.str();
             FileSize += Utilities::GetFileSize(FileDirectory_iss.str(), 3);
+            // std::cout << FileDirectory_iss.str() << std::endl;
             counter++;
         }
     }

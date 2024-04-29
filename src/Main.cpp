@@ -73,7 +73,7 @@ void Main(int argc, char* argv[]) {
         ParameterFile = "ProcessParameters.par";
     }
     Parameters parameters;
-    ReadSettings(parameters, ParameterFile);
+    parameters.ReadSettingsJSON(ParameterFile);
     // std::cout << "hallo" << std::endl;
     if (!flag_nr) {
         NRun.push_back(std::stoi(argv[2]));
@@ -177,6 +177,8 @@ void Main(int argc, char* argv[]) {
     bool flag_par = false;
     bool flag_outdir = false;
 
+    int num_threads = omp_get_num_procs();
+
     for (int i = 1; i < argc - 1; ++i) {
         // std::cout << i << " " << argv[i] << std::endl;
         if (std::string(argv[i]).compare("-nr") == 0) {
@@ -184,6 +186,9 @@ void Main(int argc, char* argv[]) {
                 NRun.push_back(std::atoi(argv[++i]));
             }
             flag_nr = true;
+        }
+        if (std::string(argv[i]).compare("-nt") == 0) {
+            num_threads = std::atoi(argv[++i]);
         }
         if (std::string(argv[i]).compare("-ne") == 0) {
             while (i + 1 < argc && std::isdigit(argv[i + 1][0])) {
@@ -209,7 +214,7 @@ void Main(int argc, char* argv[]) {
         }
         if (std::string(argv[i]).compare("-par") == 0) {
             ParameterFile = argv[i + 1];
-            // flag_col = true;
+            flag_par = true;
             i++;
         }
 
@@ -226,19 +231,22 @@ void Main(int argc, char* argv[]) {
     if (!flag_nrip) {
         IPGlasmaRun = NRun;
     }
+    if (!flag_par) {
+        ParameterFile = "ProcessParameters.par";
+    }
+    Parameters parameters;
+
+    parameters.ReadSettingsJSON(ParameterFile);
     if (!flag_dir) {
-        Directory = "/home/lieuwe/Documents/Software/iSS/data";
+        Directory = parameters.iss_data_folder;
     }
     if (!flag_ne) {
         for (int entry : NRun) {
-            NEvent.push_back(Utilities::GetNBatch(Directory + "/" + std::to_string(entry)));
+            NEvent.push_back(Utilities::GetNBatch(parameters.iss_data_folder + "/" + std::to_string(entry)));
         }
     }
     if (!flag_col) {
         collisiontype = 0;
-    }
-    if (!flag_par) {
-        ParameterFile = "ProcessParameters.par";
     }
 
     std::string centralitybinningname;
@@ -260,20 +268,20 @@ void Main(int argc, char* argv[]) {
     printf("%s│%s %-98s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Version 3.1.0", PP::HIGHLIGHT, PP::RESET);
     printf("%s│%s %-98s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Made by Lieuwe Huisman", PP::HIGHLIGHT, PP::RESET);
     printf("%s├%-100s┤%s\n", PP::HIGHLIGHT, Utilities::repeat(100, "─").c_str(), PP::RESET);
-    printf("%s│%s %-18s : %-77d %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Number of Threads", omp_get_num_procs(), PP::HIGHLIGHT, PP::RESET);
+    printf("%s│%s %-18s : %-77d %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Number of Threads", num_threads, PP::HIGHLIGHT, PP::RESET);
     // printf("%s│%s %-18s : %-47s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Runnumber", std::to_string(NRun).c_str(), PP::HIGHLIGHT, PP::RESET);
     // printf("%s│%s %-18s : %-47s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "IPGlasma runnumber", std::to_string(IPGlasmaRun).c_str(), PP::HIGHLIGHT, PP::RESET);
     // printf("%s│%s %-18s : %-47s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Number of events", std::to_string(NEvent).c_str(), PP::HIGHLIGHT, PP::RESET);
-    printf("%s│%s %-18s : %-77s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Data directory", Directory.c_str(), PP::HIGHLIGHT, PP::RESET);
+    printf("%s│%s %-18s : %-77s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Data directory", parameters.iss_data_folder.c_str(), PP::HIGHLIGHT, PP::RESET);
     printf("%s│%s %-18s : %-77s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Centrality Binning", centralitybinningname.c_str(), PP::HIGHLIGHT, PP::RESET);
     printf("%s╰%-100s╯%s\n", PP::HIGHLIGHT, Utilities::repeat(100, "─").c_str(), PP::RESET);
 
     std::vector<iSS::RunInfo> runinfo(NRun.size());
 
     if (NRun.size() == 1) {
-        outputdirectory = Directory + "/" + std::to_string(NRun[0]) + "/processed";
+        outputdirectory = parameters.iss_data_folder + "/" + std::to_string(NRun[0]) + "/processed";
     } else if (!flag_outdir) {
-        outputdirectory = Directory + "/p" + std::to_string(NRun[0]) + "/processed";
+        outputdirectory = parameters.iss_data_folder + "/p" + std::to_string(NRun[0]) + "/processed";
     }
 
     for (int i = 0; i < NRun.size(); ++i) {
@@ -281,7 +289,7 @@ void Main(int argc, char* argv[]) {
         runinfo[i].IPGlasmaRun = IPGlasmaRun[i];
         runinfo[i].NEvent = NEvent[i];
     }
-    iSS::ReadFiles(runinfo, outputdirectory, ParameterFile, collisiontype);
+    iSS::ReadFiles(runinfo, outputdirectory, parameters, collisiontype);
 }
 }  // namespace iSS
    // namespace iSS

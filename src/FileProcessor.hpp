@@ -5,6 +5,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <nlohmann/json.hpp>
 #include <string>
 
 #include "DataFormat.hpp"
@@ -18,12 +19,14 @@ struct Parameters {
     std::string iss_data_folder;
     std::string result_folder;
     std::string ampt_data_folder;
+
+    nlohmann::json jsonmap;
     // std::vector<int> iSSRun;
     // std::vector<int> IPGlasmaRun;
     // std::vector<int> NEvent;
+    void ReadSettings(std::string filename);
+    void ReadSettingsJSON(std::string filename);
 };
-
-void ReadSettings(Parameters& parameters, std::string filename);
 
 namespace AMPT {
 struct RunInfo {
@@ -41,7 +44,7 @@ struct RunInfo {
     int NEvent;
 };
 Statistics::Block_iss GetInitialStateInfo(int NRun, int eventid, Parameters& parameters);
-void ReadFiles(std::vector<iSS::RunInfo> runinfo, std::string OutputDirectory, std::string parametername, int collisiontype);
+void ReadFiles(std::vector<iSS::RunInfo> runinfo, std::string OutputDirectory, Parameters& parameters, int collisiontype);
 }  // namespace iSS
 
 #endif

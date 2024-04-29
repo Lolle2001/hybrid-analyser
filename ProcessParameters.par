@@ -1,5 +1,6 @@
-ipglasma_data_folder = /home/lieuwe/Documents/Software/IPGlasma/data
-iss_data_folder = /home/lieuwe/Documents/Software/iSS/data
-result_folder = processed
-ampt_data_folder = /home/lieuwe/Documents/Software/AMPT/data
-
+{
+    "ipglasma_data_folder" : "/home/lieuwe/Documents/Software/IPGlasma/data",
+    "iss_data_folder" : "/home/lieuwe/Documents/Software/iSS/data",
+    "result_folder" : "processed",
+    "ampt_data_folder" : "/home/lieuwe/Documents/Software/AMPT/data"
+}

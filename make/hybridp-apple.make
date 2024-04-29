@@ -2,8 +2,11 @@ CXX = g++
 
 
 OMP_PATH = /opt/homebrew/opt/libomp
+JSON_PATH = /opt/homebrew/opt/nlohmann-json
 
-CXXFLAGS = -std=c++17 -Xpreprocessor -fopenmp -I$(OMP_PATH)/include -L$(OMP_PATH)/lib -lomp
+CXXFLAGS = -std=c++17 -Xpreprocessor -fopenmp -I$(OMP_PATH)/include -L$(OMP_PATH)/lib -lomp -I$(JSON_PATH)/include
+
+# echo $(CXXFLAGS)
 
 BUILDDIR = build
 SRCDIR = src
