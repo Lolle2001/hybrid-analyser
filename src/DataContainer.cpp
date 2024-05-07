@@ -324,6 +324,8 @@ void DataContainer::InitialiseHistograms() {
     EdgesC["1:pPb5020"] = (std::vector<double>){0.00, 1.82, 2.58, 3.65, 4.47, 5.16, 5.77, 6.32, 6.84, 7.36, 7.99, 14.70};
     EdgesC["1:pp5020"] = (std::vector<double>){0.00, 20.00};
 
+    EdgesC["1:dNdetadb"] = (std::vector<double>){0., 0.5, 1., 1.5, 2., 2.5, 3., 3.5, 4., 4.5, 5., 5.5, 6., 6.5, 7., 7.5, 8., 8.5, 9., 9.5, 10., 10.5, 11., 11.5, 12., 12.5, 13., 13.5, 14., 14.5, 15., 15.5, 16., 16.5, 17., 17.5, 18., 18.5, 19., 19.5, 20.};
+
     // Evenstatistics
     Histograms1D["impactparameter_1"] = std::make_unique<Histogram1D>("impactparameter_1", EdgesC[centrality_type]);
     Histograms1D["participation_1"] = std::make_unique<Histogram1D>("participation_1", EdgesC[centrality_type]);
@@ -332,6 +334,8 @@ void DataContainer::InitialiseHistograms() {
     Histograms1D["impactparameter_2"] = std::make_unique<Histogram1D>("impactparameter_2", EdgesC["ncharged"]);
     Histograms1D["participation_2"] = std::make_unique<Histogram1D>("participation_2", EdgesC["ncharged"]);
     Histograms1D["binarycollisions_2"] = std::make_unique<Histogram1D>("binarycollisions_2", EdgesC["ncharged"]);
+
+    Histograms1D["1:dNdetadb"] = std::make_unique<Histogram1D>("1:dNdetadb", EdgesC["1:dNdetadb"]);
 
     // Transverse momentum spectra as function of pT and centrality for mid rapidity
     EdgesRap["1:p_pbar"] = (std::vector<double>){-0.5, 0.5};
@@ -721,6 +725,8 @@ void DataContainer::AddEvent(Statistics::Block &block) {
     Histograms1D["impactparameter_2"]->Add(block.GetNumberOfChargedParticles(), block.GetImpactParameter());
     Histograms1D["participation_2"]->Add(block.GetNumberOfChargedParticles(), block.GetNumberOfParticipantNucleons());
     Histograms1D["binarycollisions_2"]->Add(block.GetNumberOfChargedParticles(), block.GetNumberOfBinaryCollisions());
+
+    Histograms1D["1:dNdetadb"]->Add(block.GetImpactParameter(), block.GetNumberOfChargedParticles());
 
     HistogramMaps3D["yield_1_map"]->AddEvent();
 

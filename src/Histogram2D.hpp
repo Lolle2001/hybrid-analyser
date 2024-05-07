@@ -119,6 +119,10 @@ class Histogram2D {
         }
     }
 
+    StatisticsContainer& GetBinContent(int& ix, int& iy) {
+        return Contents[ix][iy];
+    }
+
     std::vector<double> GetEdgesX() {
         return EdgesX;
     }

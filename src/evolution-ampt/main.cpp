@@ -1,17 +1,16 @@
 
 #include <sys/stat.h>
+
 #include <sstream>
 
 #include "Evolution_ampt_hanimate.hpp"
 #include "Evolution_ampt_panimate.hpp"
 #include "Evolution_ampt_pfinalft.hpp"
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     std::string Runnumber = argv[1];
     std::string Datadirectory = argv[2];
     int partonincluded = std::stoi(argv[3]);
-    if (partonincluded == 0 || partonincluded == 2)
-    {
+    if (partonincluded == 0 || partonincluded == 2) {
         std::stringstream animationfile;
         animationfile << Datadirectory << "/" << Runnumber << "/" << Runnumber << "_1"
                       << "/ana1/h-animate.dat";
@@ -32,10 +31,18 @@ int main(int argc, char **argv)
 
         hanimate->PrintInfo(file);
         file.close();
+
+        filename.str("");
+        filename.clear();
+        filename << directory.str() << "/"
+                 << "hadron-count.dat";
+        file = std::ofstream(filename.str());
+
+        hanimate->PrintParticleCounts(file);
+        file.close();
         delete hanimate;
     }
-    if (partonincluded == 1 || partonincluded == 2)
-    {
+    if (partonincluded == 1 || partonincluded == 2) {
         std::stringstream animationfile;
         animationfile << Datadirectory << "/" << Runnumber << "/" << Runnumber << "_1"
                       << "/ana1/p-finalft.dat";
@@ -61,6 +68,16 @@ int main(int argc, char **argv)
 
         panimate->PrintInfo(file);
         file.close();
+        filename.str("");
+        filename.clear();
+        filename << directory.str() << "/"
+                 << "parton-count.dat";
+        file = std::ofstream(filename.str());
+
+        panimate->Write(file);
+
+        file.close();
+
         delete panimate;
         delete pfinalft;
     }

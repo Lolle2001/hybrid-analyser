@@ -242,25 +242,32 @@ void Histogram1D::ReadEdges(std::string filename) {
     std::string dummy2;
     std::string dummy3;
     double edge;
+
     file.open(filename, std::ios::in);
+    if (file.is_open()) {
+        std::getline(file, line);
+        iss = std::istringstream(line);
 
-    std::getline(file, line);
-    iss = std::istringstream(line);
+        iss >> dummy1 >> dummy2 >> nx;
 
-    iss >> dummy1 >> dummy2 >> nx;
+        std::getline(file, line);
+        iss = std::istringstream(line);
 
-    std::getline(file, line);
-    iss = std::istringstream(line);
+        iss >> dummy1 >> dummy2;
 
-    iss >> dummy1 >> dummy2;
+        while (iss >> edge) {
+            EdgesX.push_back(edge);
+        }
 
-    while (iss >> edge) {
-        EdgesX.push_back(edge);
+        file.close();
+
+        Resize(nx);
+
+        InitializeIndexMap();
+
+    } else {
+        std::cout << "Unable to open file" << std::endl;
     }
-
-    file.close();
-    Resize(nx);
-    InitializeIndexMap();
 }
 void Histogram1D::ReadTotalSQR(std::string filename) {
     std::ifstream file;
@@ -273,7 +280,7 @@ void Histogram1D::ReadTotalSQR(std::string filename) {
     for (int ix = 0; ix < nx; ++ix) {
         std::getline(file, line);
         iss = std::istringstream(line);
-        iss >> dummy1 >> Contents[ix].TotalSQR;
+        iss >> Contents[ix].TotalSQR;
     }
     file.close();
 }
@@ -288,7 +295,7 @@ void Histogram1D::ReadTotal(std::string filename) {
     for (int ix = 0; ix < nx; ++ix) {
         std::getline(file, line);
         iss = std::istringstream(line);
-        iss >> dummy1 >> Contents[ix].Total;
+        iss >> Contents[ix].Total;
     }
     file.close();
 }
@@ -302,8 +309,9 @@ void Histogram1D::ReadCount(std::string filename) {
     file.open(filename, std::ios::in);
     for (int ix = 0; ix < nx; ++ix) {
         std::getline(file, line);
+        // std::cout << line << std::endl;
         iss = std::istringstream(line);
-        iss >> dummy1 >> Contents[ix].EntryCount;
+        iss >> Contents[ix].EntryCount;
     }
     file.close();
 }

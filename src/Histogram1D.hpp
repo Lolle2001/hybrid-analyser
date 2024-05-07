@@ -68,6 +68,8 @@ class Histogram1D {
     void AddCurrent(double& valx, double& valy, double valcontent);
     void AddCurrent(double& valx, double& valy, double& valz, double valcontent);
 
+    int GetNbinsX() { return nx; };
+
     std::string& GetName();
 
     void PrintCount(std::ostream& output);
@@ -77,6 +79,10 @@ class Histogram1D {
     void PrintTotal(std::ostream& output);
 
     void PrintEdges(std::ostream& output);
+
+    StatisticsContainer& GetBinContent(int& ix) {
+        return Contents[ix];
+    }
 
     void ReverseEdges();
 

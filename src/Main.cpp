@@ -160,6 +160,14 @@ void Main(int argc, char* argv[]) {
 }  // namespace AMPT
 
 namespace iSS {
+/*
+--runnumbers [-rn]
+--numberofthreads [-nt]
+--numberofevents [-ne]
+--ipglasmarunnumbers [-nrip]
+--collisiontype [-col]
+--fromtable [-ft]
+*/
 void Main(int argc, char* argv[]) {
     std::vector<int> NRun;
     std::vector<int> IPGlasmaRun;
