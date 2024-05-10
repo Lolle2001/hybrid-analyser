@@ -16,12 +16,8 @@
 #include <string>
 #include <vector>
 
-// #include "../Histogram2D.hpp"
-// #include "../HistogramMap2D.hpp"
 #include "../Progressbar.hpp"
 #include "Evolution_ampt_utilities.hpp"
-
-// #include "Evolution_ampt_format.hpp"
 
 namespace AMPT {
 namespace Evolution {
@@ -44,11 +40,8 @@ struct TimeBlock {
     double Time;
     int NumberOfParticles;
 
-    // std::vector<Particle> particles;
     TimeBlock(){};
 };
-
-// struct EventBlock {
 
 class File {
    private:
@@ -56,92 +49,38 @@ class File {
     std::string InputDirectory;
     std::string OutputDirectory;
 
-    double xmin = -100;
-    double xmax = 100;
-    size_t nx = 200;
-    double ymin = -100;
-    double ymax = 100;
-    size_t ny = 200;
+    double xmin = -25;
+    double xmax = 25;
+    size_t nx = 50;
+    double ymin = -25;
+    double ymax = 25;
+    size_t ny = 50;
 
     double tmin = 0;
     double dt = 0;
     size_t nt = 0;
 
+    double zmin_s = -1;
+    double zmax_s = 1;
+    size_t nz_s = 1;
+
+    double zmin = -25;
+    double zmax = 25;
+    size_t nz = 50;
+
     double dx;
     double dy;
+    double dz_s;
+    double dz;
 
     std::vector<std::map<int, int>> ParticleCounts;
     std::vector<std::unique_ptr<Evolution::HistogramS2D>> ParticleEnergyDensity;
+    std::vector<std::unique_ptr<Evolution::HistogramS3D>> EnergyDensity3D;
     std::vector<std::unique_ptr<TimeBlock>> TimeBlocks;
 
    public:
     File(std::string InputDirectory_, std::string OutputDirectory_) : InputDirectory(InputDirectory_), OutputDirectory(OutputDirectory_){};
     File(){};
-
-    void ReadFile() {
-        std::ifstream file;
-        file.open(InputDirectory.c_str(), std::ios::in);
-        if (file.is_open()) {
-            std::string sa;
-            std::istringstream iss;
-            int linenumber = 1;
-            double zslice = 10;
-
-            dx = (xmax - xmin) / (nx);
-            dy = (ymax - ymin) / (ny);
-            double dz = zslice * 2;
-
-            double cellsize = dx * dy * dz;
-
-            getline(file, sa);
-
-            iss = std::istringstream(sa);
-            iss >> nt >> dt;
-
-            size_t timecounter = 0;
-            ParticleCounts.resize(nt);
-            ParticleEnergyDensity.resize(nt);
-            for (int i = 0; i < nt; i++) {
-                ParticleEnergyDensity[i] = std::make_unique<Evolution::HistogramS2D>(xmin, xmax, nx, ymin, ymax, ny);
-            }
-            TimeBlocks.resize(nt);
-
-            for (int t = 0; t < nt; ++t) {
-                // std::ofstream outfile(OutputDirectory + "/hadron-energy-density-" + std::to_string(t) + ".dat");
-
-                TimeBlock temptimeblock;
-
-                iss = AMPT::Evolution::CGetline(file, sa);
-                iss >> temptimeblock.Time;
-                iss = AMPT::Evolution::CGetline(file, sa);
-                iss >> temptimeblock.NumberOfParticles;
-                // HistogramS2D temphisto(xmin, xmax, nx, ymin, ymax, ny);
-                temptimeblock.TimeIndex = timecounter++;
-                for (int p = 0; p < temptimeblock.NumberOfParticles; ++p) {
-                    Particle particle;
-                    iss = AMPT::Evolution::CGetline(file, sa);
-                    iss >> particle;
-                    particle.ParticlePythiaID = LabelToPythia[particle.ParticleLabel];
-                    particle.CalculateEnergy();
-                    particle.CalculateRapidity();
-                    particle.CalculatePhi();
-                    ParticleCounts[t][particle.ParticlePythiaID]++;
-                    if (particle.PosZ > -zslice && particle.PosZ < zslice) {
-                        // temphisto.Add(particle.PosX, particle.PosY, particle.Energy / cellsize);
-                        ParticleEnergyDensity[t]->Add(particle.PosX, particle.PosY, particle.Energy / cellsize);
-                    }
-
-                    linenumber++;
-                }
-                // temphisto.PrintContents(outfile);
-
-                TimeBlocks[t] = std::make_unique<TimeBlock>(temptimeblock);
-            }
-        } else {
-            std::cout << "Cannot Open File: " << InputDirectory << std::endl;
-        }
-        file.close();
-    }
 
     void ReadFileMulti() {
         std::ifstream file;
@@ -149,26 +88,27 @@ class File {
         if (file.is_open()) {
             std::string sa;
             std::istringstream iss;
-            int linenumber = 0;
-            double zslice = 10;
+            int linenumber = 1;
+            // double zslice = 10;
 
             dx = (xmax - xmin) / (nx);
             dy = (ymax - ymin) / (ny);
-            double dz = zslice * 2;
+            dz_s = (zmax_s - zmin_s) / (nz_s);
+            dz = (zmax - zmin) / (nz);
 
+            double cellsize_s = dx * dy * dz_s;
             double cellsize = dx * dy * dz;
-
-            // getline(file, sa);
-            // linenumber += sa.size();
 
             iss = Evolution::CGetline(file, sa);
             iss >> nt >> dt;
-
+            linenumber++;
             size_t timecounter = 0;
             ParticleCounts.resize(nt);
             ParticleEnergyDensity.resize(nt);
+            EnergyDensity3D.resize(nt);
             for (int i = 0; i < nt; i++) {
                 ParticleEnergyDensity[i] = std::make_unique<Evolution::HistogramS2D>(xmin, xmax, nx, ymin, ymax, ny);
+                EnergyDensity3D[i] = std::make_unique<Evolution::HistogramS3D>(xmin, xmax, nx, ymin, ymax, ny, zmin, zmax, nz);
             }
             TimeBlocks.resize(nt);
             Particle tempparticle;
@@ -184,57 +124,56 @@ class File {
 
                 iss = AMPT::Evolution::CGetline(file, sa);
                 iss >> temptimeblock.Time;
-                // linenumber += sa.size();
                 iss = AMPT::Evolution::CGetline(file, sa);
                 iss >> temptimeblock.NumberOfParticles;
-                // linenumber += sa.size();
                 temptimeblock.TimeIndex = timecounter++;
 
+                linenumber++;
+                linenumber++;
+
                 startline[t] = file.tellg();
-                // std::cout << startline[t] << std::endl;
+                endline[t] = linenumber;
+
                 TimeBlocks[t] = std::make_unique<TimeBlock>(temptimeblock);
                 for (int p = 0; p < temptimeblock.NumberOfParticles; ++p) {
-                    // file >> tempparticle;
                     std::getline(file, sa);
-                    // file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                    // iss = CGetline(file, sa);
-                    // iss >> tempparticle;
-                    // linenumber += sa.size();
+                    linenumber++;
                 }
+
                 bar.Update();
                 bar.Print();
-                // endline[t] = linenumber;
-                // std::cout << startline[t] << " " << endline[t] << std::endl;
             }
 
-            // int NumThreads = 12;
             std::cout << std::endl;
             bar.Reset();
 
-#pragma omp parallel for
+            int nthread = omp_get_max_threads();
+
+            std::vector<std::map<int, int>> ThreadLabelToPythia(nthread, LabelToPythia);
+
+#pragma omp parallel for num_threads(nthread)
             for (int t = 0; t < nt; ++t) {
                 int threadID = omp_get_thread_num();
-                // #pragma omp critical
-                //                 {
-                //                     std::cout << threadID << " " << t << std::endl;
-                //                 }
+
                 std::ifstream tfile;
+                std::istringstream iss;
                 tfile.open(InputDirectory.c_str(), std::ios::in);
 
                 std::string sa;
-                // GotoLine(tfile, startline[t]);
+
                 tfile.seekg(startline[t]);
                 for (int p = 0; p < TimeBlocks[t]->NumberOfParticles; ++p) {
                     Particle particle;
+
                     read_hadron(tfile, particle);
-                    particle.ParticlePythiaID = LabelToPythia[particle.ParticleLabel];
+
+                    particle.ParticlePythiaID = ThreadLabelToPythia[threadID][particle.ParticleLabel];
                     particle.CalculateEnergy();
-                    particle.CalculateRapidity();
-                    particle.CalculatePhi();
                     ParticleCounts[t][particle.ParticlePythiaID]++;
-                    if (particle.PosZ > -zslice && particle.PosZ < zslice) {
-                        ParticleEnergyDensity[t]->Add(particle.PosX, particle.PosY, particle.Energy / cellsize);
+                    if (particle.PosZ >= zmin_s && particle.PosZ <= zmax_s) {
+                        ParticleEnergyDensity[t]->Add(particle.PosX, particle.PosY, particle.Energy / cellsize_s);
                     }
+                    EnergyDensity3D[t]->Add(particle.PosX, particle.PosY, particle.PosZ, particle.Energy / cellsize);
                 }
 
                 bar.Update();
@@ -242,52 +181,12 @@ class File {
                 {
                     bar.Print();
                 }
-                //                 std::getline(tfile, sa);
-                // #pragma omp critical
-                //                 { std::cout << t << " " << startline[t] << " " << sa << std::endl; }
 
                 tfile.close();
-                // std::getline(file, sa);
-                // std::cout << t << " " << startline[t] << " " << sa << std::endl;
-                // GotoLine(file, endline[t]);
-                // std::getline(file, sa);
-                // std::cout << t << " " << endline[t] << " " << sa << std::endl;
             }
 
             std::cout << std::endl;
 
-            // for (int t = 0; t < NumberOfTimeSteps; ++t) {
-            //     std::ofstream outfile(OutputDirectory + "/hadron-energy-density-" + std::to_string(t) + ".dat");
-
-            //     TimeBlock temptimeblock;
-
-            //     iss = AMPT::CGetline(file, sa);
-            //     iss >> temptimeblock.Time;
-            //     iss = AMPT::CGetline(file, sa);
-            //     iss >> temptimeblock.NumberOfParticles;
-
-            //     temptimeblock.TimeIndex = timecounter++;
-
-            //     HistogramS2D temphisto(xmin, xmax, nx, ymin, ymax, ny);
-            //     for (int p = 0; p < temptimeblock.NumberOfParticles; ++p) {
-            //         Particle particle;
-            //         iss = AMPT::CGetline(file, sa);
-            //         iss >> particle;
-            //         particle.ParticlePythiaID = LabelToPythia[particle.ParticleLabel];
-            //         particle.CalculateEnergy();
-            //         particle.CalculateRapidity();
-            //         particle.CalculatePhi();
-            //         ParticleCounts[t][particle.ParticlePythiaID]++;
-            //         if (particle.PosZ > -zslice && particle.PosZ < zslice) {
-            //             temphisto.Add(particle.PosX, particle.PosY, particle.Energy / cellsize);
-            //         }
-
-            //         linenumber++;
-            //     }
-            //     temphisto.PrintContents(outfile);
-
-            //     TimeBlocks[t] = std::make_unique<TimeBlock>(temptimeblock);
-            // }
         } else {
             std::cout << "Cannot Open File: " << InputDirectory << std::endl;
         }
@@ -316,10 +215,9 @@ class File {
     void PrintParticleCounts(std::ostream &output) {
         std::vector<int> pids = {-323, -22212, -22112, -12212, -12112, -2224, -2214, -2114, -1114, -2112, -2212, 221, 2212, 2112, -211, 111, 211, 1114, 2114, 2214, 2224, 12112, 12212, 22112, 22212, 3122, 3112, 3212, 3222, -321, 321, 311, -213, 113, 213, 223, 333, 100321, -3122, -3112, -3212, -3222, 331, 3312, -3312, 3322, -3322, 3334, -3334, 1000010020, -1000010020, 22};
 
-        output << std::setw(6) << std::right << "#itau"
-               << " ";
-        output << std::setw(6) << "tau"
-               << " ";
+        output << std::setw(6) << std::right << "#itau" << " ";
+        output << std::setw(6) << "tau" << " ";
+        output << std::setw(13) << std::right << "total" << " ";
         for (auto &entry : pids) {
             output << std::setw(13) << std::right << entry << " ";
         }
@@ -327,6 +225,11 @@ class File {
         for (int i = 0; i < ParticleCounts.size(); ++i) {
             output << std::setw(6) << std::right << i << " ";
             output << std::setw(6) << std::right << TimeBlocks[i]->Time << " ";
+            size_t total = 0;
+            for (auto &entry : pids) {
+                total += ParticleCounts[i][entry];
+            }
+            output << std::setw(13) << std::right << total << " ";
             for (auto &entry : pids) {
                 output << std::setw(13) << std::right << ParticleCounts[i][entry] << " ";
             }
@@ -335,12 +238,30 @@ class File {
     }
 
     void PrintParticleEnergyDensity(std::string Directory) {
+        Utilities::Progressbar bar(nt);
+        bar.Print();
 #pragma omp parallel for
         for (int i = 0; i < nt; ++i) {
-            std::ofstream file(Directory + "/hadron-energy-density-" + std::to_string(i) + ".dat");
+            std::ofstream file;
+            file.open(Directory + "/hadron-energy-density-" + std::to_string(i) + ".dat");
             ParticleEnergyDensity[i]->PrintContents(file);
             file.close();
+            file.open(Directory + "/hadron-energy-density-3D-" + std::to_string(i) + ".dat");
+            EnergyDensity3D[i]->PrintContents(file);
+            file.close();
+            bar.Update();
+#pragma omp critical
+            {
+                bar.Print();
+            }
         }
+        std::cout << std::endl;
+        std::ofstream file;
+        file.open(Directory + "/hadron-time.dat");
+        for (int i = 0; i < nt; ++i) {
+            file << TimeBlocks[i]->Time << "\n";
+        }
+        file.close();
     }
 
     void PrintInfo(std::ostream &output) {

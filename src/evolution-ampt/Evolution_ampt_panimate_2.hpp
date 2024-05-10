@@ -39,7 +39,6 @@ struct TimeBlock {
     double Time;
     int NumberOfParticles;
 
-    // std::vector<Particle> particles;
     TimeBlock(){};
 };
 
@@ -81,29 +80,17 @@ struct CountMap {
     }
 
     friend std::ostream &operator<<(std::ostream &output, CountMap &obj) {
-        // output << std::setw(3) << std::right << -1 << " ";
         output << std::setw(5) << std::right << obj.Map[-1] << " ";
-        // output << std::setw(3) << std::right << 1 << " ";
         output << std::setw(5) << std::right << obj.Map[1] << " ";
-        // output << std::setw(3) << std::right << -2 << " ";
         output << std::setw(5) << std::right << obj.Map[-2] << " ";
-        // output << std::setw(3) << std::right << 2 << " ";
         output << std::setw(5) << std::right << obj.Map[2] << " ";
-        // output << std::setw(3) << std::right << -3 << " ";
         output << std::setw(5) << std::right << obj.Map[-3] << " ";
-        // output << std::setw(3) << std::right << 3 << " ";
         output << std::setw(5) << std::right << obj.Map[3] << " ";
-        // output << std::setw(3) << std::right << -4 << " ";
         output << std::setw(5) << std::right << obj.Map[-4] << " ";
-        // output << std::setw(3) << std::right << 4 << " ";
         output << std::setw(5) << std::right << obj.Map[4] << " ";
-        // output << std::setw(3) << std::right << -5 << " ";
         output << std::setw(5) << std::right << obj.Map[-5] << " ";
-        // output << std::setw(3) << std::right << 5 << " ";
         output << std::setw(5) << std::right << obj.Map[5] << " ";
-        // output << std::setw(3) << std::right << -6 << " ";
         output << std::setw(5) << std::right << obj.Map[-6] << " ";
-        // output << std::setw(3) << std::right << 6 << " ";
         output << std::setw(5) << std::right << obj.Map[6] << " ";
         return output;
     }
@@ -117,22 +104,33 @@ class File {
     std::string InputDirectory;
     std::string OutputDirectory;
 
-    double xmin = -100;
-    double xmax = 100;
-    size_t nx = 200;
-    double ymin = -100;
-    double ymax = 100;
-    size_t ny = 200;
+    double xmin = -25;
+    double xmax = 25;
+    size_t nx = 50;
+    double ymin = -25;
+    double ymax = 25;
+    size_t ny = 50;
+
+    double zmin_s = -1;
+    double zmax_s = 1;
+    size_t nz_s = 1;
+
+    double zmin = -25;
+    double zmax = 25;
+    size_t nz = 50;
+
+    double dx;
+    double dy;
+    double dz_s;
+    double dz;
 
     std::vector<double> time;
     size_t nt = 0;
 
-    double dx;
-    double dy;
-
    public:
     std::vector<CountMap> ParticleCounts;
     std::vector<std::unique_ptr<Evolution::HistogramS2D>> ParticleEnergyDensity;
+    std::vector<std::unique_ptr<Evolution::HistogramS3D>> EnergyDensity3D;
     std::vector<std::unique_ptr<TimeBlock>> TimeBlocks;
 
     File(std::string InputDirectory_) : InputDirectory(InputDirectory_){};
@@ -145,12 +143,12 @@ class File {
             std::string sa;
             std::istringstream iss;
 
-            double zslice = 10;
-
             dx = (xmax - xmin) / (nx);
             dy = (ymax - ymin) / (ny);
-            double dz = zslice * 2;
+            dz_s = (zmax_s - zmin_s) / (nz_s);
+            dz = (zmax - zmin) / (nz);
 
+            double cellsize_s = dx * dy * dz_s;
             double cellsize = dx * dy * dz;
 
             std::vector<int> startline;
@@ -175,18 +173,19 @@ class File {
                     std::getline(file, sa);
                 }
             }
-            // std::cout << "hello" << std::endl;
+
             nt = TimeBlocks.size();
-            // std::cout << nt << std::endl;
-            // std::cout << startline.size() << std::endl;
+
             ParticleCounts.resize(nt);
             ParticleEnergyDensity.resize(nt);
+            EnergyDensity3D.resize(nt);
             for (int i = 0; i < nt; i++) {
                 ParticleEnergyDensity[i] = std::make_unique<Evolution::HistogramS2D>(xmin, xmax, nx, ymin, ymax, ny);
+                EnergyDensity3D[i] = std::make_unique<Evolution::HistogramS3D>(xmin, xmax, nx, ymin, ymax, ny, zmin, zmax, nz);
             }
 
             size_t nthread = omp_get_max_threads();
-            // std::cout << nthread << std::endl;
+
             std::vector<std::shared_ptr<AMPT::Evolution::Parton::Freezeout::File>> freezeoutmap(nthread, finalft);
 
             Utilities::Progressbar bar(nt);
@@ -200,23 +199,18 @@ class File {
                 std::pair<int, double> temppair;
 
                 int threadid = omp_get_thread_num();
-                // std::getline(tfile, sa);
-                // std::cout << sa << std::endl;
 
                 for (int p = 0; p < TimeBlocks[t]->NumberOfParticles; ++p) {
                     Particle particle;
                     read_parton(tfile, particle);
                     temppair = std::make_pair(particle.ParticlePythiaID, particle.PosT);
                     if (!freezeoutmap[threadid]->isFrozenOut(temppair)) {
-                        // if (particle.PosT > TimeBlocks[t]->Time) {
-                        // std::cout << particle.PosT << " " << TimeBlocks[t]->Time << std::endl;
                         particle.CalculateEnergy();
-                        particle.CalculateRapidity();
-                        particle.CalculatePhi();
                         ParticleCounts[t].Add(particle.ParticlePythiaID);
-                        if (particle.PosZ > -zslice && particle.PosZ < zslice) {
+                        if (particle.PosZ >= zmin && particle.PosZ <= zmax) {
                             ParticleEnergyDensity[t]->Add(particle.PosX, particle.PosY, particle.Energy / cellsize);
                         }
+                        EnergyDensity3D[t]->Add(particle.PosX, particle.PosY, particle.PosZ, particle.Energy / cellsize);
                     }
                 }
 
@@ -227,7 +221,7 @@ class File {
                 }
             }
             std::cout << std::endl;
-            // std::cout << "done" << std::endl;
+
         } else {
             std::cout << "Cannot Open File: " << InputDirectory << std::endl;
         }
@@ -236,13 +230,31 @@ class File {
 
     void
     PrintPartonEnergyDensity(std::string Directory) {
+        Utilities::Progressbar bar(nt);
+        bar.Print();
 #pragma omp parallel for
         for (int i = 0; i < ParticleEnergyDensity.size(); ++i) {
-            std::ofstream file(Directory + "/parton-energy-density-" + std::to_string(i) + ".dat");
+            std::ofstream file;
+            file.open(Directory + "/parton-energy-density-" + std::to_string(i) + ".dat");
             ParticleEnergyDensity[i]->PrintContents(file);
             file.close();
+            file.open(Directory + "/parton-energy-density-3D-" + std::to_string(i) + ".dat");
+            EnergyDensity3D[i]->PrintContents(file);
+            file.close();
+
+            bar.Update();
+#pragma omp critical
+            {
+                bar.Print();
+            }
         }
-        // std::cout << "done" << std::endl;
+        std::cout << std::endl;
+        std::ofstream file;
+        file.open(Directory + "/parton-time.dat");
+        for (int i = 0; i < nt; ++i) {
+            file << TimeBlocks[i]->Time << "\n";
+        }
+        file.close();
     }
 
     void PrintInfo(std::ostream &output) {
@@ -255,26 +267,7 @@ class File {
     }
 
     void Write(std::ofstream &File) {
-        // std::ofstream File;
-        // std::string FileName = Directory + std::to_string(NRun) + "/panimate_summary.dat";
-        // File.open((FileName).c_str(), std::ios::out);
         std::vector<int> pids = {-1, 1, -2, 2, -3, 3, -4, 4, -5, 5, -6, 6};
-        File << std::setw(1) << std::left << "#" << " ";
-        File << std::setw(5) << std::right << "itau" << " ";
-        File << std::setw(13) << std::right << "tau" << " ";
-        File << std::setw(10) << std::right << "N[partons]" << " ";
-        File << std::setw(6) << std::right << "N[-1]" << " ";
-        File << std::setw(6) << std::right << "N[ 1]" << " ";
-        File << std::setw(6) << std::right << "N[-2]" << " ";
-        File << std::setw(6) << std::right << "N[ 2]" << " ";
-        File << std::setw(6) << std::right << "N[-3]" << " ";
-        File << std::setw(6) << std::right << "N[ 3]" << " ";
-        File << std::setw(6) << std::right << "N[-4]" << " ";
-        File << std::setw(6) << std::right << "N[ 4]" << " ";
-        File << std::setw(6) << std::right << "N[-5]" << " ";
-        File << std::setw(6) << std::right << "N[ 5]" << " ";
-        File << std::setw(6) << std::right << "N[-6]" << " ";
-        File << std::setw(6) << std::right << "N[ 6]" << std::endl;
         File << std::setw(1) << std::left << "#" << " ";
         File << std::setw(5) << std::right << "itau" << " ";
         File << std::setw(13) << std::right << "time" << " ";
@@ -292,53 +285,19 @@ class File {
         File << std::setw(6) << std::right << -6 << " ";
         File << std::setw(6) << std::right << 6 << std::endl;
         if (File.is_open()) {
-            // std::cout << ParticleCounts.size() << std::endl;
             for (int i = 0; i < ParticleCounts.size(); ++i) {
                 File << std::setw(7) << std::right << TimeBlocks[i]->TimeIndex << " ";
                 File << std::scientific << std::setw(13) << std::right << TimeBlocks[i]->Time << " ";
                 File << std::setw(10) << std::right << TimeBlocks[i]->NumberOfParticles << " ";
                 ParticleCounts[i].Write(File);
-                // File << ParticleCounts[i]->Map[1];
                 File << std::endl;
-                // std::cout << ParticleCounts[i].Map.size() << std::endl;
-
-                // File << VectorOfParseBlocks[i]<< std::endl;
             }
         } else {
             std::cout << "Cannot open file" << std::endl;
         }
         File.close();
     }
-
-    // void Read(int NRun, std::string Directory) {
-    //     std::ifstream File;
-    //     std::string FileName = Directory + std::to_string(NRun) + "/panimate_summary.dat";
-    //     File.open((FileName).c_str(), std::ios::in);
-
-    //     if (File.is_open()) {
-    //         ParseBlock TempBlock;
-    //         int MapSize;
-    //         int ID;
-    //         int Count;
-    //         while (File >> TempBlock.Time >> TempBlock.NumberOfParticles >> MapSize) {
-    //             for (int i = 0; i < MapSize; ++i) {
-    //                 File >> ID >> Count;
-    //                 TempBlock.CountMap[ID] = Count;
-    //             }
-    //             VectorOfParseBlocks.emplace_back(TempBlock);
-    //         }
-    //     } else {
-    //         std::cout << "Cannot open file: " + FileName << std::endl;
-    //     }
-    //     File.close();
-    // }
-
-    // void Print() {
-    //     for (int i = 0; i < VectorOfParseBlocks.size(); ++i) {
-    //         std::cout << VectorOfParseBlocks[i] << std::endl;
-    //     }
-    // }
-};  // namespace Parton
+};
 }  // namespace Parton
 }  // namespace Evolution
 

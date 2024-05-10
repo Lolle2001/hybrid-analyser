@@ -62,6 +62,19 @@ std::istream &operator>>(std::istream &input, Particle &particle) {
     return input;
 }
 
+std::ostream &operator<<(std::ostream &output, Particle &particle) {
+    // output << std::setw(13) << std::right << particle.ParticlePythiaID << " ";
+    output << std::setw(9) << std::right << particle.ParticleLabel << " ";
+    output << std::setw(9) << std::right << particle.PosX << " ";
+    output << std::setw(9) << std::right << particle.PosY << " ";
+    output << std::setw(9) << std::right << particle.PosZ << " ";
+    output << std::setw(9) << std::right << particle.MomX << " ";
+    output << std::setw(9) << std::right << particle.MomY << " ";
+    output << std::setw(9) << std::right << particle.MomZ << " ";
+    output << std::setw(9) << std::right << particle.Mass;
+    return output;
+}
+
 class HistogramS2D {
    private:
     double min_x;
@@ -139,28 +152,29 @@ class HistogramS3D {
     double dy;
     double dz;
 
-    std::vector<std::vector<std::vector<double>>> contents;
-    std::vector<std::vector<std::vector<size_t>>> counts;
+    std::vector<double> contents;
+    std::vector<size_t> counts;
 
    public:
     HistogramS3D(
         double min_x, double max_x, size_t n_x,
         double min_y, double max_y, size_t n_y,
-        double min_z, double max_z, size_t n_z) : min_x(min_x), max_x(max_x), n_x(n_x), min_y(min_y), max_y(max_y), n_y(n_y), min_z(min_z), max_z(max_z), n_z(n_y) {
-        contents.resize(n_x, std::vector<std::vector<double>>(n_y, std::vector<double>(n_z, 0)));
-        counts.resize(n_x, std::vector<std::vector<size_t>>(n_y, std::vector<size_t>(n_z, 0)));
-        dx = (max_x - min_x) / (n_x);
-        dy = (max_y - min_y) / (n_y);
-        dz = (max_z - min_z) / (n_z);
+        double min_z, double max_z, size_t n_z) : min_x(min_x), max_x(max_x), n_x(n_x), min_y(min_y), max_y(max_y), n_y(n_y), min_z(min_z), max_z(max_z), n_z(n_z) {
+        contents.resize(n_x * n_y * n_z, 0);
+        counts.resize(n_x * n_y * n_z, 0);
+        dx = (max_x - min_x) / n_x;
+        dy = (max_y - min_y) / n_y;
+        dz = (max_z - min_z) / n_z;
     }
 
     void Add(double x, double y, double z, double val) {
         if (x >= min_x && x < max_x && y >= min_y && y < max_y && z >= min_z && z < max_z) {
-            int ix = static_cast<int>((x - min_x) / (dx));
-            int iy = static_cast<int>((y - min_y) / (dy));
-            int iz = static_cast<int>((z - min_z) / (dz));
-            contents[ix][iy][iz] += val;
-            counts[ix][iy][iz]++;
+            int ix = static_cast<int>((x - min_x) / dx);
+            int iy = static_cast<int>((y - min_y) / dy);
+            int iz = static_cast<int>((z - min_z) / dz);
+            size_t index = iz + n_z * (iy + n_y * ix);
+            contents[index] += val;
+            counts[index]++;
         }
     }
 
@@ -168,13 +182,14 @@ class HistogramS3D {
         output << "#" << " " << min_x << " " << max_x << " " << dx << " " << n_x << "\n";
         output << "#" << " " << min_y << " " << max_y << " " << dy << " " << n_y << "\n";
         output << "#" << " " << min_z << " " << max_z << " " << dz << " " << n_z << "\n";
-        for (int ix = 0; ix < n_x; ++ix) {
-            for (int iy = 0; iy < n_y; ++iy) {
-                for (int iz = 0; iz < n_z; ++iz) {
-                    output << contents[ix][iy][iz] << " ";
+        for (size_t ix = 0; ix < n_x; ++ix) {
+            for (size_t iy = 0; iy < n_y; ++iy) {
+                for (size_t iz = 0; iz < n_z; ++iz) {
+                    size_t index = iz + n_z * (iy + n_y * ix);
+                    output << ix << " " << iy << " " << iz << " " << contents[index] << "\n";
                 }
+                // output << "\n";
             }
-            output << "\n";
         }
     }
 };
