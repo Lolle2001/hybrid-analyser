@@ -10,8 +10,8 @@ Currently the framework is setup to generate histograms for yield, transverse mo
 
 Currently there are multiple types of histograms: 1D, 2D, 3D and Map3D.
 
-- 1D Histogram: used for event specific statistics, like the average impact parameter per bin, number of participant nucleons and binary collisions.
-- 2D Histogram: currently not used.
+- 1D Histogram: used for event statistics, like the average impact parameter per bin, number of participant nucleons and binary collisions, but also the average transverse momentum.
+- 2D Histogram: used mainly to obtain observables as function of centrality and transverse momentum or rapidity.
 - 3D Histogram: used for particle specific statistics, like the spectra, anisotropic flow etc. This can be used to be more precise on how a histogram is filled, for example by allowing both $\pi^+$ and $\pi^-$ to contribute to it, such that a summed spectrum is obtained.
 - 3D Histogram Map: used for single particle statistics. This currently only is used for fitting.
 

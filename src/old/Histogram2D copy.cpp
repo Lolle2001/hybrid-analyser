@@ -29,8 +29,8 @@ Histogram2D::Histogram2D(std::string Name_,
     InitializeIndexMap();
 }
 
-void Histogram2D::Resize(int nx_, int ny_) {
-    Contents.resize(nx_ * ny_);
+void Histogram2D::Resize(int& nx_, int& ny_) {
+    Contents.resize(nx_, Vector1D(ny_));
 }
 
 std::string& Histogram2D::GetName() {
@@ -41,7 +41,7 @@ void Histogram2D::AddEvent() {
     // std::cout << "#" << Contents[10][0][0][211].Total << std::endl;
     for (int ix = 0; ix < nx; ++ix) {
         for (int iy = 0; iy < ny; ++iy) {
-            Contents[GetIndex(ix, iy)].AddEvent();
+            Contents[ix][iy].AddEvent();
             // entry.second.Total += entry.second.TotalCurrent;
             // entry.second.TotalSQR += entry.second.TotalCurrent * entry.second.TotalCurrent;
             // entry.second.TotalCurrent = 0;
@@ -53,7 +53,7 @@ void Histogram2D::AddEvent() {
 void Histogram2D::AddEventAverage() {
     for (int ix = 0; ix < nx; ++ix) {
         for (int iy = 0; iy < ny; ++iy) {
-            Contents[GetIndex(ix, iy)].AddEventSpecial();
+            Contents[ix][iy].AddEventSpecial();
         }
     }
 }
@@ -64,7 +64,7 @@ void Histogram2D::Add(double& valx, double& valy, double valcontent) {
         int ix = IndexMapX[(int)((valx - x_min) / (x_width))];
         int iy = IndexMapY[(int)((valy - y_min) / (y_width))];
 
-        Contents[GetIndex(ix, iy)].Add(valcontent);
+        Contents[ix][iy].Add(valcontent);
     }
 }
 
@@ -73,7 +73,7 @@ void Histogram2D::AddCurrent(double& valx, double& valy, double valcontent) {
         int ix = IndexMapX[(int)((valx - x_min) / (x_width))];
         int iy = IndexMapY[(int)((valy - y_min) / (y_width))];
 
-        Contents[GetIndex(ix, iy)].AddCurrent(valcontent);
+        Contents[ix][iy].AddCurrent(valcontent);
     }
 }
 
@@ -82,7 +82,7 @@ void Histogram2D::Add(double& valx, double& valy, double& valz, double valconten
         int ix = IndexMapX[(int)((valx - x_min) / (x_width))];
         int iy = IndexMapY[(int)((valy - y_min) / (y_width))];
 
-        Contents[GetIndex(ix, iy)].Add(valcontent);
+        Contents[ix][iy].Add(valcontent);
     }
 }
 
@@ -91,7 +91,7 @@ void Histogram2D::AddCurrent(double& valx, double& valy, double& valz, double va
         int ix = IndexMapX[(int)((valx - x_min) / (x_width))];
         int iy = IndexMapY[(int)((valy - y_min) / (y_width))];
 
-        Contents[GetIndex(ix, iy)].AddCurrent(valcontent);
+        Contents[ix][iy].AddCurrent(valcontent);
     }
 }
 
@@ -138,8 +138,8 @@ void Histogram2D::PrintCount(std::ostream& output) {
     // std::cout << nx << " " << ny << " " << nz << std::endl;
     for (int ix = 0; ix < nx; ++ix) {
         for (int iy = 0; iy < ny; ++iy) {
-            output << std::setw(13) << std::right << Contents[GetIndex(ix, iy)].EntryCount << " ";
-            // std::cout << Contents[GetIndex(ix,iy)][iz].EntryCount << std::endl;
+            output << std::setw(13) << std::right << Contents[ix][iy].EntryCount << " ";
+            // std::cout << Contents[ix][iy][iz].EntryCount << std::endl;
         }
         output << "\n";
     }
@@ -147,7 +147,7 @@ void Histogram2D::PrintCount(std::ostream& output) {
 void Histogram2D::PrintTotalSQR(std::ostream& output) {
     for (int ix = 0; ix < nx; ++ix) {
         for (int iy = 0; iy < ny; ++iy) {
-            output << std::setw(13) << std::right << Contents[GetIndex(ix, iy)].TotalSQR << " ";
+            output << std::setw(13) << std::right << Contents[ix][iy].TotalSQR << " ";
         }
         output << "\n";
     }
@@ -156,38 +156,37 @@ void Histogram2D::PrintTotalSQR(std::ostream& output) {
 void Histogram2D::PrintTotal(std::ostream& output) {
     for (int ix = 0; ix < nx; ++ix) {
         for (int iy = 0; iy < ny; ++iy) {
-            output << std::setw(13) << std::right << Contents[GetIndex(ix, iy)].Total << " ";
+            output << std::setw(13) << std::right << Contents[ix][iy].Total << " ";
         }
         output << "\n";
     }
 }
 
 StatisticsContainer& Histogram2D::operator()(int& ix, int& iy) {
-    return Contents[GetIndex(ix, iy)];
+    return Contents[ix][iy];
 }
 
-// Vector1D& Histogram2D::operator()(int& ix) {
-//     return Contents[ix];
-// }
+Vector1D& Histogram2D::operator()(int& ix) {
+    return Contents[ix];
+}
 
 StatisticsContainer& Histogram2D::operator()(double& valx, double& valy) {
     int ix = IndexMapX[static_cast<int>((valx - x_min) / (x_width))];
     int iy = IndexMapY[static_cast<int>((valy - y_min) / (y_width))];
 
-    return Contents[GetIndex(ix, iy)];
+    return Contents[ix][iy];
 }
-// Vector1D& Histogram2D::operator()(double& valx) {
-//     int ix = IndexMapX[static_cast<int>((valx - x_min) / (x_width))];
+Vector1D& Histogram2D::operator()(double& valx) {
+    int ix = IndexMapX[static_cast<int>((valx - x_min) / (x_width))];
 
-//     return Contents[ix];
-// }
+    return Contents[ix];
+}
 
 void Histogram2D::operator+=(Histogram2D const& obj) {
     if (nx == obj.nx && ny == obj.ny) {
         for (int ix = 0; ix < nx; ++ix) {
             for (int iy = 0; iy < ny; ++iy) {
-                size_t index = GetIndex(ix, iy);
-                Contents[index] += obj.Contents[index];
+                Contents[ix][iy] += obj.Contents[ix][iy];
             }
         }
     } else {
@@ -252,7 +251,7 @@ void Histogram2D::ReadTotalSQR(std::string filename) {
 
         iss = std::istringstream(line);
         for (int iy = 0; iy < ny; ++iy) {
-            iss >> Contents[GetIndex(ix, iy)].TotalSQR;
+            iss >> Contents[ix][iy].TotalSQR;
         }
     }
     file.close();
@@ -268,7 +267,7 @@ void Histogram2D::ReadTotal(std::string filename) {
 
         iss = std::istringstream(line);
         for (int iy = 0; iy < ny; ++iy) {
-            iss >> Contents[GetIndex(ix, iy)].Total;
+            iss >> Contents[ix][iy].Total;
         }
     }
     file.close();
@@ -284,7 +283,7 @@ void Histogram2D::ReadCount(std::string filename) {
 
         iss = std::istringstream(line);
         for (int iy = 0; iy < ny; ++iy) {
-            iss >> Contents[GetIndex(ix, iy)].EntryCount;
+            iss >> Contents[ix][iy].EntryCount;
         }
     }
     file.close();

@@ -34,7 +34,7 @@ using Vector1D = std::vector<StatisticsContainer>;
 
 class Histogram2D {
    private:
-    Vector2D Contents;
+    Vector1D Contents;
 
     int nx, ny, nz;
 
@@ -62,7 +62,7 @@ class Histogram2D {
     Histogram2D(std::string Name_, std::vector<double> EdgesX_, std::vector<double> EdgesY_);
     Histogram2D(std::string Name_, std::vector<double> EdgesX_, std::vector<double> EdgesY_, std::vector<double> EdgesZ_);
 
-    void Resize(int& nx_, int& ny_);
+    void Resize(int nx_, int ny_);
 
     void InitializeIndexMap();
 
@@ -119,8 +119,12 @@ class Histogram2D {
         }
     }
 
+    size_t GetIndex(int ix, int iy) {
+        return iy + ix * ny;
+    }
+
     StatisticsContainer& GetBinContent(int& ix, int& iy) {
-        return Contents[ix][iy];
+        return Contents[GetIndex(ix, iy)];
     }
 
     std::vector<double> GetEdgesX() {
@@ -131,10 +135,10 @@ class Histogram2D {
     }
 
     StatisticsContainer& operator()(int& ix, int& iy);
-    Vector1D& operator()(int& ix);
+    // Vector1D& operator()(int& ix);
 
     StatisticsContainer& operator()(double& valx, double& valy);
-    Vector1D& operator()(double& valx);
+    // Vector1D& operator()(double& valx);
 
     void operator+=(Histogram2D const& obj);
 };

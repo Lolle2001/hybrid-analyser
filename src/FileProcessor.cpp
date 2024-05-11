@@ -130,7 +130,7 @@ void ReadFiles(std::vector<RunInfo> runinfo, std::string Directory, std::string 
 
 #pragma omp parallel
     {
-#pragma omp for
+#pragma omp for schedule(dynamic)
         for (int i = 0; i < BatchSize; ++i) {
             data[i] = std::make_unique<Model::File_ampt>(LogDirectories[i], FileDirectories[i], collisiontype);
             pbar.Update();
@@ -154,7 +154,7 @@ void ReadFiles(std::vector<RunInfo> runinfo, std::string Directory, std::string 
 
 #pragma omp parallel
     {
-#pragma omp for
+#pragma omp for schedule(dynamic)
         for (int i = 0; i < BatchSize; ++i) {
             data[i]->ParseEventStatistics();
 
@@ -188,7 +188,7 @@ void ReadFiles(std::vector<RunInfo> runinfo, std::string Directory, std::string 
     campt->InitializeDataContainer();
 #pragma omp parallel
     {
-#pragma omp for
+#pragma omp for schedule(dynamic)
         for (int i = 0; i < BatchSize; ++i) {
             data[i]->InitializeDataContainer();
             // data[i]->ParseParticleStatistics();
@@ -211,7 +211,7 @@ void ReadFiles(std::vector<RunInfo> runinfo, std::string Directory, std::string 
 
 #pragma omp parallel
     {
-#pragma omp for
+#pragma omp for schedule(dynamic)
         for (int i = 0; i < BatchSize; ++i) {
             // data[i]->InitializeDataContainer();
             data[i]->ParseParticleStatistics();
@@ -406,7 +406,7 @@ void ReadFiles(std::vector<iSS::RunInfo> runinfo, std::string OutputDirectory, P
 
 #pragma omp parallel
     {
-#pragma omp for
+#pragma omp for schedule(dynamic)
         for (int i = 0; i < BatchSize; ++i) {
             Statistics::Block_iss block = GetInitialStateInfo(FileDirectories_ipglasma[i]);
 
@@ -435,7 +435,7 @@ void ReadFiles(std::vector<iSS::RunInfo> runinfo, std::string OutputDirectory, P
 
 #pragma omp parallel
     {
-#pragma omp for
+#pragma omp for schedule(dynamic)
         for (int i = 0; i < BatchSize; ++i) {
             data[i]->ParseEventStatistics();
 
@@ -468,7 +468,7 @@ void ReadFiles(std::vector<iSS::RunInfo> runinfo, std::string OutputDirectory, P
 
 #pragma omp parallel
     {
-#pragma omp for
+#pragma omp for schedule(dynamic)
         for (int i = 0; i < BatchSize; ++i) {
             data[i]->InitializeDataContainer();
             data[i]->ParseParticleStatistics();

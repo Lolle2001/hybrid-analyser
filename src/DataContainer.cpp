@@ -4,15 +4,15 @@ namespace Statistics {
 
 // In derived classes this can be specified further.
 
-void DataContainer::SetFlowRange(int nmin, int nmax){
+void DataContainer::SetFlowRange(int nmin, int nmax) {
 
 };
 
-void DataContainer::ReserveEventBlocks(int reservesize){
+void DataContainer::ReserveEventBlocks(int reservesize) {
 
 };
 
-void DataContainer::ShrinkEventBlocks(){
+void DataContainer::ShrinkEventBlocks() {
 
 };
 
@@ -335,7 +335,7 @@ void DataContainer::InitialiseHistograms() {
     Histograms1D["participation_2"] = std::make_unique<Histogram1D>("participation_2", EdgesC["ncharged"]);
     Histograms1D["binarycollisions_2"] = std::make_unique<Histogram1D>("binarycollisions_2", EdgesC["ncharged"]);
 
-    Histograms1D["1:dNdetadb"] = std::make_unique<Histogram1D>("1:dNdetadb", EdgesC["1:dNdetadb"]);
+    Histograms1D["1:dNdetadb"] = std::make_unique<Histogram1D>("dNdetadb_1", EdgesC["1:dNdetadb"]);
 
     // Transverse momentum spectra as function of pT and centrality for mid rapidity
     EdgesRap["1:p_pbar"] = (std::vector<double>){-0.5, 0.5};

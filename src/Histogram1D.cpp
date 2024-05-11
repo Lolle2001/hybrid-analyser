@@ -129,45 +129,8 @@ void Histogram1D::InitializeIndexMap() {
         z_min = EdgesZ.front();
     }
 
-    std::vector<double> xwidths(nx);
-
-    // Calculate the width of each bin
-    for (int ix = 0; ix < nx; ++ix) {
-        xwidths[ix] = std::abs(EdgesX[ix + 1] - EdgesX[ix]);
-    }
-
-    // Find the smallest width for the bins
-    double x_smallest_width = xwidths[0];
-    double x_temp_width;
-    for (int ix = 0; ix < nx; ++ix) {
-        for (int jx = ix + 1; jx < nx; ++jx) {
-            x_temp_width = Utilities::igcd(xwidths[ix], xwidths[jx], 0.001);
-            if (x_temp_width < x_smallest_width) {
-                x_smallest_width = x_temp_width;
-            }
-        }
-    }
-
-    // Assign the smallest width to the bins
-    x_width = x_smallest_width;
-
-    // Calculate the number of bins
-    int temp_nx = static_cast<int>((x_max - x_min) / x_width);
-
-    // Assign index mappings for each bin
-    double x;
-    for (int ix = 0; ix < temp_nx; ++ix) {
-        x = (x_min + ix * x_width + x_width * 0.5);
-        for (int jx = 0; jx < nx; ++jx) {
-            if ((EdgesX[0] < EdgesX[1] && x > EdgesX[jx] && x < EdgesX[jx + 1]) ||
-                (EdgesX[0] > EdgesX[1] && x < EdgesX[jx] && x > EdgesX[jx + 1])) {
-                IndexMapX[ix] = jx;
-            }
-        }
-    }
-
-    // Clear the temporary vector
-    xwidths.clear();
+    x_width = Utilities::Statistics::CalculateCommonWidth(nx, EdgesX);
+    Utilities::Statistics::FillIndexMap(nx, x_min, x_max, x_width, EdgesX, IndexMapX);
 }
 
 StatisticsContainer& Histogram1D::operator()(int& ix) {
