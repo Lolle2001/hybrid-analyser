@@ -1,6 +1,0 @@
-{
-    "ipglasma_data_folder" : "../IPGlasma/data",
-    "iss_data_folder" : "../iSS/data",
-    "result_folder" : "processed",
-    "ampt_data_folder" : "../AMPT/data"
-}
