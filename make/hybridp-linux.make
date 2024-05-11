@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -fopenmp
 
-BUILDDIR = build
+BUILDDIR = build/build-hybridp
 SRCDIR = src
 SRCS = $(wildcard $(SRCDIR)/*.cpp)
 OBJS = $(patsubst $(SRCDIR)/%.cpp,$(BUILDDIR)/%.o,$(SRCS))

@@ -70,7 +70,7 @@ void Main(int argc, char* argv[]) {
     }
 
     if (!flag_par) {
-        ParameterFile = "ProcessParameters.par";
+        ParameterFile = "hybridp.par";
     }
     Parameters parameters;
     parameters.ReadSettingsJSON(ParameterFile);
@@ -240,7 +240,7 @@ void Main(int argc, char* argv[]) {
         IPGlasmaRun = NRun;
     }
     if (!flag_par) {
-        ParameterFile = "ProcessParameters.par";
+        ParameterFile = "hybridp.par";
     }
     Parameters parameters;
 

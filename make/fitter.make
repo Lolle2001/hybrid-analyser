@@ -3,7 +3,7 @@ CXXFLAGS = -std=c++17 -fopenmp
 
 
 
-BUILDDIR = build-fitter
+BUILDDIR = build/build-fitter
 
 SRCDIR1 = /home/lieuwe/Documents/Software/HybridProcessor/src/fitter
 SRCDIR2 = /home/lieuwe/Documents/Software/HybridProcessor/src

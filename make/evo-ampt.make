@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -fopenmp
 
-BUILDDIR = build-evo-ampt
+BUILDDIR = build/build-evo-ampt
 SRCDIR1 = src/evolution-ampt
 SRCDIR2 = src
 SRCS1 = $(wildcard $(SRCDIR1)/*.cpp)

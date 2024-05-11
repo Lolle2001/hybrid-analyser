@@ -8,7 +8,7 @@ CXXFLAGS = -std=c++17 -I$(OMP_PATH)/include -L$(OMP_PATH)/lib -lomp -I$(JSON_PAT
 
 # echo $(CXXFLAGS)
 
-BUILDDIR = build
+BUILDDIR = build/build-hybridp
 SRCDIR = src
 SRCS = $(wildcard $(SRCDIR)/*.cpp)
 OBJS = $(patsubst $(SRCDIR)/%.cpp,$(BUILDDIR)/%.o,$(SRCS))

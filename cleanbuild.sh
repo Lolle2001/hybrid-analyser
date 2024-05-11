@@ -9,4 +9,7 @@ rm -rf build-evo-ampt
 elif [[ $OPTION -eq 2 ]]
 then
 rm -rf build-evo-music
+elif [[ $OPTION -eq 3 ]]
+then
+rm -rf build-fitter
 fi

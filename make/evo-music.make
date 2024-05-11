@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -fopenmp
 
-BUILDDIR = build-evo-music
+BUILDDIR = build/build-evo-music
 SRCDIR1 = src/evolution-music
 SRCS1 = $(wildcard $(SRCDIR1)/*.cpp)
 OBJS1 = $(patsubst $(SRCDIR1)/%.cpp,$(BUILDDIR)/%.o,$(SRCS1))
