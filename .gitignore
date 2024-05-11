@@ -7,10 +7,6 @@ evo-music
 fitter
 
 server.par
-hybridp.par
-evo-ampt.par
 
-example.sh
-upload.sh
 
 .gitignore

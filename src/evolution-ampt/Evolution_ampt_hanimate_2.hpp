@@ -151,7 +151,7 @@ class File {
 
             std::vector<std::map<int, int>> ThreadLabelToPythia(nthread, LabelToPythia);
 
-#pragma omp parallel for num_threads(nthread)
+#pragma omp parallel for num_threads(nthread) schedule(dynamic)
             for (int t = 0; t < nt; ++t) {
                 int threadID = omp_get_thread_num();
 
@@ -240,7 +240,7 @@ class File {
     void PrintParticleEnergyDensity(std::string Directory) {
         Utilities::Progressbar bar(nt);
         bar.Print();
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
         for (int i = 0; i < nt; ++i) {
             std::ofstream file;
             file.open(Directory + "/hadron-energy-density-" + std::to_string(i) + ".dat");

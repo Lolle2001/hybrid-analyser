@@ -191,7 +191,7 @@ class File {
             Utilities::Progressbar bar(nt);
             bar.Print();
 
-#pragma omp parallel for num_threads(nthread)
+#pragma omp parallel for num_threads(nthread) schedule(dynamic)
             for (int t = 0; t < nt; ++t) {
                 std::ifstream tfile;
                 tfile.open(InputDirectory, std::ios::in);
@@ -232,7 +232,7 @@ class File {
     PrintPartonEnergyDensity(std::string Directory) {
         Utilities::Progressbar bar(nt);
         bar.Print();
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
         for (int i = 0; i < ParticleEnergyDensity.size(); ++i) {
             std::ofstream file;
             file.open(Directory + "/parton-energy-density-" + std::to_string(i) + ".dat");
