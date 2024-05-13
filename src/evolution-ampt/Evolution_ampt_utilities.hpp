@@ -4,6 +4,7 @@
 #include <cmath>
 #include <fstream>
 #include <limits>
+#include <nlohmann/json.hpp>
 #include <ostream>
 #include <sstream>
 #include <vector>
@@ -193,6 +194,49 @@ class HistogramS3D {
         }
     }
 };
+
+template <class T>
+void json_to_parameter(const nlohmann::json &j, const std::string key, T &target) {
+    if (j.contains(key)) {
+        j.at(key).get_to(target);
+    } else {
+        std::cout << "[WARNING]" << "JSON file does contain parameter with key: " << key << std::endl;
+    }
+};
+
+struct Gridsettings {
+    double xmin;
+    double xmax;
+    double dx;
+    size_t nx;
+    double ymin;
+    double ymax;
+    double dy;
+    size_t ny;
+    double zmin;
+    double zmax;
+    double dz;
+    size_t nz;
+    double dvolume;
+
+    void SetVolumeElement() {
+        dvolume = dx * dy * dz;
+    }
+    void SetProperties() {
+                dx = (xmax - xmin) / (nx);
+        dy = (ymax - ymin) / (ny);
+        dz = (zmax - zmin) / (nz);
+        dvolume = dx * dy * dz;
+    }
+};
+
+std::ostream &operator<<(std::ostream &output, const Gridsettings &grid) {
+    output << grid.dvolume << " " << grid.nx * grid.ny * grid.nz << "\n";
+    output << grid.xmin << " " << grid.xmax << " " << grid.dx << " " << grid.nx << "\n";
+    output << grid.ymin << " " << grid.ymax << " " << grid.dy << " " << grid.ny << "\n";
+    output << grid.zmin << " " << grid.zmax << " " << grid.dz << " " << grid.nz << "\n";
+    return output;
+}
 
 std::istringstream CGetline(std::ifstream &file, std::string &str) {
     std::getline(file, str);

@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-#include "../Histogram2D.hpp"
+// #include "../Histogram2D.hpp"
 #include "../Progressbar.hpp"
 #include "Evolution_ampt_pfinalft_2.hpp"
 #include "Evolution_ampt_utilities.hpp"
@@ -55,7 +55,8 @@ struct CountMap {
         {-5, 0},
         {5, 0},
         {-6, 0},
-        {6, 0}};
+        {6, 0},
+        {21, 0}};
     CountMap(){
 
     };
@@ -77,6 +78,7 @@ struct CountMap {
         output << std::setw(6) << std::right << Map[5] << " ";
         output << std::setw(6) << std::right << Map[-6] << " ";
         output << std::setw(6) << std::right << Map[6] << " ";
+        output << std::setw(6) << std::right << Map[21] << " ";
     }
 
     friend std::ostream &operator<<(std::ostream &output, CountMap &obj) {
@@ -130,10 +132,19 @@ class File {
    public:
     std::vector<CountMap> ParticleCounts;
     std::vector<std::unique_ptr<Evolution::HistogramS2D>> ParticleEnergyDensity;
+    Gridsettings Settings2D;
     std::vector<std::unique_ptr<Evolution::HistogramS3D>> EnergyDensity3D;
+    Gridsettings Settings3D;
     std::vector<std::unique_ptr<TimeBlock>> TimeBlocks;
 
     File(std::string InputDirectory_) : InputDirectory(InputDirectory_){};
+
+    void SetGrid3D(Gridsettings &settings) {
+        Settings3D = settings;
+    }
+    void SetGrid2D(Gridsettings &settings) {
+        Settings2D = settings;
+    }
 
     void Parse(std::shared_ptr<AMPT::Evolution::Parton::Freezeout::File> finalft) {
         std::ifstream file;
@@ -180,8 +191,24 @@ class File {
             ParticleEnergyDensity.resize(nt);
             EnergyDensity3D.resize(nt);
             for (int i = 0; i < nt; i++) {
-                ParticleEnergyDensity[i] = std::make_unique<Evolution::HistogramS2D>(xmin, xmax, nx, ymin, ymax, ny);
-                EnergyDensity3D[i] = std::make_unique<Evolution::HistogramS3D>(xmin, xmax, nx, ymin, ymax, ny, zmin, zmax, nz);
+                ParticleEnergyDensity[i] = std::make_unique<Evolution::HistogramS2D>(
+                    Settings2D.xmin,
+                    Settings2D.xmax,
+                    Settings2D.nx,
+                    Settings2D.ymin,
+                    Settings2D.ymax,
+                    Settings2D.ny,
+                    Settings2D.zmin,
+                    Settings2D.zmax);
+                EnergyDensity3D[i] = std::make_unique<Evolution::HistogramS3D>(Settings2D.xmin,
+                                                                               Settings3D.xmax,
+                                                                               Settings3D.nx,
+                                                                               Settings3D.ymin,
+                                                                               Settings3D.ymax,
+                                                                               Settings3D.ny,
+                                                                               Settings3D.zmin,
+                                                                               Settings3D.zmax,
+                                                                               Settings3D.nz);
             }
 
             size_t nthread = omp_get_max_threads();
@@ -207,10 +234,8 @@ class File {
                     if (!freezeoutmap[threadid]->isFrozenOut(temppair)) {
                         particle.CalculateEnergy();
                         ParticleCounts[t].Add(particle.ParticlePythiaID);
-                        if (particle.PosZ >= zmin && particle.PosZ <= zmax) {
-                            ParticleEnergyDensity[t]->Add(particle.PosX, particle.PosY, particle.Energy / cellsize);
-                        }
-                        EnergyDensity3D[t]->Add(particle.PosX, particle.PosY, particle.PosZ, particle.Energy / cellsize);
+                        ParticleEnergyDensity[t]->Add(particle.PosX, particle.PosY, particle.PosZ, particle.Energy / Settings2D.dvolume);
+                        EnergyDensity3D[t]->Add(particle.PosX, particle.PosY, particle.PosZ, particle.Energy / Settings3D.dvolume);
                     }
                 }
 
@@ -228,20 +253,15 @@ class File {
         file.close();
     }
 
-    void
-    PrintPartonEnergyDensity(std::string Directory) {
+    void Print2D(std::string Directory) {
         Utilities::Progressbar bar(nt);
         bar.Print();
 #pragma omp parallel for schedule(dynamic)
-        for (int i = 0; i < ParticleEnergyDensity.size(); ++i) {
+        for (int i = 0; i < nt; ++i) {
             std::ofstream file;
             file.open(Directory + "/parton-energy-density-" + std::to_string(i) + ".dat");
             ParticleEnergyDensity[i]->PrintContents(file);
             file.close();
-            file.open(Directory + "/parton-energy-density-3D-" + std::to_string(i) + ".dat");
-            EnergyDensity3D[i]->PrintContents(file);
-            file.close();
-
             bar.Update();
 #pragma omp critical
             {
@@ -249,12 +269,32 @@ class File {
             }
         }
         std::cout << std::endl;
+    }
+    void PrintTime(std::string Directory) {
         std::ofstream file;
         file.open(Directory + "/parton-time.dat");
         for (int i = 0; i < nt; ++i) {
             file << TimeBlocks[i]->Time << "\n";
         }
         file.close();
+    }
+
+    void Print3D(std::string Directory) {
+        Utilities::Progressbar bar(nt);
+        bar.Print();
+#pragma omp parallel for schedule(dynamic)
+        for (int i = 0; i < nt; ++i) {
+            std::ofstream file;
+            file.open(Directory + "/parton-energy-density-3D-" + std::to_string(i) + ".dat");
+            EnergyDensity3D[i]->PrintContents(file);
+            file.close();
+            bar.Update();
+#pragma omp critical
+            {
+                bar.Print();
+            }
+        }
+        std::cout << std::endl;
     }
 
     void PrintInfo(std::ostream &output) {
@@ -283,7 +323,8 @@ class File {
         File << std::setw(6) << std::right << -5 << " ";
         File << std::setw(6) << std::right << 5 << " ";
         File << std::setw(6) << std::right << -6 << " ";
-        File << std::setw(6) << std::right << 6 << std::endl;
+        File << std::setw(6) << std::right << 6 << " ";
+        File << std::setw(6) << std::right << 21 << std::endl;
         if (File.is_open()) {
             for (int i = 0; i < ParticleCounts.size(); ++i) {
                 File << std::setw(7) << std::right << TimeBlocks[i]->TimeIndex << " ";

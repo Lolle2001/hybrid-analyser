@@ -10,6 +10,8 @@
 
 // #include "DataFormat.hpp"
 
+typedef unsigned int index_t;
+
 namespace Utilities {
 
 // void Concatenate(std::vector<Statistics::Block> &v1, const std::vector<Statistics::Block> &v2);

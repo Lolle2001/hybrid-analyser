@@ -29,7 +29,7 @@ Histogram2D::Histogram2D(std::string Name_,
     InitializeIndexMap();
 }
 
-void Histogram2D::Resize(int nx_, int ny_) {
+void Histogram2D::Resize(size_t nx_, size_t ny_) {
     Contents.resize(nx_ * ny_);
 }
 
@@ -61,8 +61,8 @@ void Histogram2D::AddEventAverage() {
 void Histogram2D::Add(double& valx, double& valy, double valcontent) {
     // std::cout << valx << " " << valy << " " << valcontent << std::endl;
     if (valx >= x_min && valx < x_max && valy >= y_min && valy < y_max) {
-        int ix = IndexMapX[(int)((valx - x_min) / (x_width))];
-        int iy = IndexMapY[(int)((valy - y_min) / (y_width))];
+        index_t ix = IndexMapX[(index_t)((valx - x_min) / (x_width))];
+        index_t iy = IndexMapY[(index_t)((valy - y_min) / (y_width))];
 
         Contents[GetIndex(ix, iy)].Add(valcontent);
     }
@@ -70,8 +70,8 @@ void Histogram2D::Add(double& valx, double& valy, double valcontent) {
 
 void Histogram2D::AddCurrent(double& valx, double& valy, double valcontent) {
     if (valx >= x_min && valx < x_max && valy >= y_min && valy < y_max) {
-        int ix = IndexMapX[(int)((valx - x_min) / (x_width))];
-        int iy = IndexMapY[(int)((valy - y_min) / (y_width))];
+        index_t ix = IndexMapX[(index_t)((valx - x_min) / (x_width))];
+        index_t iy = IndexMapY[(index_t)((valy - y_min) / (y_width))];
 
         Contents[GetIndex(ix, iy)].AddCurrent(valcontent);
     }
@@ -79,8 +79,8 @@ void Histogram2D::AddCurrent(double& valx, double& valy, double valcontent) {
 
 void Histogram2D::Add(double& valx, double& valy, double& valz, double valcontent) {
     if (valx >= x_min && valx < x_max && valy >= y_min && valy < y_max && valz >= z_min && valz < z_max) {
-        int ix = IndexMapX[(int)((valx - x_min) / (x_width))];
-        int iy = IndexMapY[(int)((valy - y_min) / (y_width))];
+        index_t ix = IndexMapX[(index_t)((valx - x_min) / (x_width))];
+        index_t iy = IndexMapY[(index_t)((valy - y_min) / (y_width))];
 
         Contents[GetIndex(ix, iy)].Add(valcontent);
     }
@@ -88,8 +88,8 @@ void Histogram2D::Add(double& valx, double& valy, double& valz, double valconten
 
 void Histogram2D::AddCurrent(double& valx, double& valy, double& valz, double valcontent) {
     if (valx >= x_min && valx < x_max && valy >= y_min && valy < y_max && valz >= z_min && valz < z_max) {
-        int ix = IndexMapX[(int)((valx - x_min) / (x_width))];
-        int iy = IndexMapY[(int)((valy - y_min) / (y_width))];
+        index_t ix = IndexMapX[(index_t)((valx - x_min) / (x_width))];
+        index_t iy = IndexMapY[(index_t)((valy - y_min) / (y_width))];
 
         Contents[GetIndex(ix, iy)].AddCurrent(valcontent);
     }
@@ -162,7 +162,7 @@ void Histogram2D::PrintTotal(std::ostream& output) {
     }
 }
 
-StatisticsContainer& Histogram2D::operator()(int& ix, int& iy) {
+StatisticsContainer& Histogram2D::operator()(index_t ix, index_t iy) {
     return Contents[GetIndex(ix, iy)];
 }
 
@@ -186,7 +186,7 @@ void Histogram2D::operator+=(Histogram2D const& obj) {
     if (nx == obj.nx && ny == obj.ny) {
         for (int ix = 0; ix < nx; ++ix) {
             for (int iy = 0; iy < ny; ++iy) {
-                size_t index = GetIndex(ix, iy);
+                index_t index = GetIndex(ix, iy);
                 Contents[index] += obj.Contents[index];
             }
         }

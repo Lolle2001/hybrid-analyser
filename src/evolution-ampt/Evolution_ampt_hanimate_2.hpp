@@ -75,15 +75,24 @@ class File {
 
     std::vector<std::map<int, int>> ParticleCounts;
     std::vector<std::unique_ptr<Evolution::HistogramS2D>> ParticleEnergyDensity;
+    Gridsettings Settings2D;
     std::vector<std::unique_ptr<Evolution::HistogramS3D>> EnergyDensity3D;
+    Gridsettings Settings3D;
     std::vector<std::unique_ptr<TimeBlock>> TimeBlocks;
 
    public:
     File(std::string InputDirectory_, std::string OutputDirectory_) : InputDirectory(InputDirectory_), OutputDirectory(OutputDirectory_){};
     File(){};
 
+    void SetGrid3D(Gridsettings &settings) {
+        Settings3D = settings;
+    }
+    void SetGrid2D(Gridsettings &settings) {
+        Settings2D = settings;
+    }
+
     void ReadFileMulti() {
-        std::ifstream file;
+                std::ifstream file;
         file.open(InputDirectory.c_str(), std::ios::in);
         if (file.is_open()) {
             std::string sa;
@@ -107,8 +116,24 @@ class File {
             ParticleEnergyDensity.resize(nt);
             EnergyDensity3D.resize(nt);
             for (int i = 0; i < nt; i++) {
-                ParticleEnergyDensity[i] = std::make_unique<Evolution::HistogramS2D>(xmin, xmax, nx, ymin, ymax, ny);
-                EnergyDensity3D[i] = std::make_unique<Evolution::HistogramS3D>(xmin, xmax, nx, ymin, ymax, ny, zmin, zmax, nz);
+                ParticleEnergyDensity[i] = std::make_unique<Evolution::HistogramS2D>(
+                    Settings2D.xmin,
+                    Settings2D.xmax,
+                    Settings2D.nx,
+                    Settings2D.ymin,
+                    Settings2D.ymax,
+                    Settings2D.ny,
+                    Settings2D.zmin,
+                    Settings2D.zmax);
+                EnergyDensity3D[i] = std::make_unique<Evolution::HistogramS3D>(Settings2D.xmin,
+                                                                               Settings3D.xmax,
+                                                                               Settings3D.nx,
+                                                                               Settings3D.ymin,
+                                                                               Settings3D.ymax,
+                                                                               Settings3D.ny,
+                                                                               Settings3D.zmin,
+                                                                               Settings3D.zmax,
+                                                                               Settings3D.nz);
             }
             TimeBlocks.resize(nt);
             Particle tempparticle;
@@ -170,10 +195,8 @@ class File {
                     particle.ParticlePythiaID = ThreadLabelToPythia[threadID][particle.ParticleLabel];
                     particle.CalculateEnergy();
                     ParticleCounts[t][particle.ParticlePythiaID]++;
-                    if (particle.PosZ >= zmin_s && particle.PosZ <= zmax_s) {
-                        ParticleEnergyDensity[t]->Add(particle.PosX, particle.PosY, particle.Energy / cellsize_s);
-                    }
-                    EnergyDensity3D[t]->Add(particle.PosX, particle.PosY, particle.PosZ, particle.Energy / cellsize);
+                    ParticleEnergyDensity[t]->Add(particle.PosX, particle.PosY, particle.PosZ, particle.Energy / Settings2D.dvolume);
+                    EnergyDensity3D[t]->Add(particle.PosX, particle.PosY, particle.PosZ, particle.Energy / Settings3D.dvolume);
                 }
 
                 bar.Update();
@@ -236,8 +259,7 @@ class File {
             output << std::endl;
         }
     }
-
-    void PrintParticleEnergyDensity(std::string Directory) {
+    void Print2D(std::string Directory) {
         Utilities::Progressbar bar(nt);
         bar.Print();
 #pragma omp parallel for schedule(dynamic)
@@ -246,6 +268,29 @@ class File {
             file.open(Directory + "/hadron-energy-density-" + std::to_string(i) + ".dat");
             ParticleEnergyDensity[i]->PrintContents(file);
             file.close();
+            bar.Update();
+#pragma omp critical
+            {
+                bar.Print();
+            }
+        }
+        std::cout << std::endl;
+    }
+    void PrintTime(std::string Directory) {
+        std::ofstream file;
+        file.open(Directory + "/hadron-time.dat");
+        for (int i = 0; i < nt; ++i) {
+            file << TimeBlocks[i]->Time << "\n";
+        }
+        file.close();
+    }
+
+    void Print3D(std::string Directory) {
+        Utilities::Progressbar bar(nt);
+        bar.Print();
+#pragma omp parallel for schedule(dynamic)
+        for (int i = 0; i < nt; ++i) {
+            std::ofstream file;
             file.open(Directory + "/hadron-energy-density-3D-" + std::to_string(i) + ".dat");
             EnergyDensity3D[i]->PrintContents(file);
             file.close();
@@ -256,12 +301,6 @@ class File {
             }
         }
         std::cout << std::endl;
-        std::ofstream file;
-        file.open(Directory + "/hadron-time.dat");
-        for (int i = 0; i < nt; ++i) {
-            file << TimeBlocks[i]->Time << "\n";
-        }
-        file.close();
     }
 
     void PrintInfo(std::ostream &output) {

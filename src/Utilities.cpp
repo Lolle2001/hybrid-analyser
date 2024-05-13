@@ -65,15 +65,15 @@ int GetNBatch(std::string FileDirectory) {
 }
 
 namespace Statistics {
-double CalculateCommonWidth(int n, const std::vector<double>& edges) {
+double CalculateCommonWidth(size_t n, const std::vector<double>& edges) {
     std::vector<double> widths(n);
 
-    for (int i = 0; i < n; ++i) {
+    for (index_t i = 0; i < n; ++i) {
         widths[i] = std::abs(edges[i + 1] - edges[i]);
     }
     double smallest_width = widths[0];
-    for (int i = 0; i < n; ++i) {
-        for (int j = i + 1; j < n; ++j) {
+    for (index_t i = 0; i < n; ++i) {
+        for (index_t j = i + 1; j < n; ++j) {
             double temp_width = Utilities::igcd(widths[i], widths[j], 0.001);
             if (temp_width < smallest_width) {
                 smallest_width = temp_width;
@@ -83,7 +83,7 @@ double CalculateCommonWidth(int n, const std::vector<double>& edges) {
     widths.clear();
     return smallest_width;
 }
-double isWithinBin(double x, int index, const std::vector<double>& edges) {
+double isWithinBin(double x, index_t index, const std::vector<double>& edges) {
     if ((edges[0] < edges[1] && x > edges[index] && x < edges[index + 1]) ||
         (edges[0] > edges[1] && x < edges[index] && x > edges[index + 1])) {
         return true;
@@ -91,11 +91,11 @@ double isWithinBin(double x, int index, const std::vector<double>& edges) {
         return false;
     }
 }
-void FillIndexMap(int n, double min, double max, double width, const std::vector<double>& edges, std::map<int, int>& indexmap) {
-    int temp_n = static_cast<int>((max - min) / width);
-    for (int i = 0; i < temp_n; ++i) {
+void FillIndexMap(size_t n, double min, double max, double width, const std::vector<double>& edges, std::map<int, int>& indexmap) {
+    size_t temp_n = static_cast<size_t>((max - min) / width);
+    for (index_t i = 0; i < temp_n; ++i) {
         double x = min + i * width + width * 0.5;
-        for (int j = 0; j < n; ++j) {
+        for (index_t j = 0; j < n; ++j) {
             if (isWithinBin(x, j, edges)) {
                 indexmap[i] = j;
             }
