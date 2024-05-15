@@ -267,15 +267,18 @@ class File {
         bar.Print();
 #pragma omp parallel for schedule(dynamic)
         for (size_t it = 0; it < header.nt; ++it) {
-            std::ofstream file;
-            filename = directory + "/surface-temperature-" + std::to_string(it) + ".dat";
-            file.open(filename, std::ios::out);
-            temperature[it]->PrintContents(file);
-            file.close();
-            filename = directory + "/surface-energy-density-" + std::to_string(it) + ".dat";
-            file.open(filename, std::ios::out);
-            energydensity[it]->PrintContents(file);
-            file.close();
+            std::ofstream tfile;
+            std::string tfilename;
+            tfilename = directory + "/surface-temperature-" + std::to_string(it) + ".dat";
+            tfile.open(tfilename);
+            temperature[it]->PrintContents(tfile);
+            tfile.close();
+
+            tfilename = directory + "/surface-energy-density-" + std::to_string(it) + ".dat";
+            tfile.open(tfilename);
+            energydensity[it]->PrintContents(tfile);
+            tfile.close();
+
             bar.Update();
 #pragma omp critical
             {
