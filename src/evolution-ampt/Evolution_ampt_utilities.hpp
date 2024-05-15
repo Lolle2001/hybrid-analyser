@@ -125,6 +125,16 @@ class HistogramS2D {
         }
     }
 
+    void CalculateAverage() {
+        for (index_t ix = 0; ix < n_x; ++ix) {
+            for (index_t iy = 0; iy < n_y; ++iy) {
+                if (counts[ix][iy] > 0) {
+                    contents[ix][iy] /= counts[ix][iy];
+                }
+            }
+        }
+    }
+
     void PrintContents(std::ostream &output) {
         output << "#" << " " << min_x << " " << max_x << " " << dx << " " << n_x << "\n";
         output << "#" << " " << min_y << " " << max_y << " " << dy << " " << n_y << "\n";
@@ -223,7 +233,7 @@ struct Gridsettings {
         dvolume = dx * dy * dz;
     }
     void SetProperties() {
-                dx = (xmax - xmin) / (nx);
+        dx = (xmax - xmin) / (nx);
         dy = (ymax - ymin) / (ny);
         dz = (zmax - zmin) / (nz);
         dvolume = dx * dy * dz;

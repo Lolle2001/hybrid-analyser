@@ -27,7 +27,7 @@ class Progressbar {
    public:
     Progressbar(int total_);
 
-    void Initialize();
+    void Initialize(int total_);
     void SetFrontString(std::string front_string_);
 
     void SetStartChar(std::string x);

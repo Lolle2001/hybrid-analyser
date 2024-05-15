@@ -10,7 +10,8 @@ Progressbar::Progressbar(int total_) : total(total_),
                                        done_char("#"),
                                        todo_char("-"){};
 
-void Progressbar::Initialize() {
+void Progressbar::Initialize(int total_) {
+    total = total_;
 }
 void Progressbar::SetFrontString(std::string front_string_) {
     front_string = front_string_;
