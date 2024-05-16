@@ -230,7 +230,7 @@ class File {
             for (int j = 0; j < block_sizes[i]; j++) {
                 Readline(file, cell);
                 cell.GetProperties(header);
-                energydensity[i]->Add(cell.posx, cell.posy, cell.energy * volume_expansion_factor);
+                energydensity[i]->Add(cell.posx, cell.posy, cell.epsilon * volume_expansion_factor);
                 temperature[i]->Add(cell.posx, cell.posy, cell.temp);
             }
             file.close();

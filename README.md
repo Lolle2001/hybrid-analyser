@@ -70,3 +70,7 @@ or
 ```
 
 It is possible to combine multiple runs, by passing a list of runnumbers to `-nr` and/or `-nrip`. The option `-col 4` will use centrality binning from my thesis.
+
+## Future improvements
+
+- [ ] Add option to write animation histograms into .npy files, for fast loading in python.

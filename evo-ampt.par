@@ -21,10 +21,10 @@
     "status": true,
     "xmin": -25,
     "xmax": 25,
-    "nx": 100,
+    "nx": 256,
     "ymin": -25,
     "ymax": 25,
-    "ny": 100,
+    "ny": 256,
     "zmin": -0.5,
     "zmax": 0.5,
     "nz": 1
