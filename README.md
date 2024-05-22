@@ -74,3 +74,6 @@ It is possible to combine multiple runs, by passing a list of runnumbers to `-nr
 ## Future improvements
 
 - [ ] Add option to write animation histograms into .npy files, for fast loading in python.
+- [ ] Improve commandline parser for hybridp.
+- [ ] Add more options for hybridp to be read from .par files.
+- [ ]
