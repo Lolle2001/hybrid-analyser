@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -I/usr/local/include
+CXXFLAGS = -std=c++11 -I/usr/local/include -fopenmp 
 
 
 
@@ -30,7 +30,7 @@ TARGET = fitter
 
 ROOTLIBS := $(shell root-config --glibs --cflags --libs) 
 # GSLLIBS := $(shell gsl-config --cflags --libs)
-LIBS := $(ROOTLIBS)
+LIBS := $(ROOTLIBS) -lgomp
 # $(GSLLIBS)
 LDFLAGS = -L/usr/local/lib -lboost_math_tr1
 
