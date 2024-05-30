@@ -1,15 +1,14 @@
 {
-    "parnames" : [],
-    "corrmatrix" : [],
-    "errs" : [],
-    "vals" : [],
-    "limited" : [],
-    "fixed" : [],
-    "minfcn" : [],
-    "ndf" : [],
-    "ncalls" : [],
-    "edm" : [],
-    "species" : [],
-    "ranges" :[],
-    ""
+  "parnames": [],
+  "corrmatrix": [[[]]],
+  "errs": [[]],
+  "vals": [[]],
+  "limited": [],
+  "fixed": [],
+  "minfcn": [],
+  "ndf": [],
+  "ncalls": [],
+  "edm": [],
+  "species": [],
+  "ranges": []
 }

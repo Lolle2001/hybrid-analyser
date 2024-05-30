@@ -60,6 +60,7 @@ class Multifitter {
     std::vector<double> parsettings_init;
     size_t parsettings_npar;
     bool state_print;
+    ROOT::Fit::FitResult fitresult;
 
    public:
     Multifitter() = default;
@@ -74,6 +75,7 @@ class Multifitter {
     void PrintPars(bool state_print_);
 
     std::vector<double> Run(Chi2& chi2);
+    ROOT::Fit::FitResult GetResult();
 };
 
 #endif

@@ -164,6 +164,7 @@ std::vector<double> Multifitter::Run(Chi2& chi2) {
         // errorstate[ic] = true;
     }
     const ROOT::Fit::FitResult& result = fitter.Result();
+    ROOT::Fit::FitResult fitresult(result);
     std::vector<double> pars(parsettings_npar);
     for (int ip = 0; ip < parsettings_npar; ++ip) {
         pars[ip] = result.GetParams()[ip];
@@ -173,4 +174,8 @@ std::vector<double> Multifitter::Run(Chi2& chi2) {
     }
 
     return pars;
+}
+
+ROOT::Fit::FitResult Multifitter::GetResult() {
+    return fitresult;
 }
