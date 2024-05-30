@@ -28,9 +28,10 @@ OBJS1 = $(patsubst $(SRCDIR1)/%.cpp,$(BUILDDIR)/%.o,$(SRCS1))
 
 TARGET = fitter
 
-# ROOTLIBS := $(shell root-config --cflags --libs --evelibs) 
+ROOTLIBS := $(shell root-config --glibs --cflags --libs) 
 # GSLLIBS := $(shell gsl-config --cflags --libs)
-# LIBS := $(ROOTLIBS) $(GSLLIBS)
+LIBS := $(ROOTLIBS)
+# $(GSLLIBS)
 LDFLAGS = -L/usr/local/lib -lboost_math_tr1
 
 
@@ -49,12 +50,12 @@ all: $(TARGET)
 # 	@mkdir -p $(BUILDDIR)
 # 	$(CXX) $(CXXFLAGS) -I$(SRCDIR3) -c $< -o $@
 $(TARGET): $(OBJS1)
-	$(CXX) -o $(TARGET) $(OBJS1) $(LDFLAGS)
+	$(CXX) -o $(TARGET) $(OBJS1) $(LIBS) $(LDFLAGS)
 
 # Rule to compile the source files
 $(BUILDDIR)/%.o: $(SRCDIR1)/%.cpp
 	@mkdir -p $(BUILDDIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(ROOTLIBS) -c $< -o $@
 
 # $(BUILDDIR)/%.o: $(SRCDIR2)/%.cpp
 # 	@mkdir -p $(BUILDDIR)

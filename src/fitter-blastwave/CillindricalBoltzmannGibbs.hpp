@@ -1,6 +1,8 @@
 #ifndef CILLINDRICALBOLTZMANNGIBBS_HPP
 #define CILLINDRICALBOLTZMANNGIBBS_HPP
 
+#include <TMath.h>
+
 #include <boost/math/quadrature/gauss_kronrod.hpp>
 #include <boost/math/special_functions/bessel.hpp>
 
@@ -16,12 +18,19 @@ double Integrand(double* x, double* par) {
     double Tkin = par[3];
     double n = par[4];
 
-    double arg0 = betas * std::pow(xi, n);
-    double rho = std::atanh(arg0);
-    double arg1 = mT * std::cosh(rho) / Tkin;
-    double arg2 = pT * std::sinh(rho) / Tkin;
-    double k1 = boost::math::cyl_bessel_k(1, arg1);
-    double i0 = boost::math::cyl_bessel_i(0, arg2);
+    // double arg0 = betas * std::pow(xi, n);
+    // double rho = std::atanh(arg0);
+    // double arg1 = mT * std::cosh(rho) / Tkin;
+    // double arg2 = pT * std::sinh(rho) / Tkin;
+    // double k1 = boost::math::cyl_bessel_k(1, arg1);
+    // double i0 = boost::math::cyl_bessel_i(0, arg2);
+
+    double arg0 = betas * TMath::Power(xi, n);
+    double rho = TMath::ATanH(arg0);
+    double arg1 = mT * TMath::CosH(rho) / Tkin;
+    double arg2 = pT * TMath::SinH(rho) / Tkin;
+    double k1 = TMath::BesselK1(arg1);
+    double i0 = TMath::BesselI0(arg2);
 
     return xi * k1 * i0;
 }
@@ -56,9 +65,9 @@ double Function(double* x, double* par) {
     return mT * A * result;
 };
 
-double CostFunction(std::vector<std::vector<Data>> data, std::vector<std::vector<int>> indexes, double* pars) {
+// double CostFunction(std::vector<std::vector<Data>> data, std::vector<std::vector<int>> indexes, double* pars) {
 
-};
+// };
 
 }  // namespace Cillindrical
 
