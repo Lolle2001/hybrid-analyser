@@ -5,8 +5,10 @@
 #include <Fit/Fitter.h>
 #include <Math/Functor.h>
 
+#include <fstream>
 #include <functional>
 #include <map>
+#include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
 
@@ -74,7 +76,7 @@ class Multifitter {
     void StepsizePars(const std::vector<bool>& stepsized);
     void PrintPars(bool state_print_);
 
-    std::vector<double> Run(Chi2& chi2);
+    void Run(Chi2& chi2);
     ROOT::Fit::FitResult GetResult();
 };
 

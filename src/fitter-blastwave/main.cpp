@@ -35,6 +35,10 @@ using RGB = Utilities::RGB;
 Function to fit data from arXiv:1910.07678
 */
 
+// ROOT::Fit::FitResult fit_bgbwd(Datamap& xdata,
+//                                Datamap& ydata,
+//                                );
+
 void read_data(Datamap& xdata,
                std::vector<Datamap>& ydata,
                Datamap& xerrs,
@@ -134,7 +138,7 @@ void MultifitBoltzmann(int argc, char** argv) {
         fitter.StepsizePars({true, true, true, true, false, false, false, true, true});
         fitter.PrintPars(true);
 
-        finalparams[ic] = fitter.Run(chi2);
+        fitter.Run(chi2);
     }
 
     std::vector<std::map<int, std::shared_ptr<TGraphErrors>>> hists(nc);
@@ -302,7 +306,7 @@ void MultifitTsallis(int argc, char** argv) {
         fitter.StepsizePars({true, true, true, true, false, false, false, true, true, true, false});
         fitter.PrintPars(true);
 
-        finalparams[ic] = fitter.Run(chi2);
+        fitter.Run(chi2);
         // std::cout << ic << std::endl;
     }
 
@@ -430,15 +434,50 @@ struct FitResults {
     std::vector<std::vector<double>> CorrelationMatrix;
     std::vector<double> ParameterValues;
     std::vector<double> ParameterErrors;
-    std::map<int, std::vector<double>> ParameterLimits;
-    std::map<int, bool> ParameterFixed;
+    std::vector<std::vector<double>> ParameterLimits;
+    std::vector<bool> ParameterLimited;
+    std::vector<bool> ParameterFixed;
+    std::vector<double> ParameterStepsize;
+    std::vector<bool> ParameterStepsized;
     size_t DegreesOfFreedom;
     double Chi2;
     double MinFCN;
     double Edm;
     size_t NCalls;
     std::vector<int> Species;
-    std::vector<double> FitRange;
+    std::map<int, std::vector<double>> FitRange;
+    std::map<int, std::vector<unsigned int>> Indexmap;
+    nlohmann::json j;
+
+    void GenerateJSON() {
+        j["ParameterNames"] = ParameterNames;
+        j["CorrelationMatrix"] = CorrelationMatrix;
+        j["ParameterValues"] = ParameterValues;
+        j["ParameterErrors"] = ParameterErrors;
+        j["ParameterLimits"] = ParameterLimits;
+        j["ParameterLimited"] = ParameterLimited;
+        j["ParameterFixed"] = ParameterFixed;
+        j["ParameterStepsize"] = ParameterStepsize;
+        j["ParameterStepsized"] = ParameterStepsized;
+        j["DegreesOfFreedom"] = DegreesOfFreedom;
+        j["Chi2"] = Chi2;
+        j["MinFCN"] = MinFCN;
+        j["Edm"] = Edm;
+        j["NCalls"] = NCalls;
+        j["Species"] = Species;
+
+        for (const auto& [key, value] : FitRange) {
+            j["FitRange"][std::to_string(key)] = value;
+        }
+
+        for (const auto& [key, value] : Indexmap) {
+            j["Indexmap"][std::to_string(key)] = value;
+        }
+    }
+
+    void WritetoJSON(std::ofstream& outFile) {
+        outFile << j.dump(4);
+    }
 };
 
 void MultifitBoltzmannNoPlot(int argc, char** argv) {
@@ -468,6 +507,17 @@ void MultifitBoltzmannNoPlot(int argc, char** argv) {
     // #pragma omp parallel for shared(pids, mass, xdata, ydata, xerrs, yerrs, parindexes)
     // #pragma omp parallel for num_threads(12)
     std::vector<ROOT::Fit::FitResult> finalresults(nc);
+
+    FitResults defaultfitsettings;
+    defaultfitsettings.ParameterLimits = {{1, 10000000}, {1, 10000000}, {1, 10000000}, {0.01, 0.3}, {0, 0}, {0, 0}, {0, 0}, {0.01, 1}, {0.01, 3}};
+    defaultfitsettings.ParameterLimited = {true, true, true, true, false, false, false, true, true};
+    defaultfitsettings.ParameterFixed = {false, false, false, false, true, true, true, false, false};
+    defaultfitsettings.ParameterNames = {"A211", "A321", "A2212", "Tkin", "M211", "M321", "M2212", "BetaS", "N"};
+    defaultfitsettings.ParameterStepsize = {1, 1, 1, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01};
+    defaultfitsettings.ParameterStepsized = {true, true, true, true, false, false, false, true, true};
+    defaultfitsettings.Species = pids;
+    defaultfitsettings.FitRange = fitrange;
+    defaultfitsettings.Indexmap = parindexes;
     for (int ic = 0; ic < nc; ++ic) {
         std::vector<double> parinit = {1, 1, 1, 0.11, 0.138, 0.498, 0.938, 0.5, 1.0};
 
@@ -488,15 +538,159 @@ void MultifitBoltzmannNoPlot(int argc, char** argv) {
         fitter.StepsizePars({true, true, true, true, false, false, false, true, true});
         fitter.PrintPars(true);
 
-        finalparams[ic] = fitter.Run(chi2);
+        fitter.Run(chi2);
         finalresults[ic] = fitter.GetResult();
     }
     std::vector<FitResults> JSONResults(nc);
-    // for
+    nlohmann::json file;
+
+    size_t npar = defaultfitsettings.ParameterFixed.size();
+
+    std::vector<std::string> centralitylabels = {"0-5%", "5-10%", "10-20%", "20-30%", "30-40%", "40-50%", "50-60%", "60-70%", "70-80%", "80-90%", "90-100%"};
+    for (int ic = 0; ic < nc; ++ic) {
+        JSONResults[ic] = FitResults(defaultfitsettings);
+        JSONResults[ic].Chi2 = finalresults[ic].Chi2();
+
+        JSONResults[ic].CorrelationMatrix.resize(npar, std::vector<double>(npar));
+        JSONResults[ic].Edm = finalresults[ic].Edm();
+        JSONResults[ic].MinFCN = finalresults[ic].MinFcnValue();
+        JSONResults[ic].NCalls = finalresults[ic].NCalls();
+        JSONResults[ic].DegreesOfFreedom = finalresults[ic].Ndf();
+        JSONResults[ic].ParameterValues.resize(npar);
+        JSONResults[ic].ParameterErrors.resize(npar);
+        JSONResults[ic].ParameterNames.resize(npar);
+        for (int ipar = 0; ipar < npar; ++ipar) {
+            JSONResults[ic].ParameterValues[ipar] = finalresults[ic].GetParams()[ipar];
+            JSONResults[ic].ParameterErrors[ipar] = finalresults[ic].GetErrors()[ipar];
+            JSONResults[ic].ParameterNames[ipar] = finalresults[ic].GetParameterName(ipar);
+        }
+
+        for (int ipar = 0; ipar < npar; ++ipar) {
+            for (int jpar = 0; jpar < npar; ++jpar) {
+                JSONResults[ic].CorrelationMatrix[ipar][jpar] = finalresults[ic].CovMatrix(ipar, jpar);
+            }
+        }
+        JSONResults[ic].GenerateJSON();
+        file["centrality"][centralitylabels[ic]] = JSONResults[ic].j;
+    }
+    std::ofstream outFile("/home/lieuwe/Documents/Software/articles/1910.07678/processed/dNptdptdy-fitresults-bgbwd-1.json");
+    if (outFile.is_open()) {
+        outFile << file.dump(4);  // Dump the JSON object to the file with an indentation of 4 spaces
+        outFile.close();
+    } else {
+        throw std::runtime_error("Could not open file for writing");
+    }
+}
+
+void MultifitTsallisNoPlot(int argc, char** argv) {
+    Datamap xdata;
+    std::vector<Datamap> ydata;
+    Datamap xerrs;
+    std::vector<Datamap> yerrs;
+    read_data(xdata, ydata, xerrs, yerrs);
+
+    std::vector<int> pids = {211, 321, 2212};
+    Indexmap parindexes =
+        {{211, {0, 3, 4, 7, 8, 9, 10}},
+         {321, {1, 3, 5, 7, 8, 9, 10}},
+         {2212, {2, 3, 6, 7, 8, 9, 10}}};
+    std::map<int, double> masses =
+        {{211, 0.140},
+         {321, 0.498},
+         {2212, 0.938}};
+    Datamap fitrange =
+        {{211, {0.5, 1}},
+         {321, {0.2, 1.5}},
+         {2212, {0.3, 3.0}}};
+
+    size_t nc = std::stoi(argv[1]);
+    std::vector<std::vector<double>> finalparams(nc);
+    // #pragma omp parallel for shared(pids, mass, xdata, ydata, xerrs, yerrs, parindexes)
+    // #pragma omp parallel for num_threads(12)
+    std::vector<ROOT::Fit::FitResult> finalresults(nc);
+
+    FitResults defaultfitsettings;
+    defaultfitsettings.ParameterLimits = {{1, 10000000}, {1, 10000000}, {1, 10000000}, {0.01, 0.3}, {0, 0}, {0, 0}, {0, 0}, {0.01, 1}, {0.01, 3}, {1.0001, 2}, {0, 0}};
+    defaultfitsettings.ParameterLimited = {true, true, true, true, false, false, false, true, true, true, false};
+    defaultfitsettings.ParameterFixed = {false, false, false, false, true, true, true, false, false, false, true};
+    defaultfitsettings.ParameterNames = {"A211", "A321", "A2212", "Tkin", "M211", "M321", "M2212", "BetaS", "N", "q", "yb"};
+    defaultfitsettings.ParameterStepsize = {1, 1, 1, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.0001, 0.01};
+    defaultfitsettings.ParameterStepsized = {true, true, true, true, false, false, false, true, true, true, false};
+    defaultfitsettings.Species = pids;
+    defaultfitsettings.FitRange = fitrange;
+    defaultfitsettings.Indexmap = parindexes;
+    for (int ic = 0; ic < nc; ++ic) {
+        Chi2 chi2;
+        chi2.SetParindexes(parindexes);
+        chi2.SetData(xdata, ydata[ic], xerrs, yerrs[ic]);
+        chi2.SetSpecies({211, 321, 2212});
+        chi2.SetFitRange(fitrange);
+        chi2.SetFitFunction(Tsallis::Cillindrical::Function, 7);
+
+        Multifitter fitter;
+        fitter.FixPars({false, false, false, false, true, true, true, false, false, false, true});
+        fitter.LimitPars({true, true, true, true, false, false, false, true, true, true, false});
+        fitter.SetParLimits({{1, 10000000}, {1, 10000000}, {1, 10000000}, {0.01, 0.3}, {0, 0}, {0, 0}, {0, 0}, {0.01, 1}, {0.01, 3}, {1.0001, 2}, {0, 0}});
+        fitter.SetParStepsize({1, 1, 1, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.0001, 0.01});
+        fitter.SetParNames({"A211", "A321", "A2212", "Tkin", "M211", "M321", "M2212", "BetaS", "N", "q", "yb"});
+        fitter.SetParInit({1, 1, 1, 0.11, 0.138, 0.498, 0.938, 0.5, 1.0, 1.1, 0.5});
+        fitter.StepsizePars({true, true, true, true, false, false, false, true, true, true, false});
+        fitter.PrintPars(true);
+
+        fitter.Run(chi2);
+        finalresults[ic] = fitter.GetResult();
+    }
+    std::vector<FitResults> JSONResults(nc);
+    nlohmann::json file;
+
+    size_t npar = defaultfitsettings.ParameterFixed.size();
+    // size_t nfree = 0;
+    // for (int i = 0; i < npar; ++i) {
+    //     if (!defaultfitsettings.ParameterFixed[i]) {
+    //         nfree++;
+    //     }
+    // }
+    // std::cout << finalresults[0].NPar() << std::endl;
+    std::vector<std::string> centralitylabels = {"0-5%", "5-10%", "10-20%", "20-30%", "30-40%", "40-50%", "50-60%", "60-70%", "70-80%", "80-90%", "90-100%"};
+
+    for (int ic = 0; ic < nc; ++ic) {
+        JSONResults[ic] = FitResults(defaultfitsettings);
+        JSONResults[ic].Chi2 = finalresults[ic].Chi2();
+
+        JSONResults[ic].CorrelationMatrix.resize(npar, std::vector<double>(npar));
+        JSONResults[ic].Edm = finalresults[ic].Edm();
+        JSONResults[ic].MinFCN = finalresults[ic].MinFcnValue();
+        JSONResults[ic].NCalls = finalresults[ic].NCalls();
+        JSONResults[ic].DegreesOfFreedom = finalresults[ic].Ndf();
+        JSONResults[ic].ParameterValues.resize(npar);
+        JSONResults[ic].ParameterErrors.resize(npar);
+        JSONResults[ic].ParameterNames.resize(npar);
+        for (int ipar = 0; ipar < npar; ++ipar) {
+            JSONResults[ic].ParameterValues[ipar] = finalresults[ic].GetParams()[ipar];
+            JSONResults[ic].ParameterErrors[ipar] = finalresults[ic].GetErrors()[ipar];
+            JSONResults[ic].ParameterNames[ipar] = finalresults[ic].GetParameterName(ipar);
+        }
+
+        for (int ipar = 0; ipar < npar; ++ipar) {
+            for (int jpar = 0; jpar < npar; ++jpar) {
+                JSONResults[ic].CorrelationMatrix[ipar][jpar] = finalresults[ic].CovMatrix(ipar, jpar);
+            }
+        }
+        JSONResults[ic].GenerateJSON();
+        file["centrality"][centralitylabels[ic]] = JSONResults[ic].j;
+    }
+    std::ofstream outFile("/home/lieuwe/Documents/Software/articles/1910.07678/processed/dNptdptdy-fitresults-tbwd-1.json");
+    if (outFile.is_open()) {
+        outFile << file.dump(4);  // Dump the JSON object to the file with an indentation of 4 spaces
+        outFile.close();
+    } else {
+        throw std::runtime_error("Could not open file for writing");
+    }
 }
 
 int main(int argc, char* argv[]) {
     MultifitBoltzmannNoPlot(argc, argv);
+    MultifitTsallisNoPlot(argc, argv);
     // MultifitMT(argc, argv);
     // MultifitTsallis(argc, argv);
     return 0;

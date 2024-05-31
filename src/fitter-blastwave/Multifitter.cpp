@@ -141,10 +141,12 @@ void Multifitter::PrintPars(bool state_print_) {
     state_print = state_print_;
 }
 
-std::vector<double> Multifitter::Run(Chi2& chi2) {
+void Multifitter::Run(Chi2& chi2) {
     ROOT::Math::Functor fcn(chi2, parsettings_npar);
     ROOT::Fit::Fitter fitter;
     fitter.SetFCN(fcn, parsettings_init.data());
+    // fitter.SetData(ROOT::Fit::BinData());
+
     for (int ipar = 0; ipar < parsettings_npar; ++ipar) {
         fitter.Config().ParSettings(ipar).SetName(parsettings_name[ipar]);
         if (parsettings_limited[ipar]) {
@@ -164,16 +166,11 @@ std::vector<double> Multifitter::Run(Chi2& chi2) {
         // errorstate[ic] = true;
     }
     const ROOT::Fit::FitResult& result = fitter.Result();
-    ROOT::Fit::FitResult fitresult(result);
-    std::vector<double> pars(parsettings_npar);
-    for (int ip = 0; ip < parsettings_npar; ++ip) {
-        pars[ip] = result.GetParams()[ip];
-    }
+    fitresult = ROOT::Fit::FitResult(result);
+
     if (state_print) {
         result.Print(std::cout, true);
     }
-
-    return pars;
 }
 
 ROOT::Fit::FitResult Multifitter::GetResult() {
