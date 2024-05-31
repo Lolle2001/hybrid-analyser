@@ -16,6 +16,9 @@ using Indexmap = std::map<int, std::vector<unsigned int>>;
 using Datamap = std::map<int, std::vector<double>>;
 using Datamap2D = std::map<int, std::vector<std::vector<double>>>;
 
+/*
+[WIP]
+*/
 class Chi2 {
    private:
     Indexmap parindex;
@@ -51,6 +54,9 @@ class Chi2 {
     double operator()(const double* par);
 };
 
+/*
+[WIP]
+*/
 class Multifitter {
    private:
     std::vector<bool> parsettings_fixed;
