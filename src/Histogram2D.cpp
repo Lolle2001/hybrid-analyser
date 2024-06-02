@@ -25,7 +25,9 @@ Histogram2D::Histogram2D(std::string Name_,
     ny = EdgesY.size() - 1;
     thirdaxis = true;
     nz = 1;
+
     Resize(nx, ny);
+
     InitializeIndexMap();
 }
 
@@ -106,7 +108,9 @@ void Histogram2D::InitializeIndexMap() {
     }
 
     x_width = Utilities::Statistics::CalculateCommonWidth(nx, EdgesX);
+
     Utilities::Statistics::FillIndexMap(nx, x_min, x_max, x_width, EdgesX, IndexMapX);
+
     y_width = Utilities::Statistics::CalculateCommonWidth(ny, EdgesY);
     Utilities::Statistics::FillIndexMap(ny, y_min, y_max, y_width, EdgesY, IndexMapY);
 }

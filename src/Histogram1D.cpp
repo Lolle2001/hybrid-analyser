@@ -13,6 +13,7 @@ Histogram1D::Histogram1D(
     nx = EdgesX.size() - 1;
 
     Resize(nx);
+
     InitializeIndexMap();
 }
 
@@ -24,6 +25,7 @@ Histogram1D::Histogram1D(std::string Name_,
 
     ny = 1;
     Resize(nx);
+
     InitializeIndexMap();
 }
 
@@ -37,6 +39,7 @@ Histogram1D::Histogram1D(std::string Name_,
     ny = 1;
     nz = 1;
     Resize(nx);
+
     InitializeIndexMap();
 }
 
@@ -130,6 +133,7 @@ void Histogram1D::InitializeIndexMap() {
     }
 
     x_width = Utilities::Statistics::CalculateCommonWidth(nx, EdgesX);
+
     Utilities::Statistics::FillIndexMap(nx, x_min, x_max, x_width, EdgesX, IndexMapX);
 }
 

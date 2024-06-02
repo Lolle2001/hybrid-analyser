@@ -186,6 +186,7 @@ void ReadFiles(std::vector<RunInfo> runinfo, std::string Directory, std::string 
     fflush(stdout);
     pbar.Print();
     campt->InitializeDataContainer();
+
 #pragma omp parallel
     {
 #pragma omp for schedule(dynamic)

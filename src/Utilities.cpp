@@ -5,15 +5,24 @@ namespace Utilities {
 //     v1.insert(std::end(v1), std::begin(v2), std::end(v2));
 // };
 
-double igcd(double a, double b, double base) {
-    if (a < b) {
-        return igcd(b, a, base);
+// double igcd(double a, double b, double base) {
+//     if (a < b) {
+//         return igcd(b, a, base);
+//     }
+//     if (std::fabs(b) < base) {
+//         return a;
+//     } else {
+//         return (igcd(b, a - std::floor(a / b) * b, base));
+//     }
+// }
+
+double igcd(double a, double b, double tol) {
+    while (std::abs(b) > tol) {
+        double temp = std::fmod(a, b);
+        a = b;
+        b = temp;
     }
-    if (std::fabs(b) < base) {
-        return a;
-    } else {
-        return (igcd(b, a - std::floor(a / b) * b, base));
-    }
+    return a;
 }
 
 long double GetFileSize(std::filesystem::path filepath, const int option) {
@@ -74,12 +83,13 @@ double CalculateCommonWidth(size_t n, const std::vector<double>& edges) {
     double smallest_width = widths[0];
     for (index_t i = 0; i < n; ++i) {
         for (index_t j = i + 1; j < n; ++j) {
-            double temp_width = Utilities::igcd(widths[i], widths[j], 0.001);
+            double temp_width = igcd(widths[i], widths[j], 0.001);
             if (temp_width < smallest_width) {
                 smallest_width = temp_width;
             }
         }
     }
+
     widths.clear();
     return smallest_width;
 }
@@ -93,7 +103,9 @@ double isWithinBin(double x, index_t index, const std::vector<double>& edges) {
 }
 void FillIndexMap(size_t n, double min, double max, double width, const std::vector<double>& edges, std::map<int, int>& indexmap) {
     size_t temp_n = static_cast<size_t>((max - min) / width);
+
     for (index_t i = 0; i < temp_n; ++i) {
+        // std::cout << i << std::endl;
         double x = min + i * width + width * 0.5;
         for (index_t j = 0; j < n; ++j) {
             if (isWithinBin(x, j, edges)) {
