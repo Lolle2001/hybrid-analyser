@@ -14,6 +14,9 @@
 #include "Timer.hpp"
 #include "Utilities.hpp"
 
+using size_s = unsigned int;
+using index_t = unsigned int;
+
 struct Parameters {
     std::string ipglasma_data_folder;
     std::string iss_data_folder;
@@ -41,7 +44,7 @@ namespace iSS {
 struct RunInfo {
     int iSSRun;
     int IPGlasmaRun;
-    int NEvent;
+    size_s NEvent;
 };
 Statistics::Block_iss GetInitialStateInfo(int NRun, int eventid, Parameters& parameters);
 void ReadFiles(std::vector<iSS::RunInfo> runinfo, std::string OutputDirectory, Parameters& parameters, int collisiontype);

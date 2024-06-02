@@ -12,7 +12,7 @@ void Main(int argc, char* argv[]) {
     std::vector<int> NBatch;
     std::string Directory;
     int collisiontype;
-    int LowerNBatch = 1;
+    size_t LowerNBatch = 1;
     std::string ParameterFile;
     std::string outputdirectory;
     // std::cout << "hallo" << std::endl;
@@ -149,10 +149,10 @@ void Main(int argc, char* argv[]) {
         outputdirectory = Directory + "/p" + std::to_string(NRun[0]) + "/processed";
     }
 
-    for (int i = 0; i < NRun.size(); ++i) {
+    for (index_t i = 0; i < NRun.size(); ++i) {
         runinfo[i].NRun = NRun[i];
         runinfo[i].NBatchMax = NBatch[i];
-        runinfo[i].NBatchMin = 1;
+        runinfo[i].NBatchMin = LowerNBatch;
     }
 
     AMPT::ReadFiles(runinfo, Directory, outputdirectory, parameters, collisiontype);
@@ -292,7 +292,7 @@ void Main(int argc, char* argv[]) {
         outputdirectory = parameters.iss_data_folder + "/p" + std::to_string(NRun[0]) + "/processed";
     }
 
-    for (int i = 0; i < NRun.size(); ++i) {
+    for (index_t i = 0; i < NRun.size(); ++i) {
         runinfo[i].iSSRun = NRun[i];
         runinfo[i].IPGlasmaRun = IPGlasmaRun[i];
         runinfo[i].NEvent = NEvent[i];

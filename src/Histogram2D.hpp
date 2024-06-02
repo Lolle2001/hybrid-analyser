@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <nlohmann/json.hpp>
 #include <sstream>
 #include <thread>
 #include <vector>
@@ -59,7 +60,7 @@ class Histogram2D {
     std::string Name;
 
    public:
-    Histogram2D(){};
+    Histogram2D() = default;
     // Histogram3D(int & nx_, int & ny_, int & nz_);
     Histogram2D(std::string Name_, std::vector<double> EdgesX_, std::vector<double> EdgesY_);
     Histogram2D(std::string Name_, std::vector<double> EdgesX_, std::vector<double> EdgesY_, std::vector<double> EdgesZ_);
@@ -82,6 +83,7 @@ class Histogram2D {
     void PrintTotalSQR(std::ostream& output);
     void PrintTotal(std::ostream& output);
     void PrintCount(std::ostream& output);
+    void PrintAll(std::ostream& output);
 
     void ReadEdges(std::string filename);
     void ReadTotalSQR(std::string filename);

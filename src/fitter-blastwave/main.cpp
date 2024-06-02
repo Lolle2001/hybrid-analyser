@@ -219,13 +219,13 @@ void fit_bgbw_all(int argc, char** argv) {
         JSONResults[ic].ParameterValues.resize(npar);
         JSONResults[ic].ParameterErrors.resize(npar);
         JSONResults[ic].ParameterNames.resize(npar);
-        for (int ipar = 0; ipar < npar; ++ipar) {
+        for (index_t ipar = 0; ipar < npar; ++ipar) {
             JSONResults[ic].ParameterValues[ipar] = finalresults[ic].GetParams()[ipar];
             JSONResults[ic].ParameterErrors[ipar] = finalresults[ic].GetErrors()[ipar];
             JSONResults[ic].ParameterNames[ipar] = finalresults[ic].GetParameterName(ipar);
         }
 
-        for (int ipar = 0; ipar < npar; ++ipar) {
+        for (index_t ipar = 0; ipar < npar; ++ipar) {
             for (int jpar = 0; jpar < npar; ++jpar) {
                 JSONResults[ic].CorrelationMatrix[ipar][jpar] = finalresults[ic].CovMatrix(ipar, jpar);
             }
@@ -340,13 +340,13 @@ void fit_tbw_all(int argc, char** argv) {
         JSONResults[ic].ParameterValues.resize(npar);
         JSONResults[ic].ParameterErrors.resize(npar);
         JSONResults[ic].ParameterNames.resize(npar);
-        for (int ipar = 0; ipar < npar; ++ipar) {
+        for (index_t ipar = 0; ipar < npar; ++ipar) {
             JSONResults[ic].ParameterValues[ipar] = finalresults[ic].GetParams()[ipar];
             JSONResults[ic].ParameterErrors[ipar] = finalresults[ic].GetErrors()[ipar];
             JSONResults[ic].ParameterNames[ipar] = finalresults[ic].GetParameterName(ipar);
         }
 
-        for (int ipar = 0; ipar < npar; ++ipar) {
+        for (index_t ipar = 0; ipar < npar; ++ipar) {
             for (int jpar = 0; jpar < npar; ++jpar) {
                 JSONResults[ic].CorrelationMatrix[ipar][jpar] = finalresults[ic].CovMatrix(ipar, jpar);
             }

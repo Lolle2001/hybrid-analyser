@@ -5,7 +5,6 @@
 #include <map>
 #include <vector>
 
-#include "BinContainer.hpp"
 #include "Messenger.hpp"
 #include "StatisticsContainer.hpp"
 #include "Utilities.hpp"
@@ -21,7 +20,7 @@ class Histogram1D {
    private:
     Vector1D Contents;
 
-    int nx, ny, nz;
+    size_t nx, ny, nz;
 
     std::map<int, int> IndexMapX;
 
@@ -54,7 +53,7 @@ class Histogram1D {
     // Histogram1D(std::shared_ptr<BinContainer> bincontainerX);
 
     void
-    Resize(int& nx_);
+    Resize(size_t& nx_);
 
     void InitializeIndexMap();
 
@@ -68,7 +67,7 @@ class Histogram1D {
     void AddCurrent(double& valx, double& valy, double valcontent);
     void AddCurrent(double& valx, double& valy, double& valz, double valcontent);
 
-    int GetNbinsX() { return nx; };
+    size_t GetNbinsX() { return nx; };
 
     std::string& GetName();
 
@@ -80,7 +79,7 @@ class Histogram1D {
 
     void PrintEdges(std::ostream& output);
 
-    StatisticsContainer& GetBinContent(int& ix) {
+    StatisticsContainer& GetBinContent(index_t& ix) {
         return Contents[ix];
     }
 
@@ -91,7 +90,7 @@ class Histogram1D {
     void ReadTotal(std::string filename);
     void ReadCount(std::string filename);
 
-    StatisticsContainer& operator()(int& ix);
+    StatisticsContainer& operator()(index_t& ix);
 
     StatisticsContainer& operator()(double& valx);
 

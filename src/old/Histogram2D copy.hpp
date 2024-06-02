@@ -36,7 +36,7 @@ class Histogram2D {
    private:
     Vector2D Contents;
 
-    int nx, ny, nz;
+    size_t nx, ny, nz;
 
     std::map<int, int> IndexMapX;
     std::map<int, int> IndexMapY;
@@ -86,17 +86,17 @@ class Histogram2D {
     void ReadTotal(std::string filename);
     void ReadCount(std::string filename);
 
-    int GetNbinsX() { return nx; };
-    int GetNbinsY() { return ny; };
+    size_t GetNbinsX() { return nx; };
+    size_t GetNbinsY() { return ny; };
 
-    double GetBinWidthX(int ix) {
+    double GetBinWidthX(index_t ix) {
         if (ix < nx) {
             return (EdgesX[ix + 1] - EdgesX[ix]);
         } else {
             return 0;
         }
     }
-    double GetBinWidthY(int iy) {
+    double GetBinWidthY(index_t iy) {
         if (iy < ny) {
             return (EdgesY[iy + 1] - EdgesY[iy]);
         } else {
@@ -104,14 +104,14 @@ class Histogram2D {
         }
     }
 
-    double GetBinMidX(int ix) {
+    double GetBinMidX(index_t ix) {
         if (ix < nx) {
             return (EdgesX[ix + 1] + EdgesX[ix]) / 2;
         } else {
             return 0;
         }
     }
-    double GetBinMidY(int iy) {
+    double GetBinMidY(index_t iy) {
         if (iy < ny) {
             return (EdgesY[iy + 1] + EdgesY[iy]) / 2;
         } else {
@@ -119,7 +119,7 @@ class Histogram2D {
         }
     }
 
-    StatisticsContainer& GetBinContent(int& ix, int& iy) {
+    StatisticsContainer& GetBinContent(index_t& ix, index_t& iy) {
         return Contents[ix][iy];
     }
 
@@ -130,8 +130,8 @@ class Histogram2D {
         return EdgesY;
     }
 
-    StatisticsContainer& operator()(int& ix, int& iy);
-    Vector1D& operator()(int& ix);
+    StatisticsContainer& operator()(index_t& ix, index_t& iy);
+    Vector1D& operator()(index_t& ix);
 
     StatisticsContainer& operator()(double& valx, double& valy);
     Vector1D& operator()(double& valx);

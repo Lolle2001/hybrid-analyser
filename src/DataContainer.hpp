@@ -7,7 +7,7 @@
 
 #include "ParticleProperties.hpp"
 // #include "File_input.hpp"
-#include "BinContainer.hpp"
+
 #include "DataFormat.hpp"
 #include "Histogram1D.hpp"
 #include "Histogram2D.hpp"
@@ -17,6 +17,8 @@
 // #include "HistogramSet.hpp"
 
 #define DEFAULT_EXTENSION_HISTOGRAM "hist"
+
+using size_s = unsigned int;
 
 namespace Statistics {
 
@@ -39,16 +41,16 @@ class DataContainer {
     VectorMap<std::vector<double>> EdgesPsR;  // Pseudorapidity
     VectorMap<std::vector<double>> EdgesMom;  // Transverse Momentum
 
-        std::vector<std::shared_ptr<Statistics::Block>> EventBlocks;
+    std::vector<std::shared_ptr<Statistics::Block>> EventBlocks;
 
-    unsigned int NumberOfBlocks = 0;
+    size_t NumberOfBlocks = 0;
 
     std::string centrality_type;
 
     bool use_impactparameter_classification = false;
 
-    int nharmonic_min = 1;
-    int nharmonic_max = NUMBER_OF_HARMONICS;
+    size_t nharmonic_min = 1;
+    size_t nharmonic_max = NUMBER_OF_HARMONICS;
 
     typedef double& (Statistics::Block::*FunctionPointer)();
     FunctionPointer funcptr;
@@ -66,7 +68,7 @@ class DataContainer {
 
     void SetCentralityType(int collisiontype);
 
-    void SetFlowRange(int nmin, int nmax);
+    void SetFlowRange(size_s nmin, size_s nmax);
 
     void AddParticle(Statistics::Block& block, Statistics::Line& line);
 

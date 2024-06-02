@@ -33,7 +33,7 @@ class HistogramMap2D {
     Vector2DMap Contents;
     MapVector2D ContentsConverted;
 
-    int nx, ny;
+    size_t nx, ny;
 
     std::map<int, int> IndexMapX;
     std::map<int, int> IndexMapY;
@@ -55,7 +55,7 @@ class HistogramMap2D {
     // HistogramMap3D(int & nx_, int & ny_, int & nz_);
     HistogramMap2D(std::string Name_, std::vector<double> EdgesX_, std::vector<double> EdgesY_);
 
-    void Resize(int& nx_, int& ny_);
+    void Resize(size_t& nx_, size_t& ny_);
 
     void InitializeIndexMap();
 
@@ -82,14 +82,14 @@ class HistogramMap2D {
     int GetNbinsX() { return nx; };
     int GetNbinsY() { return ny; };
 
-    double GetBinWidthX(int ix) {
+    double GetBinWidthX(index_t ix) {
         if (ix < nx) {
             return (EdgesX[ix + 1] - EdgesX[ix]);
         } else {
             return 0;
         }
     }
-    double GetBinWidthY(int iy) {
+    double GetBinWidthY(index_t iy) {
         if (iy < ny) {
             return (EdgesY[iy + 1] - EdgesY[iy]);
         } else {
@@ -97,7 +97,7 @@ class HistogramMap2D {
         }
     }
 
-    double GetBinMidX(int ix) {
+    double GetBinMidX(index_t ix) {
         if (ix < nx) {
             return (EdgesX[ix + 1] + EdgesX[ix]) / 2;
         } else {

@@ -140,7 +140,7 @@ void Block::Write(std::ostream& output) const {
            << std::scientific << std::setw(13) << std::left << ImpactParameter << " "
            << std::setw(4) << std::left << NumberOfParticipantNucleons << " "
            << std::setw(6) << std::left << NumberOfBinaryCollisions << " ";
-    for (int n = 1; n <= NUMBER_OF_HARMONICS; ++n) {
+    for (index_t n = 1; n <= NUMBER_OF_HARMONICS; ++n) {
         output << std::scientific << std::setw(13) << std::right << EventPlaneAngle[n] << " ";
     }
 

@@ -138,8 +138,8 @@ class HistogramS2D {
     void PrintContents(std::ostream &output) {
         output << "#" << " " << min_x << " " << max_x << " " << dx << " " << n_x << "\n";
         output << "#" << " " << min_y << " " << max_y << " " << dy << " " << n_y << "\n";
-        for (int ix = 0; ix < n_x; ++ix) {
-            for (int iy = 0; iy < n_y; ++iy) {
+        for (index_t ix = 0; ix < n_x; ++ix) {
+            for (index_t iy = 0; iy < n_y; ++iy) {
                 output << contents[ix][iy] << " ";
             }
             output << "\n";

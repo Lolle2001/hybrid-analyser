@@ -18,7 +18,7 @@ HistogramMap2D::HistogramMap2D(
     InitializeIndexMap();
 }
 
-void HistogramMap2D::Resize(int& nx_, int& ny_) {
+void HistogramMap2D::Resize(size_t& nx_, size_t& ny_) {
     Contents.resize(nx_, Vector1DMap(ny_));
 }
 
@@ -28,8 +28,8 @@ std::string& HistogramMap2D::GetName() {
 
 void HistogramMap2D::AddEvent() {
     // std::cout << "#" << Contents[10][0][0][211].Total << std::endl;
-    for (int ix = 0; ix < nx; ++ix) {
-        for (int iy = 0; iy < ny; ++iy) {
+    for (index_t ix = 0; ix < nx; ++ix) {
+        for (index_t iy = 0; iy < ny; ++iy) {
             for (auto& entry : Contents[ix][iy]) {
                 entry.second.AddEvent();
                 // entry.second.Total += entry.second.TotalCurrent;
@@ -42,8 +42,8 @@ void HistogramMap2D::AddEvent() {
 }
 
 void HistogramMap2D::AddEventAverage() {
-    for (int ix = 0; ix < nx; ++ix) {
-        for (int iy = 0; iy < ny; ++iy) {
+    for (index_t ix = 0; ix < nx; ++ix) {
+        for (index_t iy = 0; iy < ny; ++iy) {
             for (auto& entry : Contents[ix][iy]) {
                 entry.second.AddEventSpecial();
             }
@@ -78,11 +78,11 @@ void HistogramMap2D::InitializeIndexMap() {
     std::vector<double> xwidths(nx);
     std::vector<double> ywidths(ny);
 
-    for (int ix = 0; ix < nx; ++ix) {
+    for (index_t ix = 0; ix < nx; ++ix) {
         xwidths[ix] = EdgesX[ix + 1] - EdgesX[ix];
         // std::cout << xwidths[ix] << std::endl;
     }
-    for (int iy = 0; iy < ny; ++iy) {
+    for (index_t iy = 0; iy < ny; ++iy) {
         ywidths[iy] = EdgesY[iy + 1] - EdgesY[iy];
     }
 
@@ -91,18 +91,17 @@ void HistogramMap2D::InitializeIndexMap() {
 
     double x_temp_width;
     double y_temp_width;
-    double z_temp_width;
 
-    for (int ix = 0; ix < nx; ++ix) {
-        for (int jx = ix + 1; jx < nx; ++jx) {
+    for (index_t ix = 0; ix < nx; ++ix) {
+        for (index_t jx = ix + 1; jx < nx; ++jx) {
             x_temp_width = Utilities::igcd(xwidths[ix], xwidths[jx], 0.001);
             if (x_temp_width < x_smallest_width) {
                 x_smallest_width = x_temp_width;
             }
         }
     }
-    for (int iy = 0; iy < ny; ++iy) {
-        for (int jy = iy + 1; jy < ny; ++jy) {
+    for (index_t iy = 0; iy < ny; ++iy) {
+        for (index_t jy = iy + 1; jy < ny; ++jy) {
             y_temp_width = Utilities::igcd(ywidths[iy], ywidths[jy], 0.001);
             if (y_temp_width < y_smallest_width) {
                 y_smallest_width = y_temp_width;
@@ -113,28 +112,27 @@ void HistogramMap2D::InitializeIndexMap() {
     x_width = x_smallest_width;
     y_width = y_smallest_width;
 
-    int temp_nx = static_cast<int>((x_max - x_min) / x_width);
-    int temp_ny = static_cast<int>((y_max - y_min) / y_width);
+    size_t temp_nx = static_cast<size_t>((x_max - x_min) / x_width);
+    size_t temp_ny = static_cast<size_t>((y_max - y_min) / y_width);
 
     // std::cout << x_max << " " << x_min << " " << x_width << " " << temp_nx << std::endl;
 
     double x;
     double y;
-    double z;
 
-    for (int ix = 0; ix < temp_nx; ++ix) {
+    for (index_t ix = 0; ix < temp_nx; ++ix) {
         x = (x_min + ix * x_width + x_width * 0.5);
 
-        for (int jx = 0; jx < nx; ++jx) {
+        for (index_t jx = 0; jx < nx; ++jx) {
             if (x > EdgesX[jx] && x < EdgesX[jx + 1]) {
                 IndexMapX[ix] = jx;
             }
         }
     }
-    for (int iy = 0; iy < temp_ny; ++iy) {
+    for (index_t iy = 0; iy < temp_ny; ++iy) {
         y = (y_min + iy * y_width + y_width * 0.5);
 
-        for (int jy = 0; jy < ny; ++jy) {
+        for (index_t jy = 0; jy < ny; ++jy) {
             if (y > EdgesY[jy] && y < EdgesY[jy + 1]) {
                 IndexMapY[iy] = jy;
             }
@@ -146,10 +144,9 @@ void HistogramMap2D::InitializeIndexMap() {
 }
 
 void HistogramMap2D::Convert() {
-    ContentsConverted;
-    for (int ix = 0; ix < nx; ++ix) {
+    for (index_t ix = 0; ix < nx; ++ix) {
         // centrality
-        for (int iy = 0; iy < ny; ++iy) {
+        for (index_t iy = 0; iy < ny; ++iy) {
             // momentum
 
             // rapidity
@@ -169,13 +166,13 @@ void HistogramMap2D::Convert() {
 void HistogramMap2D::PrintEdges(std::ostream& output) {
     output << "nbins(x) = " << nx << "\n";
     output << "edges(x) = ";
-    for (int ix = 0; ix <= nx; ++ix) {
+    for (index_t ix = 0; ix <= nx; ++ix) {
         output << EdgesX[ix] << " ";
     }
     output << "\n";
     output << "nbins(y) = " << ny << "\n";
     output << "edges(y) = ";
-    for (int iy = 0; iy <= ny; ++iy) {
+    for (index_t iy = 0; iy <= ny; ++iy) {
         output << EdgesY[iy] << " ";
     }
     output << "\n";
@@ -185,8 +182,8 @@ void HistogramMap2D::PrintCount(std::ostream& output) {
     output << "# " << ContentsConverted.size() << "\n";
     for (const auto& entry : ContentsConverted) {
         output << "# " << entry.first << "\n";
-        for (int ix = 0; ix < nx; ++ix) {
-            for (int iy = 0; iy < ny; ++iy) {
+        for (index_t ix = 0; ix < nx; ++ix) {
+            for (index_t iy = 0; iy < ny; ++iy) {
                 output << std::setw(13) << std::right << entry.second[ix][iy].EntryCount << " ";
             }
             output << "\n";
@@ -197,8 +194,8 @@ void HistogramMap2D::PrintTotalSQR(std::ostream& output) {
     output << "# " << ContentsConverted.size() << "\n";
     for (const auto& entry : ContentsConverted) {
         output << "# " << entry.first << "\n";
-        for (int ix = 0; ix < nx; ++ix) {
-            for (int iy = 0; iy < ny; ++iy) {
+        for (index_t ix = 0; ix < nx; ++ix) {
+            for (index_t iy = 0; iy < ny; ++iy) {
                 output << std::setw(13) << std::right << entry.second[ix][iy].TotalSQR << " ";
             }
             output << "\n";
@@ -209,8 +206,8 @@ void HistogramMap2D::PrintTotal(std::ostream& output) {
     output << "# " << ContentsConverted.size() << "\n";
     for (const auto& entry : ContentsConverted) {
         output << "# " << entry.first << "\n";
-        for (int ix = 0; ix < nx; ++ix) {
-            for (int iy = 0; iy < ny; ++iy) {
+        for (index_t ix = 0; ix < nx; ++ix) {
+            for (index_t iy = 0; iy < ny; ++iy) {
                 output << std::setw(13) << std::right << entry.second[ix][iy].Total << " ";
             }
             output << "\n";
@@ -268,20 +265,20 @@ void HistogramMap2D::ReadTotalSQR(std::string filename) {
 
     std::string dummy1;
     std::string dummy2;
-    int nids;
+    size_t nids;
     int pid;
     file.open(filename, std::ios::in);
     std::getline(file, line);
     iss = std::istringstream(line);
     iss >> dummy1 >> nids;
-    for (int ip = 0; ip < nids; ++ip) {
+    for (index_t ip = 0; ip < nids; ++ip) {
         std::getline(file, line);
         iss = std::istringstream(line);
         iss >> dummy1 >> pid;
-        for (int ix = 0; ix < nx; ++ix) {
+        for (index_t ix = 0; ix < nx; ++ix) {
             std::getline(file, line);
             iss = std::istringstream(line);
-            for (int iy = 0; iy < ny; ++iy) {
+            for (index_t iy = 0; iy < ny; ++iy) {
                 iss >> Contents[ix][iy][pid].TotalSQR;
             }
         }
@@ -296,20 +293,20 @@ void HistogramMap2D::ReadTotal(std::string filename) {
 
     std::string dummy1;
     std::string dummy2;
-    int nids;
+    size_t nids;
     int pid;
     file.open(filename, std::ios::in);
     std::getline(file, line);
     iss = std::istringstream(line);
     iss >> dummy1 >> nids;
-    for (int ip = 0; ip < nids; ++ip) {
+    for (index_t ip = 0; ip < nids; ++ip) {
         std::getline(file, line);
         iss = std::istringstream(line);
         iss >> dummy1 >> pid;
-        for (int ix = 0; ix < nx; ++ix) {
+        for (index_t ix = 0; ix < nx; ++ix) {
             std::getline(file, line);
             iss = std::istringstream(line);
-            for (int iy = 0; iy < ny; ++iy) {
+            for (index_t iy = 0; iy < ny; ++iy) {
                 iss >> Contents[ix][iy][pid].Total;
             }
         }
@@ -324,20 +321,20 @@ void HistogramMap2D::ReadCount(std::string filename) {
 
     std::string dummy1;
     std::string dummy2;
-    int nids;
+    size_t nids;
     int pid;
     file.open(filename, std::ios::in);
     std::getline(file, line);
     iss = std::istringstream(line);
     iss >> dummy1 >> nids;
-    for (int ip = 0; ip < nids; ++ip) {
+    for (index_t ip = 0; ip < nids; ++ip) {
         std::getline(file, line);
         iss = std::istringstream(line);
         iss >> dummy1 >> pid;
-        for (int ix = 0; ix < nx; ++ix) {
+        for (index_t ix = 0; ix < nx; ++ix) {
             std::getline(file, line);
             iss = std::istringstream(line);
-            for (int iy = 0; iy < ny; ++iy) {
+            for (index_t iy = 0; iy < ny; ++iy) {
                 iss >> Contents[ix][iy][pid].EntryCount;
             }
         }
@@ -377,8 +374,8 @@ Vector1DMap& HistogramMap2D::operator()(double& valx) {
 
 void HistogramMap2D::operator+=(HistogramMap2D const& obj) {
     if (nx == obj.nx && ny == obj.ny) {
-        for (int ix = 0; ix < nx; ++ix) {
-            for (int iy = 0; iy < ny; ++iy) {
+        for (index_t ix = 0; ix < nx; ++ix) {
+            for (index_t iy = 0; iy < ny; ++iy) {
                 for (auto entry : obj.Contents[ix][iy]) {
                     Contents[ix][iy][entry.first] += entry.second;
                 }

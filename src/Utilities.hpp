@@ -10,7 +10,8 @@
 
 // #include "DataFormat.hpp"
 
-typedef unsigned int index_t;
+using index_t = unsigned int;
+using filename_t = std::string;
 
 namespace Utilities {
 

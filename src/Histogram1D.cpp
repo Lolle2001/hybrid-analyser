@@ -50,18 +50,18 @@ void Histogram1D::ReverseEdges() {
     }
 }
 
-void Histogram1D::Resize(int& nx_) {
+void Histogram1D::Resize(size_t& nx_) {
     Contents.resize(nx_);
 }
 
 void Histogram1D::AddEvent() {
-    for (int ix = 0; ix < nx; ++ix) {
+    for (index_t ix = 0; ix < nx; ++ix) {
         Contents[ix].AddEvent();
     }
 }
 
 void Histogram1D::AddEventAverage() {
-    for (int ix = 0; ix < nx; ++ix) {
+    for (index_t ix = 0; ix < nx; ++ix) {
         Contents[ix].AddEventSpecial();
     }
 }
@@ -133,7 +133,7 @@ void Histogram1D::InitializeIndexMap() {
     Utilities::Statistics::FillIndexMap(nx, x_min, x_max, x_width, EdgesX, IndexMapX);
 }
 
-StatisticsContainer& Histogram1D::operator()(int& ix) {
+StatisticsContainer& Histogram1D::operator()(index_t& ix) {
     return Contents[ix];
 }
 
@@ -146,7 +146,7 @@ StatisticsContainer& Histogram1D::operator()(double& valx) {
 void Histogram1D::operator+=(Histogram1D const& obj) {
     if (nx == obj.nx) {
         // std::cout << nx << std::endl;
-        for (int ix = 0; ix < nx; ++ix) {
+        for (index_t ix = 0; ix < nx; ++ix) {
             Contents[ix] += obj.Contents[ix];
         }
     } else {
@@ -156,19 +156,19 @@ void Histogram1D::operator+=(Histogram1D const& obj) {
 }
 
 void Histogram1D::PrintCount(std::ostream& output) {
-    for (int ix = 0; ix < nx; ++ix) {
+    for (index_t ix = 0; ix < nx; ++ix) {
         output << Contents[ix].EntryCount << "\n";
     }
 }
 
 void Histogram1D::PrintTotal(std::ostream& output) {
-    for (int ix = 0; ix < nx; ++ix) {
+    for (index_t ix = 0; ix < nx; ++ix) {
         output << Contents[ix].Total << "\n";
     }
 }
 
 void Histogram1D::PrintTotalSQR(std::ostream& output) {
-    for (int ix = 0; ix < nx; ++ix) {
+    for (index_t ix = 0; ix < nx; ++ix) {
         output << Contents[ix].TotalSQR << "\n";
     }
 }
@@ -176,14 +176,14 @@ void Histogram1D::PrintTotalSQR(std::ostream& output) {
 void Histogram1D::PrintEdges(std::ostream& output) {
     output << "nbins(x) = " << nx << "\n";
     output << "edges(x) = ";
-    for (int ix = 0; ix <= nx; ++ix) {
+    for (index_t ix = 0; ix <= nx; ++ix) {
         output << EdgesX[ix] << " ";
     }
     output << "\n";
     if (secondaxis) {
         output << "nbins(y) = " << ny << "\n";
         output << "edges(y) = ";
-        for (int iy = 0; iy <= ny; ++iy) {
+        for (index_t iy = 0; iy <= ny; ++iy) {
             output << EdgesY[iy] << " ";
         }
         output << "\n";
@@ -191,7 +191,7 @@ void Histogram1D::PrintEdges(std::ostream& output) {
     if (thirdaxis) {
         output << "nbins(z) = " << nz << "\n";
         output << "edges(z) = ";
-        for (int iz = 0; iz <= nz; ++iz) {
+        for (index_t iz = 0; iz <= nz; ++iz) {
             output << EdgesZ[iz] << " ";
         }
         output << "\n";
@@ -240,7 +240,7 @@ void Histogram1D::ReadTotalSQR(std::string filename) {
     double value;
 
     file.open(filename, std::ios::in);
-    for (int ix = 0; ix < nx; ++ix) {
+    for (index_t ix = 0; ix < nx; ++ix) {
         std::getline(file, line);
         iss = std::istringstream(line);
         iss >> Contents[ix].TotalSQR;
@@ -255,7 +255,7 @@ void Histogram1D::ReadTotal(std::string filename) {
     double value;
 
     file.open(filename, std::ios::in);
-    for (int ix = 0; ix < nx; ++ix) {
+    for (index_t ix = 0; ix < nx; ++ix) {
         std::getline(file, line);
         iss = std::istringstream(line);
         iss >> Contents[ix].Total;
@@ -270,7 +270,7 @@ void Histogram1D::ReadCount(std::string filename) {
     double value;
 
     file.open(filename, std::ios::in);
-    for (int ix = 0; ix < nx; ++ix) {
+    for (index_t ix = 0; ix < nx; ++ix) {
         std::getline(file, line);
         // std::cout << line << std::endl;
         iss = std::istringstream(line);

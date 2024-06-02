@@ -1,5 +1,5 @@
-CXX = g++
-CXXFLAGS = -std=c++17 -fopenmp
+CXX = g++ 
+CXXFLAGS = -std=c++17 -fopenmp # -Wall -Wextra -Wpedantic -Wno-reorder
 
 BUILDDIR = build/build-hybridp
 SRCDIR = src

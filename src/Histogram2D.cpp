@@ -39,8 +39,8 @@ std::string& Histogram2D::GetName() {
 
 void Histogram2D::AddEvent() {
     // std::cout << "#" << Contents[10][0][0][211].Total << std::endl;
-    for (int ix = 0; ix < nx; ++ix) {
-        for (int iy = 0; iy < ny; ++iy) {
+    for (index_t ix = 0; ix < nx; ++ix) {
+        for (index_t iy = 0; iy < ny; ++iy) {
             Contents[GetIndex(ix, iy)].AddEvent();
             // entry.second.Total += entry.second.TotalCurrent;
             // entry.second.TotalSQR += entry.second.TotalCurrent * entry.second.TotalCurrent;
@@ -51,8 +51,8 @@ void Histogram2D::AddEvent() {
 }
 
 void Histogram2D::AddEventAverage() {
-    for (int ix = 0; ix < nx; ++ix) {
-        for (int iy = 0; iy < ny; ++iy) {
+    for (index_t ix = 0; ix < nx; ++ix) {
+        for (index_t iy = 0; iy < ny; ++iy) {
             Contents[GetIndex(ix, iy)].AddEventSpecial();
         }
     }
@@ -114,20 +114,20 @@ void Histogram2D::InitializeIndexMap() {
 void Histogram2D::PrintEdges(std::ostream& output) {
     output << "nbins(x) = " << nx << "\n";
     output << "edges(x) = ";
-    for (int ix = 0; ix <= nx; ++ix) {
+    for (index_t ix = 0; ix <= nx; ++ix) {
         output << EdgesX[ix] << " ";
     }
     output << "\n";
     output << "nbins(y) = " << ny << "\n";
     output << "edges(y) = ";
-    for (int iy = 0; iy <= ny; ++iy) {
+    for (index_t iy = 0; iy <= ny; ++iy) {
         output << EdgesY[iy] << " ";
     }
     output << "\n";
     if (thirdaxis) {
         output << "nbins(z) = " << nz << "\n";
         output << "edges(z) = ";
-        for (int iz = 0; iz <= nz; ++iz) {
+        for (index_t iz = 0; iz <= nz; ++iz) {
             output << EdgesZ[iz] << " ";
         }
         output << "\n";
@@ -136,8 +136,8 @@ void Histogram2D::PrintEdges(std::ostream& output) {
 
 void Histogram2D::PrintCount(std::ostream& output) {
     // std::cout << nx << " " << ny << " " << nz << std::endl;
-    for (int ix = 0; ix < nx; ++ix) {
-        for (int iy = 0; iy < ny; ++iy) {
+    for (index_t ix = 0; ix < nx; ++ix) {
+        for (index_t iy = 0; iy < ny; ++iy) {
             output << std::setw(13) << std::right << Contents[GetIndex(ix, iy)].EntryCount << " ";
             // std::cout << Contents[GetIndex(ix,iy)][iz].EntryCount << std::endl;
         }
@@ -145,8 +145,8 @@ void Histogram2D::PrintCount(std::ostream& output) {
     }
 }
 void Histogram2D::PrintTotalSQR(std::ostream& output) {
-    for (int ix = 0; ix < nx; ++ix) {
-        for (int iy = 0; iy < ny; ++iy) {
+    for (index_t ix = 0; ix < nx; ++ix) {
+        for (index_t iy = 0; iy < ny; ++iy) {
             output << std::setw(13) << std::right << Contents[GetIndex(ix, iy)].TotalSQR << " ";
         }
         output << "\n";
@@ -154,12 +154,58 @@ void Histogram2D::PrintTotalSQR(std::ostream& output) {
 }
 
 void Histogram2D::PrintTotal(std::ostream& output) {
-    for (int ix = 0; ix < nx; ++ix) {
-        for (int iy = 0; iy < ny; ++iy) {
+    for (index_t ix = 0; ix < nx; ++ix) {
+        for (index_t iy = 0; iy < ny; ++iy) {
             output << std::setw(13) << std::right << Contents[GetIndex(ix, iy)].Total << " ";
         }
         output << "\n";
     }
+}
+
+void Histogram2D::PrintAll(std::ostream& output) {
+    nlohmann::json j;
+    j["name"];
+    j["settings"]["nbins"]["x"] = nx;
+    j["settings"]["nbins"]["y"] = ny;
+    if (thirdaxis) {
+        j["settings"]["nbins"]["z"] = nz;
+    }
+    j["settings"]["edges"]["x"] = EdgesX;
+    j["settings"]["edges"]["y"] = EdgesY;
+    if (thirdaxis) {
+        j["settings"]["edges"]["z"] = EdgesZ;
+    }
+    j["settings"]["wids"]["x"];
+    j["settings"]["wids"]["y"];
+    if (thirdaxis) {
+        j["settings"]["wids"]["z"];
+    }
+    j["settings"]["mids"]["x"];
+    j["settings"]["mids"]["y"];
+    if (thirdaxis) {
+        j["settings"]["mids"]["z"];
+    }
+    j["settings"]["errs"]["x"];
+    j["settings"]["errs"]["y"];
+    if (thirdaxis) {
+        j["settings"]["errs"]["z"];
+    }
+    j["settings"]["names"]["x"] = "ph";
+    j["settings"]["names"]["y"] = "ph";
+    if (thirdaxis) {
+        j["settings"]["names"]["z"] = "ph";
+    }
+    j["settings"]["dimension"] = 2;
+
+    j["contents"]["average"];
+    j["contents"]["averagesqr"];
+    j["contents"]["error"];
+    j["contents"]["total"];
+    j["contents"]["totalsqr"];
+    j["contents"]["count"];
+    j["contents"]["name"];
+
+    output << j.dump(4);
 }
 
 StatisticsContainer& Histogram2D::operator()(index_t ix, index_t iy) {
@@ -171,8 +217,8 @@ StatisticsContainer& Histogram2D::operator()(index_t ix, index_t iy) {
 // }
 
 StatisticsContainer& Histogram2D::operator()(double& valx, double& valy) {
-    int ix = IndexMapX[static_cast<int>((valx - x_min) / (x_width))];
-    int iy = IndexMapY[static_cast<int>((valy - y_min) / (y_width))];
+    index_t ix = IndexMapX[static_cast<index_t>((valx - x_min) / (x_width))];
+    index_t iy = IndexMapY[static_cast<index_t>((valy - y_min) / (y_width))];
 
     return Contents[GetIndex(ix, iy)];
 }
@@ -184,8 +230,8 @@ StatisticsContainer& Histogram2D::operator()(double& valx, double& valy) {
 
 void Histogram2D::operator+=(Histogram2D const& obj) {
     if (nx == obj.nx && ny == obj.ny) {
-        for (int ix = 0; ix < nx; ++ix) {
-            for (int iy = 0; iy < ny; ++iy) {
+        for (index_t ix = 0; ix < nx; ++ix) {
+            for (index_t iy = 0; iy < ny; ++iy) {
                 index_t index = GetIndex(ix, iy);
                 Contents[index] += obj.Contents[index];
             }
@@ -247,11 +293,11 @@ void Histogram2D::ReadTotalSQR(std::string filename) {
     std::istringstream iss;
 
     file.open(filename, std::ios::in);
-    for (int ix = 0; ix < nx; ++ix) {
+    for (index_t ix = 0; ix < nx; ++ix) {
         std::getline(file, line);
 
         iss = std::istringstream(line);
-        for (int iy = 0; iy < ny; ++iy) {
+        for (index_t iy = 0; iy < ny; ++iy) {
             iss >> Contents[GetIndex(ix, iy)].TotalSQR;
         }
     }
@@ -263,11 +309,11 @@ void Histogram2D::ReadTotal(std::string filename) {
     std::istringstream iss;
 
     file.open(filename, std::ios::in);
-    for (int ix = 0; ix < nx; ++ix) {
+    for (index_t ix = 0; ix < nx; ++ix) {
         std::getline(file, line);
 
         iss = std::istringstream(line);
-        for (int iy = 0; iy < ny; ++iy) {
+        for (index_t iy = 0; iy < ny; ++iy) {
             iss >> Contents[GetIndex(ix, iy)].Total;
         }
     }
@@ -279,11 +325,11 @@ void Histogram2D::ReadCount(std::string filename) {
     std::istringstream iss;
 
     file.open(filename, std::ios::in);
-    for (int ix = 0; ix < nx; ++ix) {
+    for (index_t ix = 0; ix < nx; ++ix) {
         std::getline(file, line);
 
         iss = std::istringstream(line);
-        for (int iy = 0; iy < ny; ++iy) {
+        for (index_t iy = 0; iy < ny; ++iy) {
             iss >> Contents[GetIndex(ix, iy)].EntryCount;
         }
     }

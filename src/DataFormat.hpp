@@ -5,6 +5,9 @@
 #include <iomanip>
 #include <istream>
 #include <vector>
+
+using index_t = unsigned int;
+
 namespace Statistics {
 
 const unsigned int NUMBER_OF_HARMONICS = 2;
@@ -107,37 +110,37 @@ std::ostream& operator<<(std::ostream& output, Line_iss& obj);
 
 class Block {
    private:
-    int EventID;
-    int NumberOfParticles;
+    size_t EventID;
+    size_t NumberOfParticles;
     double NumberOfChargedParticles = 0;
     double ImpactParameter;
-    int NumberOfParticipantNucleons;
-    int NumberOfBinaryCollisions;
+    size_t NumberOfParticipantNucleons;
+    size_t NumberOfBinaryCollisions;
     double ReactionPlaneAngle;
     double EventPlaneAngle[NUMBER_OF_HARMONICS + 1] = {0};
 
    public:
     Block() : EventID(0), NumberOfParticles(0), ImpactParameter(0.0), NumberOfParticipantNucleons(0), NumberOfBinaryCollisions(0), ReactionPlaneAngle(0.0){};
 
-    Block(int eventID, int numParticles, double impactParam,
-          int numParticipantNucleons, int numBinaryCollisions, double reactionPlaneAngle)
+    Block(size_t eventID, size_t numParticles, double impactParam,
+          size_t numParticipantNucleons, size_t numBinaryCollisions, double reactionPlaneAngle)
         : EventID(eventID), NumberOfParticles(numParticles), NumberOfBinaryCollisions(numBinaryCollisions), ImpactParameter(impactParam), NumberOfParticipantNucleons(numParticipantNucleons), ReactionPlaneAngle(reactionPlaneAngle) {}
 
-    void SetEventID(int EventID_) { EventID = EventID_; }
-    void SetNumberOfParticles(int NumberOfParticles_) { NumberOfParticles = NumberOfParticles_; }
+    void SetEventID(size_t EventID_) { EventID = EventID_; }
+    void SetNumberOfParticles(size_t NumberOfParticles_) { NumberOfParticles = NumberOfParticles_; }
     void SetImpactParameter(double ImpactParameter_) { ImpactParameter = ImpactParameter_; }
-    void SetNumberOfParticipantNucleons(int NumberOfParticipantNucleons_) { NumberOfParticipantNucleons = NumberOfParticipantNucleons_; }
+    void SetNumberOfParticipantNucleons(size_t NumberOfParticipantNucleons_) { NumberOfParticipantNucleons = NumberOfParticipantNucleons_; }
     void SetReactionPlaneAngle(double ReactionPlaneAngle_) { ReactionPlaneAngle = ReactionPlaneAngle_; };
-    void SetNumberOfBinaryCollisions(int NumberOfBinaryCollisions_) { NumberOfBinaryCollisions = NumberOfBinaryCollisions_; }
+    void SetNumberOfBinaryCollisions(size_t NumberOfBinaryCollisions_) { NumberOfBinaryCollisions = NumberOfBinaryCollisions_; }
 
     void SetNumberOfChargedParticles(int x) { NumberOfChargedParticles = x; };
     double& GetNumberOfChargedParticles() { return NumberOfChargedParticles; };
 
-    int& GetEventID() { return EventID; };
-    int& GetNumberOfParticles() { return NumberOfParticles; }
+    size_t& GetEventID() { return EventID; };
+    size_t& GetNumberOfParticles() { return NumberOfParticles; }
     double& GetImpactParameter() { return ImpactParameter; }
-    int& GetNumberOfParticipantNucleons() { return NumberOfParticipantNucleons; }
-    int& GetNumberOfBinaryCollisions() { return NumberOfBinaryCollisions; }
+    size_t& GetNumberOfParticipantNucleons() { return NumberOfParticipantNucleons; }
+    size_t& GetNumberOfBinaryCollisions() { return NumberOfBinaryCollisions; }
     double& GetReactionPlaneAngle() { return ReactionPlaneAngle; }
 
     void SetEventPlaneAngle(int n, double x) { EventPlaneAngle[n] = x; }
@@ -180,38 +183,38 @@ class Block_iss : public Block {
 
 class Block_ampt : public Block {
    private:
-    int EventIterationFlag;
-    int NumberOfParticipantNucleons_PROJ;
-    int NumberOfParticipantNucleons_TARG;
-    int NumberOfParticipantNucleonsElastic_PROJ;
-    int NumberOfParticipantNucleonsInelastic_PROJ;
-    int NumberOfParticipantNucleonsElastic_TARG;
-    int NumberOfParticipantNucleonsInelastic_TARG;
+    size_t EventIterationFlag;
+    size_t NumberOfParticipantNucleons_PROJ;
+    size_t NumberOfParticipantNucleons_TARG;
+    size_t NumberOfParticipantNucleonsElastic_PROJ;
+    size_t NumberOfParticipantNucleonsInelastic_PROJ;
+    size_t NumberOfParticipantNucleonsElastic_TARG;
+    size_t NumberOfParticipantNucleonsInelastic_TARG;
 
    public:
     Block_ampt() : Block(){};
 
-    void SetEventIterationFlag(int x) { EventIterationFlag = x; }
-    void SetNumberOfParticipantNucleons_PROJ(int x) { NumberOfParticipantNucleons_PROJ = x; }
-    void SetNumberOfParticipantNucleons_TARG(int x) { NumberOfParticipantNucleons_TARG = x; }
-    void SetNumberOfParticipantNucleonsElastic_PROJ(int x) { NumberOfParticipantNucleonsElastic_PROJ = x; }
-    void SetNumberOfParticipantNucleonsInelastic_PROJ(int x) { NumberOfParticipantNucleonsInelastic_PROJ = x; }
-    void SetNumberOfParticipantNucleonsElastic_TARG(int x) { NumberOfParticipantNucleonsElastic_TARG = x; }
-    void SetNumberOfParticipantNucleonsInelastic_TARG(int x) { NumberOfParticipantNucleonsInelastic_TARG = x; }
+    void SetEventIterationFlag(size_t x) { EventIterationFlag = x; }
+    void SetNumberOfParticipantNucleons_PROJ(size_t x) { NumberOfParticipantNucleons_PROJ = x; }
+    void SetNumberOfParticipantNucleons_TARG(size_t x) { NumberOfParticipantNucleons_TARG = x; }
+    void SetNumberOfParticipantNucleonsElastic_PROJ(size_t x) { NumberOfParticipantNucleonsElastic_PROJ = x; }
+    void SetNumberOfParticipantNucleonsInelastic_PROJ(size_t x) { NumberOfParticipantNucleonsInelastic_PROJ = x; }
+    void SetNumberOfParticipantNucleonsElastic_TARG(size_t x) { NumberOfParticipantNucleonsElastic_TARG = x; }
+    void SetNumberOfParticipantNucleonsInelastic_TARG(size_t x) { NumberOfParticipantNucleonsInelastic_TARG = x; }
 
-    int& GetEventIterationFlag() { return EventIterationFlag; }
+    size_t& GetEventIterationFlag() { return EventIterationFlag; }
 
-    int& GetNumberOfParticipantNucleons_PROJ() { return NumberOfParticipantNucleons_PROJ; }
+    size_t& GetNumberOfParticipantNucleons_PROJ() { return NumberOfParticipantNucleons_PROJ; }
 
-    int& GetNumberOfParticipantNucleons_TARG() { return NumberOfParticipantNucleons_TARG; }
+    size_t& GetNumberOfParticipantNucleons_TARG() { return NumberOfParticipantNucleons_TARG; }
 
-    int& GetNumberOfParticipantNucleonsElastic_PROJ() { return NumberOfParticipantNucleonsElastic_PROJ; }
+    size_t& GetNumberOfParticipantNucleonsElastic_PROJ() { return NumberOfParticipantNucleonsElastic_PROJ; }
 
-    int& GetNumberOfParticipantNucleonsInelastic_PROJ() { return NumberOfParticipantNucleonsInelastic_PROJ; }
+    size_t& GetNumberOfParticipantNucleonsInelastic_PROJ() { return NumberOfParticipantNucleonsInelastic_PROJ; }
 
-    int& GetNumberOfParticipantNucleonsElastic_TARG() { return NumberOfParticipantNucleonsElastic_TARG; }
+    size_t& GetNumberOfParticipantNucleonsElastic_TARG() { return NumberOfParticipantNucleonsElastic_TARG; }
 
-    int& GetNumberOfParticipantNucleonsInelastic_TARG() { return NumberOfParticipantNucleonsInelastic_TARG; }
+    size_t& GetNumberOfParticipantNucleonsInelastic_TARG() { return NumberOfParticipantNucleonsInelastic_TARG; }
     void Write(std::ostream& output) const override;
 };
 

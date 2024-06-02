@@ -73,10 +73,10 @@ void Parameters::ReadSettingsJSON(std::string filename) {
 namespace AMPT {
 
 void ReadFiles(std::vector<RunInfo> runinfo, std::string Directory, std::string OutputDirectory, Parameters& parameters, int collisiontype) {
-    size_t BatchSize = 0;
+    size_s BatchSize = 0;
     std::stringstream infostring;
     for (RunInfo& entry : runinfo) {
-        size_t tempsize = entry.NBatchMax - entry.NBatchMin + 1;
+        size_s tempsize = entry.NBatchMax - entry.NBatchMin + 1;
         entry.BatchSize = tempsize;
         BatchSize += tempsize;
         infostring << entry.NRun << "(" << tempsize << ")"
@@ -97,7 +97,7 @@ void ReadFiles(std::vector<RunInfo> runinfo, std::string Directory, std::string 
 
     size_t counter = 0;
     for (RunInfo entry : runinfo) {
-        for (int i = 0; i < entry.BatchSize; ++i) {
+        for (index_t i = 0; i < entry.BatchSize; ++i) {
             std::stringstream FileDirectory;
             std::stringstream LogDirectory;
             FileDirectory << Directory << "/" << entry.NRun << "/" << entry.NRun << "_" << i + entry.NBatchMin << "/ana/ampt.dat";
@@ -131,7 +131,7 @@ void ReadFiles(std::vector<RunInfo> runinfo, std::string Directory, std::string 
 #pragma omp parallel
     {
 #pragma omp for schedule(dynamic)
-        for (int i = 0; i < BatchSize; ++i) {
+        for (index_t i = 0; i < BatchSize; ++i) {
             data[i] = std::make_unique<Model::File_ampt>(LogDirectories[i], FileDirectories[i], collisiontype);
             pbar.Update();
 #pragma omp critical
@@ -155,7 +155,7 @@ void ReadFiles(std::vector<RunInfo> runinfo, std::string Directory, std::string 
 #pragma omp parallel
     {
 #pragma omp for schedule(dynamic)
-        for (int i = 0; i < BatchSize; ++i) {
+        for (index_t i = 0; i < BatchSize; ++i) {
             data[i]->ParseEventStatistics();
 
             pbar.Update();
@@ -169,13 +169,13 @@ void ReadFiles(std::vector<RunInfo> runinfo, std::string Directory, std::string 
     fflush(stdout);
 
     std::unique_ptr<Model::File_ampt> dummy = std::make_unique<Model::File_ampt>(collisiontype);
-    for (int i = 0; i < BatchSize; ++i) {
+    for (index_t i = 0; i < BatchSize; ++i) {
         dummy->GetFileData().InsertBlocks(data[i]->GetFileData());
     }
 
     dummy->GetFileData().CalculateCentralityClasses();
 
-    for (int i = 0; i < BatchSize; ++i) {
+    for (index_t i = 0; i < BatchSize; ++i) {
         data[i]->GetFileData().SetCentralityEdges("ncharged", dummy->GetFileData().GetCentralityEdges("ncharged"));
     }
     campt->GetFileData().SetCentralityEdges("ncharged", dummy->GetFileData().GetCentralityEdges("ncharged"));
@@ -189,7 +189,7 @@ void ReadFiles(std::vector<RunInfo> runinfo, std::string Directory, std::string 
 #pragma omp parallel
     {
 #pragma omp for schedule(dynamic)
-        for (int i = 0; i < BatchSize; ++i) {
+        for (index_t i = 0; i < BatchSize; ++i) {
             data[i]->InitializeDataContainer();
             // data[i]->ParseParticleStatistics();
 
@@ -212,7 +212,7 @@ void ReadFiles(std::vector<RunInfo> runinfo, std::string Directory, std::string 
 #pragma omp parallel
     {
 #pragma omp for schedule(dynamic)
-        for (int i = 0; i < BatchSize; ++i) {
+        for (index_t i = 0; i < BatchSize; ++i) {
             // data[i]->InitializeDataContainer();
             data[i]->ParseParticleStatistics();
 
@@ -226,7 +226,7 @@ void ReadFiles(std::vector<RunInfo> runinfo, std::string Directory, std::string 
     printf("\n");
     fflush(stdout);
 
-    for (int i = 0; i < BatchSize; ++i) {
+    for (index_t i = 0; i < BatchSize; ++i) {
         *campt += *data[i];
     }
 
@@ -346,10 +346,10 @@ Statistics::Block_iss GetInitialStateInfo(std::string filename) {
 }
 
 void ReadFiles(std::vector<iSS::RunInfo> runinfo, std::string OutputDirectory, Parameters& parameters, int collisiontype) {
-    size_t BatchSize = 0;
+    size_s BatchSize = 0;
     std::stringstream infostring;
     for (iSS::RunInfo& entry : runinfo) {
-        size_t tempsize = entry.NEvent;
+        size_s tempsize = entry.NEvent;
 
         BatchSize += tempsize;
         infostring << entry.iSSRun << "(" << tempsize << ")"
@@ -370,7 +370,7 @@ void ReadFiles(std::vector<iSS::RunInfo> runinfo, std::string OutputDirectory, P
 
     size_t counter = 0;
     for (iSS::RunInfo entry : runinfo) {
-        for (int i = 0; i < entry.NEvent; ++i) {
+        for (index_t i = 0; i < entry.NEvent; ++i) {
             std::stringstream FileDirectory_iss;
             std::stringstream FileDirectory_ipglasma;
             FileDirectory_iss << parameters.iss_data_folder << "/" << entry.iSSRun << "/" << entry.iSSRun << "_" << std::to_string(i) << "/particle_samples.bin";
@@ -407,7 +407,7 @@ void ReadFiles(std::vector<iSS::RunInfo> runinfo, std::string OutputDirectory, P
 #pragma omp parallel
     {
 #pragma omp for schedule(dynamic)
-        for (int i = 0; i < BatchSize; ++i) {
+        for (index_t i = 0; i < BatchSize; ++i) {
             Statistics::Block_iss block = GetInitialStateInfo(FileDirectories_ipglasma[i]);
 
             block.SetEventID(i);
@@ -436,7 +436,7 @@ void ReadFiles(std::vector<iSS::RunInfo> runinfo, std::string OutputDirectory, P
 #pragma omp parallel
     {
 #pragma omp for schedule(dynamic)
-        for (int i = 0; i < BatchSize; ++i) {
+        for (index_t i = 0; i < BatchSize; ++i) {
             data[i]->ParseEventStatistics();
 
             pbar.Update();
@@ -450,11 +450,11 @@ void ReadFiles(std::vector<iSS::RunInfo> runinfo, std::string OutputDirectory, P
     fflush(stdout);
 
     std::unique_ptr<Model::File_iss> dummy = std::make_unique<Model::File_iss>(collisiontype);
-    for (int i = 0; i < BatchSize; ++i) {
+    for (index_t i = 0; i < BatchSize; ++i) {
         dummy->GetFileData().InsertBlocks(data[i]->GetFileData());
     }
     dummy->GetFileData().CalculateCentralityClasses();
-    for (int i = 0; i < BatchSize; ++i) {
+    for (index_t i = 0; i < BatchSize; ++i) {
         data[i]->GetFileData().SetCentralityEdges("ncharged", dummy->GetFileData().GetCentralityEdges("ncharged"));
     }
     cdata->GetFileData().SetCentralityEdges("ncharged", dummy->GetFileData().GetCentralityEdges("ncharged"));
@@ -469,7 +469,7 @@ void ReadFiles(std::vector<iSS::RunInfo> runinfo, std::string OutputDirectory, P
 #pragma omp parallel
     {
 #pragma omp for schedule(dynamic)
-        for (int i = 0; i < BatchSize; ++i) {
+        for (index_t i = 0; i < BatchSize; ++i) {
             data[i]->InitializeDataContainer();
             data[i]->ParseParticleStatistics();
 
@@ -483,7 +483,7 @@ void ReadFiles(std::vector<iSS::RunInfo> runinfo, std::string OutputDirectory, P
     printf("\n");
     fflush(stdout);
 
-    for (int i = 0; i < BatchSize; ++i) {
+    for (index_t i = 0; i < BatchSize; ++i) {
         *cdata += *data[i];
     }
     Clock.Stop();

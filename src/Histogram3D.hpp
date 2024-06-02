@@ -36,7 +36,7 @@ class Histogram3D {
    private:
     Vector1D Contents;
 
-    int nx, ny, nz;
+    size_t nx, ny, nz;
 
     std::map<int, int> IndexMapX;
     std::map<int, int> IndexMapY;
@@ -59,11 +59,11 @@ class Histogram3D {
     std::string Name;
 
    public:
-    Histogram3D(){};
+    Histogram3D() = default;
     // Histogram3D(int & nx_, int & ny_, int & nz_);
     Histogram3D(std::string Name_, std::vector<double> EdgesX_, std::vector<double> EdgesY_, std::vector<double> EdgesZ_);
 
-    void Resize(int& nx_, int& ny_, int& nz_);
+    void Resize(size_t& nx_, size_t& ny_, size_t& nz_);
 
     void InitializeIndexMap();
 
@@ -88,46 +88,46 @@ class Histogram3D {
     void ReadTotal(std::string filename);
     void ReadCount(std::string filename);
 
-    int GetNbinsX() { return nx; };
-    int GetNbinsY() { return ny; };
-    int GetNbinsZ() { return nz; };
+    size_t GetNbinsX() { return nx; };
+    size_t GetNbinsY() { return ny; };
+    size_t GetNbinsZ() { return nz; };
 
-    double GetBinWidthX(int ix) {
+    double GetBinWidthX(index_t ix) {
         if (ix < nx) {
             return (EdgesX[ix + 1] - EdgesX[ix]);
         } else {
             return 0;
         }
     }
-    double GetBinWidthY(int iy) {
+    double GetBinWidthY(index_t iy) {
         if (iy < ny) {
             return (EdgesY[iy + 1] - EdgesY[iy]);
         } else {
             return 0;
         }
     }
-    double GetBinWidthZ(int iz) {
+    double GetBinWidthZ(index_t iz) {
         if (iz < nz) {
             return (EdgesZ[iz + 1] - EdgesZ[iz]);
         } else {
             return 0;
         }
     }
-    double GetBinMidX(int ix) {
+    double GetBinMidX(index_t ix) {
         if (ix < nx) {
             return (EdgesX[ix + 1] + EdgesX[ix]) / 2;
         } else {
             return 0;
         }
     }
-    double GetBinMidY(int iy) {
+    double GetBinMidY(index_t iy) {
         if (iy < ny) {
             return (EdgesY[iy + 1] + EdgesY[iy]) / 2;
         } else {
             return 0;
         }
     }
-    double GetBinMidZ(int iz) {
+    double GetBinMidZ(index_t iz) {
         if (iz < nz) {
             return (EdgesZ[iz + 1] + EdgesZ[iz]) / 2;
         } else {
@@ -145,15 +145,15 @@ class Histogram3D {
         return EdgesZ;
     }
 
-    size_t GetIndex(int ix, int iy, int iz) {
+    size_t GetIndex(index_t ix, index_t iy, index_t iz) {
         return iz + iy * nz + ix * ny * nz;
     }
 
-    StatisticsContainer& GetContent(int ix, int iy, int iz) {
+    StatisticsContainer& GetContent(index_t ix, index_t iy, index_t iz) {
         return Contents[GetIndex(ix, iy, iz)];
     }
 
-    StatisticsContainer& operator()(int& ix, int& iy, int& iz);
+    StatisticsContainer& operator()(index_t& ix, index_t& iy, index_t& iz);
     // Vector1D& operator()(int& ix, int& iy);
     // Vector2D& operator()(int& ix);
 

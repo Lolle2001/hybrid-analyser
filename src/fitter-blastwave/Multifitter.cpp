@@ -7,7 +7,7 @@ double Chi2::FuncWithRange(const double* par) {
 
         size_t xsize = size_data[pid];
 
-        for (int ix = 0; ix < xsize; ++ix) {
+        for (index_t ix = 0; ix < xsize; ++ix) {
             // double xerr = xerrs[pid][ix];
             double x = xdata[pid][ix];
             double yerr = yerrs[pid][ix];
@@ -36,7 +36,7 @@ double Chi2::FuncWithoutRange(const double* par) {
 
         size_t xsize = size_data[pid];
 
-        for (int ix = 0; ix < xsize; ++ix) {
+        for (index_t ix = 0; ix < xsize; ++ix) {
             // double xerr = xerrs[pid][ix];
             double x = xdata[pid][ix];
             double yerr = yerrs[pid][ix];
@@ -92,7 +92,7 @@ double Chi2::operator()(const double* par) {
 
         size_t xsize = size_data[pid];
 
-        for (int ix = 0; ix < xsize; ++ix) {
+        for (index_t ix = 0; ix < xsize; ++ix) {
             // double xerr = xerrs[pid][ix];
             double x = xdata[pid][ix];
             double yerr = yerrs[pid][ix];
