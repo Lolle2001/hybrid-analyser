@@ -157,6 +157,13 @@ void fit_bgbw_all(int argc, char** argv) {
     defaultfitsettings.Species = pids;
     defaultfitsettings.FitRange = fitrange;
     defaultfitsettings.Indexmap = parindexes;
+    size_t npar = defaultfitsettings.ParameterFixed.size();
+    size_t npar_free = 0;
+    for (int i = 0; i < npar; ++i) {
+        if (!defaultfitsettings.ParameterFixed[i]) {
+            npar_free++;
+        }
+    }
     for (int ic = 0; ic < nc; ++ic) {
         std::vector<double> parinit = {1, 1, 1, 0.11, 0.138, 0.498, 0.938, 0.5, 1.0};
 
@@ -167,6 +174,18 @@ void fit_bgbw_all(int argc, char** argv) {
         chi2.SetFitRange(fitrange);
         chi2.SetFitFunction(BoltzmannGibbs::Cillindrical::Function, 5);
 
+        size_t npoint = 0;
+
+        for (int s = 0; s < defaultfitsettings.Species.size(); ++s) {
+            int ts = defaultfitsettings.Species[s];
+            for (int i = 0; i < xdata[ts].size(); ++i) {
+                if (xdata[ts][i] >= fitrange[ts][0] &&
+                    xdata[ts][i] <= fitrange[ts][1]) {
+                    npoint++;
+                }
+            }
+        }
+        size_t ndf = npoint - npar_free;
         Multifitter fitter;
         fitter.FixPars({false, false, false, false, true, true, true, false, false});
         fitter.LimitPars({true, true, true, true, false, false, false, true, true});
@@ -179,11 +198,13 @@ void fit_bgbw_all(int argc, char** argv) {
 
         fitter.Run(chi2);
         finalresults[ic] = fitter.GetResult();
+
+        double finalchi2 = chi2(fitter.GetResult().GetParams());
+
+        finalresults[ic].SetChi2AndNdf(finalchi2, npoint);
     }
     std::vector<FitResults> JSONResults(nc);
     nlohmann::json file;
-
-    size_t npar = defaultfitsettings.ParameterFixed.size();
 
     std::vector<std::string> centralitylabels = {"0-5%", "5-10%", "10-20%", "20-30%", "30-40%", "40-50%", "50-60%", "60-70%", "70-80%", "80-90%", "90-100%"};
     for (int ic = 0; ic < nc; ++ic) {
@@ -257,6 +278,15 @@ void fit_tbw_all(int argc, char** argv) {
     defaultfitsettings.Species = pids;
     defaultfitsettings.FitRange = fitrange;
     defaultfitsettings.Indexmap = parindexes;
+
+    size_t npar = defaultfitsettings.ParameterFixed.size();
+    size_t npar_free = 0;
+    for (int i = 0; i < npar; ++i) {
+        if (!defaultfitsettings.ParameterFixed[i]) {
+            npar_free++;
+        }
+    }
+
     for (int ic = 0; ic < nc; ++ic) {
         Chi2 chi2;
         chi2.SetParindexes(parindexes);
@@ -264,6 +294,17 @@ void fit_tbw_all(int argc, char** argv) {
         chi2.SetSpecies({211, 321, 2212});
         chi2.SetFitRange(fitrange);
         chi2.SetFitFunction(Tsallis::Cillindrical::Function, 7);
+
+        size_t npoint = 0;
+
+        for (int s = 0; s < defaultfitsettings.Species.size(); ++s) {
+            for (int i = 0; i < xdata[defaultfitsettings.Species[s]].size(); ++i) {
+                if (xdata[defaultfitsettings.Species[s]][i] >= fitrange[defaultfitsettings.Species[s]][0] && xdata[defaultfitsettings.Species[s]][i] <= fitrange[defaultfitsettings.Species[s]][1]) {
+                    npoint++;
+                }
+            }
+        }
+        size_t ndf = npoint - npar_free;
 
         Multifitter fitter;
         fitter.FixPars({false, false, false, false, true, true, true, false, false, false, true});
@@ -277,11 +318,13 @@ void fit_tbw_all(int argc, char** argv) {
 
         fitter.Run(chi2);
         finalresults[ic] = fitter.GetResult();
+
+        double finalchi2 = chi2(fitter.GetResult().GetParams());
+
+        finalresults[ic].SetChi2AndNdf(finalchi2, npoint);
     }
     std::vector<FitResults> JSONResults(nc);
     nlohmann::json file;
-
-    size_t npar = defaultfitsettings.ParameterFixed.size();
 
     std::vector<std::string> centralitylabels = {"0-5%", "5-10%", "10-20%", "20-30%", "30-40%", "40-50%", "50-60%", "60-70%", "70-80%", "80-90%", "90-100%"};
 
@@ -320,9 +363,18 @@ void fit_tbw_all(int argc, char** argv) {
     }
 }
 
-int main(int argc, char* argv[]) {
-    fit_bgbw_all(argc, argv);
-    fit_tbw_all(argc, argv);
+int main(int argc, char** argv) {
+    if (argc > 2) {
+        std::string command = argv[2];
+        if (command.compare("all") == 0 || command.compare("bgbw") == 0) {
+            fit_bgbw_all(argc, argv);
+        }
+        if (command.compare("all") == 0 || command.compare("tbw") == 0) {
+            fit_tbw_all(argc, argv);
+        }
+    }
+
+    // fit_tbw_all(argc, argv);
 
     return 0;
 }

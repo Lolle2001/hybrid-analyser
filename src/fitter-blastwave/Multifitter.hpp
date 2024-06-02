@@ -86,4 +86,11 @@ class Multifitter {
     ROOT::Fit::FitResult GetResult();
 };
 
+namespace CFitter {
+using CMultiChi2Function = Chi2;
+using CMultiFitter = Multifitter;
+// class CMultiChi2Function : public Chi2 {};
+// class CMultiFitter : public Multifitter {};
+}  // namespace CFitter
+
 #endif

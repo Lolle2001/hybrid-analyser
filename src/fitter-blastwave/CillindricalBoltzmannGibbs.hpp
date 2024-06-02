@@ -44,8 +44,8 @@ double Function(double* x, double* par) {
     double n = par[4];
     double mT = std::sqrt(m0 * m0 + pT * pT);
 
-    double xmin = 0.0;
-    double xmax = 1.0;
+    const double xmin = 0.0;
+    const double xmax = 1.0;
 
     // Integrand parameters
     double integrandParams[5] = {mT, pT, betas, Tkin, n};
