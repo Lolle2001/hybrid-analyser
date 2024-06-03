@@ -137,6 +137,79 @@ void Histogram1D::InitializeIndexMap() {
     Utilities::Statistics::FillIndexMap(nx, x_min, x_max, x_width, EdgesX, IndexMapX);
 }
 
+void Histogram1D::PrintAll(std::ostream& output) {
+    nlohmann::json j;
+
+    std::vector<double> average(nx, 0);
+    std::vector<double> averagesqr(nx, 0);
+    std::vector<double> total(nx, 0);
+    std::vector<double> totalsqr(nx, 0);
+    std::vector<double> error(nx, 0);
+    std::vector<size_t> count(nx, 0);
+
+    for (index_t ix = 0; ix < nx; ++ix) {
+        average[ix] = Contents[ix].Total / Contents[ix].EntryCount;
+        averagesqr[ix] = Contents[ix].TotalSQR / Contents[ix].EntryCount;
+        total[ix] = Contents[ix].Total;
+        totalsqr[ix] = Contents[ix].TotalSQR;
+        error[ix] = std::sqrt(averagesqr[ix] - average[ix] * average[ix]);
+        count[ix] = Contents[ix].EntryCount;
+    }
+    std::vector<double> xmids(nx);
+
+    std::vector<double> xwids(nx);
+
+    std::vector<double> xerr(nx);
+
+    for (index_t ix = 0; ix < nx; ++ix) {
+        xmids[ix] = (EdgesX[ix + 1] + EdgesX[ix]) / 2;
+        xwids[ix] = (EdgesX[ix + 1] - EdgesX[ix]);
+        xerr[ix] = (EdgesX[ix + 1] - EdgesX[ix]) / 2;
+    }
+
+    j["name"] = Name;
+    j["settings"]["nbins"]["x"] = nx;
+    j["settings"]["edges"]["x"] = EdgesX;
+    j["settings"]["wids"]["x"] = xwids;
+    j["settings"]["mids"]["x"] = xmids;
+    j["settings"]["errs"]["x"] = xerr;
+    j["settings"]["names"]["x"] = "ph";
+    if (secondaxis) {
+        j["settings"]["nbins"]["y"] = ny;
+        j["settings"]["edges"]["y"] = EdgesY;
+        j["settings"]["wids"]["y"] = {z_max - z_min};
+        j["settings"]["mids"]["y"] = {(z_max + z_min) / 2};
+        j["settings"]["errs"]["y"] = {(z_max - z_min) / 2};
+        j["settings"]["names"]["y"] = "ph";
+    }
+    if (thirdaxis) {
+        j["settings"]["nbins"]["z"] = nz;
+        j["settings"]["edges"]["z"] = EdgesZ;
+        j["settings"]["wids"]["z"] = {z_max - z_min};
+        j["settings"]["mids"]["z"] = {(z_max + z_min) / 2};
+        j["settings"]["errs"]["z"] = {(z_max - z_min) / 2};
+        j["settings"]["names"]["z"] = "ph";
+    }
+
+    j["settings"]["dimension"] = 1;
+    nlohmann::json javerage(average);
+    nlohmann::json javeragesqr(averagesqr);
+    nlohmann::json jerror(error);
+    nlohmann::json jtotal(total);
+    nlohmann::json jtotalsqr(totalsqr);
+    nlohmann::json jcount(count);
+
+    j["contents"]["average"] = javerage;
+    j["contents"]["averagesqr"] = javeragesqr;
+    j["contents"]["error"] = jerror;
+    j["contents"]["total"] = jtotal;
+    j["contents"]["totalsqr"] = jtotalsqr;
+    j["contents"]["count"] = jcount;
+    j["contents"]["name"] = Name;
+
+    output << j.dump(4);
+}
+
 StatisticsContainer& Histogram1D::operator()(index_t& ix) {
     return Contents[ix];
 }

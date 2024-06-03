@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <nlohmann/json.hpp>
 #include <sstream>
 #include <thread>
 #include <vector>
@@ -74,6 +75,7 @@ class Histogram3D {
     void Add(double& valx, double& valy, double& valz, double valcontent);
     void AddCurrent(double& valx, double& valy, double& valz, double valcontent);
 
+    void PrintAll(std::ostream& output);
     // void Convert();
     void PrintEdges(std::ostream& output);
     void PrintTotalSQR(std::ostream& output);

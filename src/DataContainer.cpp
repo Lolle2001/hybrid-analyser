@@ -39,6 +39,14 @@ void DataContainer::WriteData(std::string DataDirectory) {
     std::ofstream File;
 
     for (const auto &entry : Histograms3D) {
+        Filename << DataDirectory << "/" << Histograms3D[entry.first]->GetName()
+
+                 << "." << "json";
+        File.open(Filename.str(), std::ios::out);
+        Histograms3D[entry.first]->PrintAll(File);
+        File.close();
+        Filename.str("");
+        Filename.clear();
         Filename << DataDirectory << "/" << Histograms3D[entry.first]->GetName() << "_"
                  << "COUNT"
                  << "." << DEFAULT_EXTENSION_HISTOGRAM;
@@ -113,6 +121,15 @@ void DataContainer::WriteData(std::string DataDirectory) {
         Filename.str("");
         Filename.clear();
 
+        Filename << DataDirectory << "/" << Histograms2D[entry.first]->GetName()
+
+                 << "." << "json";
+        File.open(Filename.str(), std::ios::out);
+        Histograms2D[entry.first]->PrintAll(File);
+        File.close();
+        Filename.str("");
+        Filename.clear();
+
         Filename << DataDirectory << "/" << Histograms2D[entry.first]->GetName() << "_"
                  << "SETTINGS"
                  << "." << DEFAULT_EXTENSION_HISTOGRAM;
@@ -123,6 +140,14 @@ void DataContainer::WriteData(std::string DataDirectory) {
         Filename.clear();
     }
     for (const auto &entry : Histograms1D) {
+        Filename << DataDirectory << "/" << Histograms1D[entry.first]->GetName()
+
+                 << "." << "json";
+        File.open(Filename.str(), std::ios::out);
+        Histograms1D[entry.first]->PrintAll(File);
+        File.close();
+        Filename.str("");
+        Filename.clear();
         Filename << DataDirectory << "/" << Histograms1D[entry.first]->GetName() << "_"
                  << "COUNT"
                  << "." << DEFAULT_EXTENSION_HISTOGRAM;
@@ -352,10 +377,13 @@ void DataContainer::InitialiseHistograms() {
     EdgesMom["1:charged"] = {0.1, 0.12, 0.14, 0.16, 0.18, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1., 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2., 2.2, 2.4, 2.6, 2.8, 3., 3.2, 3.4, 3.6, 3.8, 4., 4.5, 5., 5.5, 6., 6.5, 7., 8., 9., 10., 11., 12., 13., 14., 15., 16., 18., 20.};
 
     Histograms2D["dNdptdy_1_charged"] = std::make_unique<Histogram2D>("dNdptdy_1_charged", EdgesC[centrality_type], EdgesMom["1:charged"], EdgesRap["1:charged"]);
-
+    Histograms2D["dNdptdy_1_charged"]->SetName("b", "p_{T}", "y", "N_{ch}");
     Histograms2D["dNdptdy_1_chpions"] = std::make_unique<Histogram2D>("dNdptdy_1_chpions", EdgesC[centrality_type], EdgesMom["1:pi+_pi-"], EdgesRap["1:pi+_pi-"]);
+    Histograms2D["dNdptdy_1_chpions"]->SetName("b", "p_{T}", "y", "N_{chpions}");
     Histograms2D["dNdptdy_1_chkaons"] = std::make_unique<Histogram2D>("dNdptdy_1_chkaons", EdgesC[centrality_type], EdgesMom["1:K+_K-"], EdgesRap["1:K+_K-"]);
+    Histograms2D["dNdptdy_1_chkaons"]->SetName("b", "p_{T}", "y", "N_{chkaons}");
     Histograms2D["dNdptdy_1_chprotons"] = std::make_unique<Histogram2D>("dNdptdy_1_chprotons", EdgesC[centrality_type], EdgesMom["1:p_pbar"], EdgesRap["1:p_pbar"]);
+    Histograms2D["dNdptdy_1_chprotons"]->SetName("b", "p_{T}", "y", "N_{chprotons}");
 
     EdgesRap["2:p_pbar"] = {-0.8, 0.8};
     EdgesRap["2:K+_K-"] = {-0.8, 0.8};

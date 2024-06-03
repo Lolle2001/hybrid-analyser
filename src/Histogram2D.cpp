@@ -40,16 +40,11 @@ std::string& Histogram2D::GetName() {
 }
 
 void Histogram2D::AddEvent() {
-    // std::cout << "#" << Contents[10][0][0][211].Total << std::endl;
     for (index_t ix = 0; ix < nx; ++ix) {
         for (index_t iy = 0; iy < ny; ++iy) {
             Contents[GetIndex(ix, iy)].AddEvent();
-            // entry.second.Total += entry.second.TotalCurrent;
-            // entry.second.TotalSQR += entry.second.TotalCurrent * entry.second.TotalCurrent;
-            // entry.second.TotalCurrent = 0;
         }
     }
-    // std::cout << "!" << Contents[10][0][0][211].Total << std::endl;
 }
 
 void Histogram2D::AddEventAverage() {
@@ -60,8 +55,7 @@ void Histogram2D::AddEventAverage() {
     }
 }
 
-void Histogram2D::Add(double& valx, double& valy, double valcontent) {
-    // std::cout << valx << " " << valy << " " << valcontent << std::endl;
+void Histogram2D::Add(double valx, double valy, double valcontent) {
     if (valx >= x_min && valx < x_max && valy >= y_min && valy < y_max) {
         index_t ix = IndexMapX[(index_t)((valx - x_min) / (x_width))];
         index_t iy = IndexMapY[(index_t)((valy - y_min) / (y_width))];
@@ -70,7 +64,7 @@ void Histogram2D::Add(double& valx, double& valy, double valcontent) {
     }
 }
 
-void Histogram2D::AddCurrent(double& valx, double& valy, double valcontent) {
+void Histogram2D::AddCurrent(double valx, double valy, double valcontent) {
     if (valx >= x_min && valx < x_max && valy >= y_min && valy < y_max) {
         index_t ix = IndexMapX[(index_t)((valx - x_min) / (x_width))];
         index_t iy = IndexMapY[(index_t)((valy - y_min) / (y_width))];
@@ -79,7 +73,7 @@ void Histogram2D::AddCurrent(double& valx, double& valy, double valcontent) {
     }
 }
 
-void Histogram2D::Add(double& valx, double& valy, double& valz, double valcontent) {
+void Histogram2D::Add(double valx, double valy, double valz, double valcontent) {
     if (valx >= x_min && valx < x_max && valy >= y_min && valy < y_max && valz >= z_min && valz < z_max) {
         index_t ix = IndexMapX[(index_t)((valx - x_min) / (x_width))];
         index_t iy = IndexMapY[(index_t)((valy - y_min) / (y_width))];
@@ -88,7 +82,7 @@ void Histogram2D::Add(double& valx, double& valy, double& valz, double valconten
     }
 }
 
-void Histogram2D::AddCurrent(double& valx, double& valy, double& valz, double valcontent) {
+void Histogram2D::AddCurrent(double valx, double valy, double valz, double valcontent) {
     if (valx >= x_min && valx < x_max && valy >= y_min && valy < y_max && valz >= z_min && valz < z_max) {
         index_t ix = IndexMapX[(index_t)((valx - x_min) / (x_width))];
         index_t iy = IndexMapY[(index_t)((valy - y_min) / (y_width))];
@@ -139,11 +133,9 @@ void Histogram2D::PrintEdges(std::ostream& output) {
 }
 
 void Histogram2D::PrintCount(std::ostream& output) {
-    // std::cout << nx << " " << ny << " " << nz << std::endl;
     for (index_t ix = 0; ix < nx; ++ix) {
         for (index_t iy = 0; iy < ny; ++iy) {
             output << std::setw(13) << std::right << Contents[GetIndex(ix, iy)].EntryCount << " ";
-            // std::cout << Contents[GetIndex(ix,iy)][iz].EntryCount << std::endl;
         }
         output << "\n";
     }
@@ -165,49 +157,90 @@ void Histogram2D::PrintTotal(std::ostream& output) {
         output << "\n";
     }
 }
+void Histogram2D::SetName(std::string XName_, std::string YName_, std::string ZName_, std::string CName_) {
+    XName = XName_;
+    YName = YName_;
+    ZName = ZName_;
+    CName = CName_;
+}
 
 void Histogram2D::PrintAll(std::ostream& output) {
     nlohmann::json j;
-    j["name"];
+
+    std::vector<std::vector<double>> average(nx, std::vector<double>(ny, 0));
+    std::vector<std::vector<double>> averagesqr(nx, std::vector<double>(ny, 0));
+    std::vector<std::vector<double>> total(nx, std::vector<double>(ny, 0));
+    std::vector<std::vector<double>> totalsqr(nx, std::vector<double>(ny, 0));
+    std::vector<std::vector<double>> error(nx, std::vector<double>(ny, 0));
+    std::vector<std::vector<size_t>> count(nx, std::vector<size_t>(ny, 0));
+
+    for (index_t ix = 0; ix < nx; ++ix) {
+        for (index_t iy = 0; iy < ny; ++iy) {
+            index_t index = GetIndex(ix, iy);
+            average[ix][iy] = Contents[index].Total / Contents[index].EntryCount;
+            averagesqr[ix][iy] = Contents[index].TotalSQR / Contents[index].EntryCount;
+            total[ix][iy] = Contents[index].Total;
+            totalsqr[ix][iy] = Contents[index].TotalSQR;
+            error[ix][iy] = std::sqrt(averagesqr[ix][iy] - average[ix][iy] * average[ix][iy]);
+            count[ix][iy] = Contents[index].EntryCount;
+        }
+    }
+    std::vector<double> xmids(nx);
+    std::vector<double> ymids(ny);
+    std::vector<double> xwids(nx);
+    std::vector<double> ywids(ny);
+    std::vector<double> xerr(nx);
+    std::vector<double> yerr(ny);
+
+    for (index_t ix = 0; ix < nx; ++ix) {
+        xmids[ix] = (EdgesX[ix + 1] + EdgesX[ix]) / 2;
+        xwids[ix] = (EdgesX[ix + 1] - EdgesX[ix]);
+        xerr[ix] = (EdgesX[ix + 1] - EdgesX[ix]) / 2;
+    }
+    for (index_t iy = 0; iy < ny; ++iy) {
+        ymids[iy] = (EdgesY[iy + 1] + EdgesY[iy]) / 2;
+        ywids[iy] = (EdgesY[iy + 1] - EdgesY[iy]);
+        yerr[iy] = (EdgesY[iy + 1] - EdgesY[iy]) / 2;
+    }
+
+    j["name"] = Name;
     j["settings"]["nbins"]["x"] = nx;
+    j["settings"]["edges"]["x"] = EdgesX;
+    j["settings"]["wids"]["x"] = xwids;
+    j["settings"]["mids"]["x"] = xmids;
+    j["settings"]["errs"]["x"] = xerr;
+    j["settings"]["names"]["x"] = XName;
+
     j["settings"]["nbins"]["y"] = ny;
+    j["settings"]["edges"]["y"] = EdgesY;
+    j["settings"]["wids"]["y"] = ywids;
+    j["settings"]["mids"]["y"] = ymids;
+    j["settings"]["errs"]["y"] = yerr;
+    j["settings"]["names"]["y"] = YName;
     if (thirdaxis) {
         j["settings"]["nbins"]["z"] = nz;
-    }
-    j["settings"]["edges"]["x"] = EdgesX;
-    j["settings"]["edges"]["y"] = EdgesY;
-    if (thirdaxis) {
         j["settings"]["edges"]["z"] = EdgesZ;
+        j["settings"]["wids"]["z"] = {z_max - z_min};
+        j["settings"]["mids"]["z"] = {(z_max + z_min) / 2};
+        j["settings"]["errs"]["z"] = {(z_max - z_min) / 2};
+        j["settings"]["names"]["z"] = ZName;
     }
-    j["settings"]["wids"]["x"];
-    j["settings"]["wids"]["y"];
-    if (thirdaxis) {
-        j["settings"]["wids"]["z"];
-    }
-    j["settings"]["mids"]["x"];
-    j["settings"]["mids"]["y"];
-    if (thirdaxis) {
-        j["settings"]["mids"]["z"];
-    }
-    j["settings"]["errs"]["x"];
-    j["settings"]["errs"]["y"];
-    if (thirdaxis) {
-        j["settings"]["errs"]["z"];
-    }
-    j["settings"]["names"]["x"] = "ph";
-    j["settings"]["names"]["y"] = "ph";
-    if (thirdaxis) {
-        j["settings"]["names"]["z"] = "ph";
-    }
-    j["settings"]["dimension"] = 2;
 
-    j["contents"]["average"];
-    j["contents"]["averagesqr"];
-    j["contents"]["error"];
-    j["contents"]["total"];
-    j["contents"]["totalsqr"];
-    j["contents"]["count"];
-    j["contents"]["name"];
+    j["settings"]["dimension"] = 2;
+    nlohmann::json javerage(average);
+    nlohmann::json javeragesqr(averagesqr);
+    nlohmann::json jerror(error);
+    nlohmann::json jtotal(total);
+    nlohmann::json jtotalsqr(totalsqr);
+    nlohmann::json jcount(count);
+
+    j["contents"]["average"] = javerage;
+    j["contents"]["averagesqr"] = javeragesqr;
+    j["contents"]["error"] = jerror;
+    j["contents"]["total"] = jtotal;
+    j["contents"]["totalsqr"] = jtotalsqr;
+    j["contents"]["count"] = jcount;
+    j["contents"]["name"] = CName;
 
     output << j.dump(4);
 }
@@ -220,7 +253,7 @@ StatisticsContainer& Histogram2D::operator()(index_t ix, index_t iy) {
 //     return Contents[ix];
 // }
 
-StatisticsContainer& Histogram2D::operator()(double& valx, double& valy) {
+StatisticsContainer& Histogram2D::operator()(double valx, double valy) {
     index_t ix = IndexMapX[static_cast<index_t>((valx - x_min) / (x_width))];
     index_t iy = IndexMapY[static_cast<index_t>((valy - y_min) / (y_width))];
 

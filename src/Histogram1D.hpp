@@ -3,6 +3,7 @@
 #define HISTOGRAM1D_HPP
 
 #include <map>
+#include <nlohmann/json.hpp>
 #include <vector>
 
 #include "Messenger.hpp"
@@ -78,6 +79,8 @@ class Histogram1D {
     void PrintTotal(std::ostream& output);
 
     void PrintEdges(std::ostream& output);
+
+    void PrintAll(std::ostream& output);
 
     StatisticsContainer& GetBinContent(index_t& ix) {
         return Contents[ix];

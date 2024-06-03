@@ -99,6 +99,96 @@ void Histogram3D::ReverseEdges() {
     }
 }
 
+void Histogram3D::PrintAll(std::ostream& output) {
+    nlohmann::json j;
+
+    std::vector<std::vector<std::vector<double>>> average(nx, std::vector<std::vector<double>>(ny, std::vector<double>(nz, 0)));
+    std::vector<std::vector<std::vector<double>>> averagesqr(nx, std::vector<std::vector<double>>(ny, std::vector<double>(nz, 0)));
+    std::vector<std::vector<std::vector<double>>> total(nx, std::vector<std::vector<double>>(ny, std::vector<double>(nz, 0)));
+    std::vector<std::vector<std::vector<double>>> totalsqr(nx, std::vector<std::vector<double>>(ny, std::vector<double>(nz, 0)));
+    std::vector<std::vector<std::vector<double>>> error(nx, std::vector<std::vector<double>>(ny, std::vector<double>(nz, 0)));
+    std::vector<std::vector<std::vector<size_t>>> count(nx, std::vector<std::vector<size_t>>(ny, std::vector<size_t>(nz, 0)));
+
+    for (index_t ix = 0; ix < nx; ++ix) {
+        for (index_t iy = 0; iy < ny; ++iy) {
+            for (index_t iz = 0; iz < nz; ++iz) {
+                index_t index = GetIndex(ix, iy, iz);
+                average[ix][iy][iz] = Contents[index].Total / Contents[index].EntryCount;
+                averagesqr[ix][iy][iz] = Contents[index].TotalSQR / Contents[index].EntryCount;
+                total[ix][iy][iz] = Contents[index].Total;
+                totalsqr[ix][iy][iz] = Contents[index].TotalSQR;
+                error[ix][iy][iz] = std::sqrt(averagesqr[ix][iy][iz] - average[ix][iy][iz] * average[ix][iy][iz]);
+                count[ix][iy][iz] = Contents[index].EntryCount;
+            }
+        }
+    }
+    std::vector<double> xmids(nx);
+    std::vector<double> ymids(ny);
+    std::vector<double> zmids(nz);
+    std::vector<double> xwids(nx);
+    std::vector<double> ywids(ny);
+    std::vector<double> zwids(nz);
+    std::vector<double> xerr(nx);
+    std::vector<double> yerr(ny);
+    std::vector<double> zerr(nz);
+
+    for (index_t ix = 0; ix < nx; ++ix) {
+        xmids[ix] = (EdgesX[ix + 1] + EdgesX[ix]) / 2;
+        xwids[ix] = (EdgesX[ix + 1] - EdgesX[ix]);
+        xerr[ix] = (EdgesX[ix + 1] - EdgesX[ix]) / 2;
+    }
+    for (index_t iy = 0; iy < ny; ++iy) {
+        ymids[iy] = (EdgesY[iy + 1] + EdgesY[iy]) / 2;
+        ywids[iy] = (EdgesY[iy + 1] - EdgesY[iy]);
+        yerr[iy] = (EdgesY[iy + 1] - EdgesY[iy]) / 2;
+    }
+    for (index_t iz = 0; iz < nz; ++iz) {
+        zmids[iz] = (EdgesZ[iz + 1] + EdgesZ[iz]) / 2;
+        zwids[iz] = (EdgesZ[iz + 1] - EdgesZ[iz]);
+        zerr[iz] = (EdgesZ[iz + 1] - EdgesZ[iz]) / 2;
+    }
+
+    j["name"] = Name;
+    j["settings"]["nbins"]["x"] = nx;
+    j["settings"]["edges"]["x"] = EdgesX;
+    j["settings"]["wids"]["x"] = xwids;
+    j["settings"]["mids"]["x"] = xmids;
+    j["settings"]["errs"]["x"] = xerr;
+    j["settings"]["names"]["x"] = "ph";
+
+    j["settings"]["nbins"]["y"] = ny;
+    j["settings"]["edges"]["y"] = EdgesY;
+    j["settings"]["wids"]["y"] = ywids;
+    j["settings"]["mids"]["y"] = ymids;
+    j["settings"]["errs"]["y"] = yerr;
+    j["settings"]["names"]["y"] = "ph";
+
+    j["settings"]["nbins"]["z"] = nz;
+    j["settings"]["edges"]["z"] = EdgesZ;
+    j["settings"]["wids"]["z"] = zwids;
+    j["settings"]["mids"]["z"] = zmids;
+    j["settings"]["errs"]["z"] = zerr;
+    j["settings"]["names"]["z"] = "ph";
+
+    j["settings"]["dimension"] = 3;
+    nlohmann::json javerage(average);
+    nlohmann::json javeragesqr(averagesqr);
+    nlohmann::json jerror(error);
+    nlohmann::json jtotal(total);
+    nlohmann::json jtotalsqr(totalsqr);
+    nlohmann::json jcount(count);
+
+    j["contents"]["average"] = javerage;
+    j["contents"]["averagesqr"] = javeragesqr;
+    j["contents"]["error"] = jerror;
+    j["contents"]["total"] = jtotal;
+    j["contents"]["totalsqr"] = jtotalsqr;
+    j["contents"]["count"] = jcount;
+    j["contents"]["name"] = Name;
+
+    output << j.dump(4);
+}
+
 void Histogram3D::PrintEdges(std::ostream& output) {
     output << "nbins(x) = " << nx << "\n";
     output << "edges(x) = ";

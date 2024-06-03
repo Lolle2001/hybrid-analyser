@@ -59,6 +59,11 @@ class Histogram2D {
     std::vector<double> EdgesZ;
     std::string Name;
 
+    std::string YName;
+    std::string XName;
+    std::string ZName;
+    std::string CName;
+
    public:
     Histogram2D() = default;
     // Histogram3D(int & nx_, int & ny_, int & nz_);
@@ -71,12 +76,14 @@ class Histogram2D {
 
     void AddEvent();
     void AddEventAverage();
-    void Add(double& valx, double& valy, double valcontent);
-    void Add(double& valx, double& valy, double& valz, double valcontent);
-    void AddCurrent(double& valx, double& valy, double valcontent);
-    void AddCurrent(double& valx, double& valy, double& valz, double valcontent);
+    void Add(double valx, double valy, double valcontent);
+    void Add(double valx, double valy, double valz, double valcontent);
+    void AddCurrent(double valx, double valy, double valcontent);
+    void AddCurrent(double valx, double valy, double valz, double valcontent);
 
     std::string& GetName();
+
+    void SetName(std::string XName_, std::string YName_, std::string ZName_, std::string CName_);
 
     // void Convert();
     void PrintEdges(std::ostream& output);
@@ -141,7 +148,7 @@ class Histogram2D {
     StatisticsContainer& operator()(index_t ix, index_t iy);
     // Vector1D& operator()(int& ix);
 
-    StatisticsContainer& operator()(double& valx, double& valy);
+    StatisticsContainer& operator()(double valx, double valy);
     // Vector1D& operator()(double& valx);
 
     void operator+=(Histogram2D const& obj);
