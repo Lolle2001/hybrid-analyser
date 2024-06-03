@@ -92,7 +92,7 @@ double Integrand(double *x, double *par) {
 
     double rhoarg = betas * TMath::Power(xi, n);
     double rho = TMath::ATanH(rhoarg);
-    double ET = mT * TMath::CosH(y) * TMath::CosH(rho) - pT * TMath::SinH(rho) * TMath::Cos(phi);
+    double ET = mT * TMath::CosH(rho) - pT * TMath::SinH(rho) * TMath::Cos(phi);
     double phiexparg = 1 + ((q - 1) / (Tkin)) * ET;
     double phiexp = TMath::Power(phiexparg, 1 / (1 - q));
 

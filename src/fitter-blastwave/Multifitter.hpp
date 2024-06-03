@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+#include "fitter_utilities.hpp"
+
 using Indexmap = std::map<int, std::vector<unsigned int>>;
 using Datamap = std::map<int, std::vector<double>>;
 using Datamap2D = std::map<int, std::vector<std::vector<double>>>;
