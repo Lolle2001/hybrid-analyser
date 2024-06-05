@@ -9,6 +9,7 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 
+#include "../Progressbar.hpp"
 #include "CillindricalBoltzmannGibbs.hpp"
 #include "CillindricalTsallis.hpp"
 #include "EllipticalBoltzmannGibbs.hpp"
@@ -78,306 +79,11 @@ void read_data(Datamap& xdata,
     }
 }
 
-void fit_bgbw_all(int argc, char** argv) {
-    Datamap xdata;
-    std::vector<Datamap> ydata;
-    Datamap xerrs;
-    std::vector<Datamap> yerrs;
-    read_data(xdata, ydata, xerrs, yerrs);
-
-    MultifitterSettings settings(FitSets::BGBW_1);
-
-    size_t nc = std::stoi(argv[1]);
-    std::vector<std::vector<double>> finalparams(nc);
-    std::vector<ROOT::Fit::FitResult> finalresults(nc);
-
-    size_t npar = settings.ParameterFixed.size();
-    size_t npar_free = 0;
-    for (int i = 0; i < npar; ++i) {
-        if (!settings.ParameterFixed[i]) {
-            npar_free++;
-        }
-    }
-    for (int ic = 0; ic < nc; ++ic) {
-        Chi2 chi2;
-        chi2.SetParindexes(settings.Indexmap);
-        chi2.SetData(xdata, ydata[ic], xerrs, yerrs[ic]);
-        chi2.SetSpecies(settings.Species);
-        chi2.SetFitRange(settings.FitRange);
-        chi2.SetFitFunction(BoltzmannGibbs::Cillindrical::Function, 5);
-
-        size_t npoint = 0;
-
-        for (int s = 0; s < settings.Species.size(); ++s) {
-            int ts = settings.Species[s];
-            for (int i = 0; i < xdata[ts].size(); ++i) {
-                if (xdata[ts][i] >= settings.FitRange[ts][0] &&
-                    xdata[ts][i] <= settings.FitRange[ts][1]) {
-                    npoint++;
-                }
-            }
-        }
-        size_t ndf = npoint - npar_free;
-        Multifitter fitter;
-        fitter.FixPars(settings.ParameterFixed);
-        fitter.LimitPars(settings.ParameterLimited);
-        fitter.SetParLimits(settings.ParameterLimits);
-        fitter.SetParStepsize(settings.ParameterStepsize);
-        fitter.SetParNames(settings.ParameterNames);
-        fitter.SetParInit(settings.ParameterInitValues);
-        fitter.StepsizePars(settings.ParameterStepsized);
-        fitter.PrintPars(true);
-
-        fitter.Run(chi2);
-        finalresults[ic] = fitter.GetResult();
-
-        double finalchi2 = chi2(fitter.GetResult().GetParams());
-
-        finalresults[ic].SetChi2AndNdf(finalchi2, npoint);
-    }
-    std::vector<MultifitterResults> JSONResults(nc);
-    nlohmann::json file;
-
-    std::vector<std::string> centralitylabels = {"0-5%", "5-10%", "10-20%", "20-30%", "30-40%", "40-50%", "50-60%", "60-70%", "70-80%", "80-90%", "90-100%"};
-    for (int ic = 0; ic < nc; ++ic) {
-        JSONResults[ic] = MultifitterResults(settings);
-        JSONResults[ic].Chi2 = finalresults[ic].Chi2();
-
-        JSONResults[ic].CorrelationMatrix.resize(npar, std::vector<double>(npar));
-        JSONResults[ic].CovarianceMatrix.resize(npar, std::vector<double>(npar));
-        JSONResults[ic].Edm = finalresults[ic].Edm();
-        JSONResults[ic].MinFCN = finalresults[ic].MinFcnValue();
-        JSONResults[ic].NCalls = finalresults[ic].NCalls();
-        JSONResults[ic].DegreesOfFreedom = finalresults[ic].Ndf();
-        JSONResults[ic].ParameterValues.resize(npar);
-        JSONResults[ic].ParameterErrors.resize(npar);
-        JSONResults[ic].settings.ParameterNames.resize(npar);
-        for (index_t ipar = 0; ipar < npar; ++ipar) {
-            JSONResults[ic].ParameterValues[ipar] = finalresults[ic].GetParams()[ipar];
-            JSONResults[ic].ParameterErrors[ipar] = finalresults[ic].GetErrors()[ipar];
-            JSONResults[ic].settings.ParameterNames[ipar] = finalresults[ic].GetParameterName(ipar);
-        }
-
-        for (index_t ipar = 0; ipar < npar; ++ipar) {
-            for (int jpar = 0; jpar < npar; ++jpar) {
-                JSONResults[ic].CovarianceMatrix[ipar][jpar] = finalresults[ic].CovMatrix(ipar, jpar);
-                JSONResults[ic].CorrelationMatrix[ipar][jpar] = finalresults[ic].Correlation(ipar, jpar);
-            }
-        }
-        JSONResults[ic].GenerateJSON();
-        file["centrality"][centralitylabels[ic]] = JSONResults[ic].j;
-    }
-    std::ofstream outFile("/home/lieuwe/Documents/Software/articles/1910.07678/processed/dNptdptdy-fitresults-bgbw-1.json");
-    if (outFile.is_open()) {
-        outFile << file.dump(4);
-        outFile.close();
-    } else {
-        throw std::runtime_error("Could not open file for writing");
-    }
-}
-
-void fit_bgbw_all_2(int argc, char** argv) {
-    Datamap xdata;
-    std::vector<Datamap> ydata;
-    Datamap xerrs;
-    std::vector<Datamap> yerrs;
-    read_data(xdata, ydata, xerrs, yerrs);
-
-    MultifitterSettings settings(FitSets::BGBW_2);
-
-    size_t nc = std::stoi(argv[1]);
-    std::vector<std::vector<double>> finalparams(nc);
-    std::vector<ROOT::Fit::FitResult> finalresults(nc);
-
-    size_t npar = settings.ParameterFixed.size();
-    size_t npar_free = 0;
-    for (int i = 0; i < npar; ++i) {
-        if (!settings.ParameterFixed[i]) {
-            npar_free++;
-        }
-    }
-    for (int ic = 0; ic < nc; ++ic) {
-        Chi2 chi2;
-        chi2.SetParindexes(settings.Indexmap);
-        chi2.SetData(xdata, ydata[ic], xerrs, yerrs[ic]);
-        chi2.SetSpecies(settings.Species);
-        chi2.SetFitRange(settings.FitRange);
-        chi2.SetFitFunction(BoltzmannGibbs::Elliptical_2::Function, 6);
-
-        size_t npoint = 0;
-
-        for (int s = 0; s < settings.Species.size(); ++s) {
-            int ts = settings.Species[s];
-            for (int i = 0; i < xdata[ts].size(); ++i) {
-                if (xdata[ts][i] >= settings.FitRange[ts][0] &&
-                    xdata[ts][i] <= settings.FitRange[ts][1]) {
-                    npoint++;
-                }
-            }
-        }
-        size_t ndf = npoint - npar_free;
-        Multifitter fitter;
-        fitter.FixPars(settings.ParameterFixed);
-        fitter.LimitPars(settings.ParameterLimited);
-        fitter.SetParLimits(settings.ParameterLimits);
-        fitter.SetParStepsize(settings.ParameterStepsize);
-        fitter.SetParNames(settings.ParameterNames);
-        fitter.SetParInit(settings.ParameterInitValues);
-        fitter.StepsizePars(settings.ParameterStepsized);
-        fitter.PrintPars(true);
-
-        fitter.Run(chi2);
-        finalresults[ic] = fitter.GetResult();
-
-        double finalchi2 = chi2(fitter.GetResult().GetParams());
-
-        finalresults[ic].SetChi2AndNdf(finalchi2, npoint);
-    }
-    std::vector<MultifitterResults> JSONResults(nc);
-    nlohmann::json file;
-
-    std::vector<std::string> centralitylabels = {"0-5%", "5-10%", "10-20%", "20-30%", "30-40%", "40-50%", "50-60%", "60-70%", "70-80%", "80-90%", "90-100%"};
-    for (int ic = 0; ic < nc; ++ic) {
-        JSONResults[ic] = MultifitterResults(settings);
-        JSONResults[ic].Chi2 = finalresults[ic].Chi2();
-
-        JSONResults[ic].CorrelationMatrix.resize(npar, std::vector<double>(npar));
-        JSONResults[ic].CovarianceMatrix.resize(npar, std::vector<double>(npar));
-        JSONResults[ic].Edm = finalresults[ic].Edm();
-        JSONResults[ic].MinFCN = finalresults[ic].MinFcnValue();
-        JSONResults[ic].NCalls = finalresults[ic].NCalls();
-        JSONResults[ic].DegreesOfFreedom = finalresults[ic].Ndf();
-        JSONResults[ic].ParameterValues.resize(npar);
-        JSONResults[ic].ParameterErrors.resize(npar);
-        JSONResults[ic].settings.ParameterNames.resize(npar);
-        for (index_t ipar = 0; ipar < npar; ++ipar) {
-            JSONResults[ic].ParameterValues[ipar] = finalresults[ic].GetParams()[ipar];
-            JSONResults[ic].ParameterErrors[ipar] = finalresults[ic].GetErrors()[ipar];
-            JSONResults[ic].settings.ParameterNames[ipar] = finalresults[ic].GetParameterName(ipar);
-        }
-
-        for (index_t ipar = 0; ipar < npar; ++ipar) {
-            for (int jpar = 0; jpar < npar; ++jpar) {
-                JSONResults[ic].CovarianceMatrix[ipar][jpar] = finalresults[ic].CovMatrix(ipar, jpar);
-                JSONResults[ic].CorrelationMatrix[ipar][jpar] = finalresults[ic].Correlation(ipar, jpar);
-            }
-        }
-        JSONResults[ic].Status = finalresults[ic].Status();
-        JSONResults[ic].GenerateJSON();
-        file["centrality"][centralitylabels[ic]] = JSONResults[ic].j;
-    }
-    std::ofstream outFile("/home/lieuwe/Documents/Software/articles/1910.07678/processed/dNptdptdy-fitresults-bgbw-2.json");
-    if (outFile.is_open()) {
-        outFile << file.dump(4);
-        outFile.close();
-    } else {
-        throw std::runtime_error("Could not open file for writing");
-    }
-}
-
-void fit_tbw_all(int argc, char** argv) {
-    Datamap xdata;
-    std::vector<Datamap> ydata;
-    Datamap xerrs;
-    std::vector<Datamap> yerrs;
-    read_data(xdata, ydata, xerrs, yerrs);
-
-    MultifitterSettings settings(FitSets::TBW_1);
-
-    size_t nc = std::stoi(argv[1]);
-    std::vector<std::vector<double>> finalparams(nc);
-    std::vector<ROOT::Fit::FitResult> finalresults(nc);
-
-    size_t npar = settings.ParameterFixed.size();
-    size_t npar_free = 0;
-    for (int i = 0; i < npar; ++i) {
-        if (!settings.ParameterFixed[i]) {
-            npar_free++;
-        }
-    }
-    for (int ic = 0; ic < nc; ++ic) {
-        Chi2 chi2;
-        chi2.SetParindexes(settings.Indexmap);
-        chi2.SetData(xdata, ydata[ic], xerrs, yerrs[ic]);
-        chi2.SetSpecies(settings.Species);
-        chi2.SetFitRange(settings.FitRange);
-        chi2.SetFitFunction(Tsallis::Cillindrical::Function, 7);
-
-        size_t npoint = 0;
-
-        for (int s = 0; s < settings.Species.size(); ++s) {
-            int ts = settings.Species[s];
-            for (int i = 0; i < xdata[ts].size(); ++i) {
-                if (xdata[ts][i] >= settings.FitRange[ts][0] &&
-                    xdata[ts][i] <= settings.FitRange[ts][1]) {
-                    npoint++;
-                }
-            }
-        }
-        size_t ndf = npoint - npar_free;
-        Multifitter fitter;
-        fitter.FixPars(settings.ParameterFixed);
-        fitter.LimitPars(settings.ParameterLimited);
-        fitter.SetParLimits(settings.ParameterLimits);
-        fitter.SetParStepsize(settings.ParameterStepsize);
-        fitter.SetParNames(settings.ParameterNames);
-        fitter.SetParInit(settings.ParameterInitValues);
-        fitter.StepsizePars(settings.ParameterStepsized);
-        fitter.PrintPars(true);
-
-        fitter.Run(chi2);
-        finalresults[ic] = fitter.GetResult();
-
-        double finalchi2 = chi2(fitter.GetResult().GetParams());
-
-        finalresults[ic].SetChi2AndNdf(finalchi2, npoint);
-    }
-    std::vector<MultifitterResults> JSONResults(nc);
-    nlohmann::json file;
-
-    std::vector<std::string> centralitylabels = {"0-5%", "5-10%", "10-20%", "20-30%", "30-40%", "40-50%", "50-60%", "60-70%", "70-80%", "80-90%", "90-100%"};
-    for (int ic = 0; ic < nc; ++ic) {
-        JSONResults[ic] = MultifitterResults(settings);
-        JSONResults[ic].Chi2 = finalresults[ic].Chi2();
-
-        JSONResults[ic].CorrelationMatrix.resize(npar, std::vector<double>(npar));
-        JSONResults[ic].CovarianceMatrix.resize(npar, std::vector<double>(npar));
-        JSONResults[ic].Edm = finalresults[ic].Edm();
-        JSONResults[ic].MinFCN = finalresults[ic].MinFcnValue();
-        JSONResults[ic].NCalls = finalresults[ic].NCalls();
-        JSONResults[ic].DegreesOfFreedom = finalresults[ic].Ndf();
-        JSONResults[ic].ParameterValues.resize(npar);
-        JSONResults[ic].ParameterErrors.resize(npar);
-        JSONResults[ic].settings.ParameterNames.resize(npar);
-        for (index_t ipar = 0; ipar < npar; ++ipar) {
-            JSONResults[ic].ParameterValues[ipar] = finalresults[ic].GetParams()[ipar];
-            JSONResults[ic].ParameterErrors[ipar] = finalresults[ic].GetErrors()[ipar];
-            JSONResults[ic].settings.ParameterNames[ipar] = finalresults[ic].GetParameterName(ipar);
-        }
-
-        for (index_t ipar = 0; ipar < npar; ++ipar) {
-            for (int jpar = 0; jpar < npar; ++jpar) {
-                JSONResults[ic].CovarianceMatrix[ipar][jpar] = finalresults[ic].CovMatrix(ipar, jpar);
-                JSONResults[ic].CorrelationMatrix[ipar][jpar] = finalresults[ic].Correlation(ipar, jpar);
-            }
-        }
-        JSONResults[ic].GenerateJSON();
-        file["centrality"][centralitylabels[ic]] = JSONResults[ic].j;
-    }
-    std::ofstream outFile("/home/lieuwe/Documents/Software/articles/1910.07678/processed/dNptdptdy-fitresults-tbw-1.json");
-    if (outFile.is_open()) {
-        outFile << file.dump(4);
-        outFile.close();
-    } else {
-        throw std::runtime_error("Could not open file for writing");
-    }
-}
-
 void fit(
-    MultifitterData& data,
-    MultifitterSettings& settings,
+    MultifitterData data,
+    MultifitterSettings settings,
     MultifitterResults& results,
-    std::function<double(double*, double*)>& fitfunction,
+    const std::function<double(double*, double*)>& fitfunction,
     unsigned int fitfunction_npars) {
     size_t npar = settings.ParameterFixed.size();
     size_t npar_free = 0;
@@ -386,6 +92,7 @@ void fit(
             npar_free++;
         }
     }
+
     Chi2 chi2;
     chi2.SetParindexes(settings.Indexmap);
     chi2.SetData(data.xvals, data.yvals, data.xerrs, data.yerrs);
@@ -405,6 +112,7 @@ void fit(
         }
     }
     size_t ndf = npoint - npar_free;
+
     Multifitter fitter;
     fitter.FixPars(settings.ParameterFixed);
     fitter.LimitPars(settings.ParameterLimited);
@@ -413,7 +121,7 @@ void fit(
     fitter.SetParNames(settings.ParameterNames);
     fitter.SetParInit(settings.ParameterInitValues);
     fitter.StepsizePars(settings.ParameterStepsized);
-    fitter.PrintPars(true);
+    fitter.PrintPars(false);
 
     fitter.Run(chi2);
     ROOT::Fit::FitResult finalresult = fitter.GetResult();
@@ -448,96 +156,37 @@ void fit(
     }
 };
 
-void fit_tbw_all_2(int argc, char** argv) {
+void fit_general(size_t nc,
+                 MultifitterSettings settings,
+                 const std::function<double(double*, double*)>& fitfunction,
+                 unsigned int nfitfunc_npar,
+                 std::string filename) {
     Datamap xdata;
     std::vector<Datamap> ydata;
     Datamap xerrs;
     std::vector<Datamap> yerrs;
     read_data(xdata, ydata, xerrs, yerrs);
+    // MultifitterSettings settings(FitSets::BGBW_1);
+    std::vector<MultifitterData> data(nc);
+    std::vector<MultifitterResults> results(nc);
 
-    MultifitterSettings settings(FitSets::TBW_3);
-
-    size_t nc = std::stoi(argv[1]);
-    std::vector<std::vector<double>> finalparams(nc);
-    std::vector<ROOT::Fit::FitResult> finalresults(nc);
-
-    size_t npar = settings.ParameterFixed.size();
-    size_t npar_free = 0;
-    for (int i = 0; i < npar; ++i) {
-        if (!settings.ParameterFixed[i]) {
-            npar_free++;
-        }
-    }
-    for (int ic = 0; ic < nc; ++ic) {
-        Chi2 chi2;
-        chi2.SetParindexes(settings.Indexmap);
-        chi2.SetData(xdata, ydata[ic], xerrs, yerrs[ic]);
-        chi2.SetSpecies(settings.Species);
-        chi2.SetFitRange(settings.FitRange);
-        chi2.SetFitFunction(Tsallis::Cillindrical_3::Function, 9);
-
-        size_t npoint = 0;
-
-        for (int s = 0; s < settings.Species.size(); ++s) {
-            int ts = settings.Species[s];
-            for (int i = 0; i < xdata[ts].size(); ++i) {
-                if (xdata[ts][i] >= settings.FitRange[ts][0] &&
-                    xdata[ts][i] <= settings.FitRange[ts][1]) {
-                    npoint++;
-                }
-            }
-        }
-        size_t ndf = npoint - npar_free;
-        Multifitter fitter;
-        fitter.FixPars(settings.ParameterFixed);
-        fitter.LimitPars(settings.ParameterLimited);
-        fitter.SetParLimits(settings.ParameterLimits);
-        fitter.SetParStepsize(settings.ParameterStepsize);
-        fitter.SetParNames(settings.ParameterNames);
-        fitter.SetParInit(settings.ParameterInitValues);
-        fitter.StepsizePars(settings.ParameterStepsized);
-        fitter.PrintPars(true);
-
-        fitter.Run(chi2);
-        finalresults[ic] = fitter.GetResult();
-
-        double finalchi2 = chi2(fitter.GetResult().GetParams());
-
-        finalresults[ic].SetChi2AndNdf(finalchi2, npoint);
-    }
-    std::vector<MultifitterResults> JSONResults(nc);
     nlohmann::json file;
-
     std::vector<std::string> centralitylabels = {"0-5%", "5-10%", "10-20%", "20-30%", "30-40%", "40-50%", "50-60%", "60-70%", "70-80%", "80-90%", "90-100%"};
-    for (int ic = 0; ic < nc; ++ic) {
-        JSONResults[ic] = MultifitterResults(settings);
-        JSONResults[ic].Chi2 = finalresults[ic].Chi2();
 
-        JSONResults[ic].CorrelationMatrix.resize(npar, std::vector<double>(npar));
-        JSONResults[ic].CovarianceMatrix.resize(npar, std::vector<double>(npar));
-        JSONResults[ic].Edm = finalresults[ic].Edm();
-        JSONResults[ic].MinFCN = finalresults[ic].MinFcnValue();
-        JSONResults[ic].NCalls = finalresults[ic].NCalls();
-        JSONResults[ic].DegreesOfFreedom = finalresults[ic].Ndf();
-        JSONResults[ic].ParameterValues.resize(npar);
-        JSONResults[ic].ParameterErrors.resize(npar);
-        JSONResults[ic].settings.ParameterNames.resize(npar);
-        for (index_t ipar = 0; ipar < npar; ++ipar) {
-            JSONResults[ic].ParameterValues[ipar] = finalresults[ic].GetParams()[ipar];
-            JSONResults[ic].ParameterErrors[ipar] = finalresults[ic].GetErrors()[ipar];
-            JSONResults[ic].settings.ParameterNames[ipar] = finalresults[ic].GetParameterName(ipar);
-        }
+    Utilities::Progressbar bar(nc);
+    bar.Print();
 
-        for (index_t ipar = 0; ipar < npar; ++ipar) {
-            for (int jpar = 0; jpar < npar; ++jpar) {
-                JSONResults[ic].CovarianceMatrix[ipar][jpar] = finalresults[ic].CovMatrix(ipar, jpar);
-                JSONResults[ic].CorrelationMatrix[ipar][jpar] = finalresults[ic].Correlation(ipar, jpar);
-            }
-        }
-        JSONResults[ic].GenerateJSON();
-        file["centrality"][centralitylabels[ic]] = JSONResults[ic].j;
+    for (index_t ic = 0; ic < nc; ++ic) {
+        data[ic] = MultifitterData(xdata, ydata[ic], xerrs, yerrs[ic]);
+
+        fit(data[ic], settings, results[ic], fitfunction, nfitfunc_npar);
+        results[ic].GenerateJSON();
+        file["centrality"][centralitylabels[ic]] = results[ic].j;
+        bar.Update();
+        bar.Print();
     }
-    std::ofstream outFile("/home/lieuwe/Documents/Software/articles/1910.07678/processed/dNptdptdy-fitresults-tbw-2.json");
+    std::cout << std::endl;
+    std::ofstream outFile(filename);
     if (outFile.is_open()) {
         outFile << file.dump(4);
         outFile.close();
@@ -545,44 +194,6 @@ void fit_tbw_all_2(int argc, char** argv) {
         throw std::runtime_error("Could not open file for writing");
     }
 }
-
-// void get_ci(
-//     MultifitterData& data,
-//     MultifitterSettings& settings,
-//     MultifitterResults& results,
-//     std::map<int, std::vector<double>> plotrange,
-//     size_t npoints) {
-
-//     std::map<int, std::vector<double>> y_upper;
-//     std::map<int, std::vector<double>> y_lower;
-//     std::map<int, std::vector<double>> x_vals;
-//     std::map<int, std::vector<std::vector<double>>> y_vals;
-
-//     for (int ip = 0; ip < settings.Species.size(); ++ip) {
-//         int pid = settings.Species[ip];
-//         y_upper[pid].resize(npoints);
-//         y_lower[pid].resize(npoints);
-//         x_vals[pid].resize(npoints);
-//         y_vals[pid].resize(npoints, std::vector<double>(27, 0));
-//         for (int ix = 0; ix < npoints; ++ix) {
-//             x_vals[pid][ix] = plotrange[pid][0] + ix * (plotrange[pid][1] - plotrange[pid][0]) / (npoints);
-//             for(int ipar =0; ipar < 3; ++ipar) {
-//                 for(int jpar = 0; jpar < 3; ++jpar){
-
-//                 }
-//             }
-
-//             double pars[5] = {
-//                 results.ParameterValues[settings.Indexmap[pid][0]],
-//                 results.ParameterValues[settings.Indexmap[pid][1]],
-//                 results.ParameterValues[settings.Indexmap[pid][2]],
-//                 results.ParameterValues[settings.Indexmap[pid][3]],
-//                 results.ParameterValues[settings.Indexmap[pid][4]]};
-//             BoltzmannGibbs::Cillindrical::Function(&data.xvals[pid][ix], pars);
-//         }
-//     }
-
-// }
 
 void plot_bgbw(int argc, char** argv) {
     Datamap xdata;
@@ -803,21 +414,33 @@ void plot_bgbw(int argc, char** argv) {
 
 int main(int argc, char** argv) {
     std::string command;
-
+    size_t nc = std::stoi(argv[1]);
     if (argc > 2) {
         command = argv[2];
     }
     if (command.compare("all") == 0 || command.compare("bgbw") == 0) {
-        fit_bgbw_all(argc, argv);
+        fit_general(
+            nc, FitSets::BGBW_1,
+            BoltzmannGibbs::Cillindrical::Function, 5,
+            "/home/lieuwe/Documents/Software/articles/1910.07678/processed/dNptdptdy-fitresults-bgbw-1.json");
     }
     if (command.compare("all") == 0 || command.compare("tbw") == 0) {
-        fit_tbw_all(argc, argv);
+        fit_general(
+            nc, FitSets::TBW_1,
+            Tsallis::Cillindrical::Function, 7,
+            "/home/lieuwe/Documents/Software/articles/1910.07678/processed/dNptdptdy-fitresults-tbw-1.json");
     }
     if (command.compare("all") == 0 || command.compare("tbw_2") == 0) {
-        fit_tbw_all_2(argc, argv);
+        fit_general(
+            nc, FitSets::TBW_3,
+            Tsallis::Cillindrical_3::Function, 9,
+            "/home/lieuwe/Documents/Software/articles/1910.07678/processed/dNptdptdy-fitresults-tbw-2.json");
     }
     if (command.compare("all") == 0 || command.compare("bgbw_2") == 0) {
-        fit_bgbw_all_2(argc, argv);
+        fit_general(
+            nc, FitSets::BGBW_2,
+            BoltzmannGibbs::Elliptical_2::Function, 6,
+            "/home/lieuwe/Documents/Software/articles/1910.07678/processed/dNptdptdy-fitresults-bgbw-2.json");
     }
     if (command.compare("plot") == 0) {
         std::cout << "Plotting results" << std::endl;

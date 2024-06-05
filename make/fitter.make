@@ -1,12 +1,12 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -I/usr/local/include -fopenmp 
+CXXFLAGS = -std=c++17 -I/usr/local/include -fopenmp 
 
 
 
 BUILDDIR = build/build-fitter
 
-SRCDIR1 = /home/lieuwe/Documents/Software/HybridProcessor/src/fitter-blastwave
-# SRCDIR2 = /home/lieuwe/Documents/Software/HybridProcessor/src
+SRCDIR1 = src/fitter-blastwave
+SRCDIR2 = src
 # SRCDIR3 = /home/lieuwe/CERN_ROOT/build/include
 # SRCDIR4 = /home/lieuwe
 
@@ -25,6 +25,9 @@ SRCDIR1 = /home/lieuwe/Documents/Software/HybridProcessor/src/fitter-blastwave
 
 SRCS1 = $(wildcard $(SRCDIR1)/*.cpp)
 OBJS1 = $(patsubst $(SRCDIR1)/%.cpp,$(BUILDDIR)/%.o,$(SRCS1))
+
+SRCS2 = $(SRCDIR2)/Progressbar.cpp $(SRCDIR2)/Utilities.cpp
+OBJS2 = $(BUILDDIR)/Progressbar.o $(BUILDDIR)/Utilities.o
 
 TARGET = fitter
 
@@ -49,17 +52,17 @@ all: $(TARGET)
 # $(BUILDDIR)/%.o: $(SRCDIR1)/%.cpp
 # 	@mkdir -p $(BUILDDIR)
 # 	$(CXX) $(CXXFLAGS) -I$(SRCDIR3) -c $< -o $@
-$(TARGET): $(OBJS1)
-	$(CXX) -o $(TARGET) $(OBJS1) $(LIBS) $(LDFLAGS)
+$(TARGET): $(OBJS1) $(OBJS2)
+	$(CXX) -o $(TARGET) $(OBJS1) $(OBJS2) $(LIBS) $(LDFLAGS)
 
 # Rule to compile the source files
 $(BUILDDIR)/%.o: $(SRCDIR1)/%.cpp
 	@mkdir -p $(BUILDDIR)
 	$(CXX) $(CXXFLAGS) $(ROOTLIBS) -c $< -o $@
 
-# $(BUILDDIR)/%.o: $(SRCDIR2)/%.cpp
-# 	@mkdir -p $(BUILDDIR)
-# 	$(CXX) $(CXXFLAGS) -I$(SRCDIR3) -c $< -o $@
+$(BUILDDIR)/%.o: $(SRCDIR2)/%.cpp
+	@mkdir -p $(BUILDDIR)
+	$(CXX) $(CXXFLAGS) $(ROOTLIBS) -c $< -o $@
 
 clean:
 	rm -rf $(BUILDDIR) $(TARGET)

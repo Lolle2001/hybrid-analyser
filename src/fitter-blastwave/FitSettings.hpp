@@ -13,6 +13,9 @@ struct MultifitterData {
     Datamap yvals;
     Datamap xerrs;
     Datamap yerrs;
+    MultifitterData() = default;
+    MultifitterData(Datamap xvals_, Datamap yvals_, Datamap xerrs_, Datamap yerrs_)
+        : xvals(xvals_), yvals(yvals_), xerrs(xerrs_), yerrs(yerrs_){};
 };
 
 struct MultifitterSettings {
@@ -29,6 +32,13 @@ struct MultifitterSettings {
     std::map<int, std::vector<unsigned int>> Indexmap;
     MultifitterSettings() = default;
 };
+
+std::ostream& operator<<(std::ostream& out, const MultifitterSettings& obj) {
+    for (unsigned int i = 0; i < obj.ParameterNames.size(); ++i) {
+        out << obj.ParameterNames[i] << " " << obj.ParameterInitValues[i] << " " << std::endl;
+    }
+    return out;
+}
 
 struct MultifitterResults {
     MultifitterSettings settings;

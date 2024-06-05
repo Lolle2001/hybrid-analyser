@@ -69,7 +69,7 @@ class Multifitter {
     std::vector<std::string> parsettings_name;
     std::vector<double> parsettings_init;
     size_t parsettings_npar;
-    bool state_print;
+    bool state_print = false;
     ROOT::Fit::FitResult fitresult;
 
    public:
