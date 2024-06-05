@@ -373,6 +373,81 @@ void fit_tbw_all(int argc, char** argv) {
     }
 }
 
+void fit(
+    MultifitterData& data,
+    MultifitterSettings& settings,
+    MultifitterResults& results,
+    std::function<double(double*, double*)>& fitfunction,
+    unsigned int fitfunction_npars) {
+    size_t npar = settings.ParameterFixed.size();
+    size_t npar_free = 0;
+    for (int i = 0; i < npar; ++i) {
+        if (!settings.ParameterFixed[i]) {
+            npar_free++;
+        }
+    }
+    Chi2 chi2;
+    chi2.SetParindexes(settings.Indexmap);
+    chi2.SetData(data.xvals, data.yvals, data.xerrs, data.yerrs);
+    chi2.SetSpecies(settings.Species);
+    chi2.SetFitRange(settings.FitRange);
+    chi2.SetFitFunction(fitfunction, fitfunction_npars);
+
+    size_t npoint = 0;
+
+    for (int s = 0; s < settings.Species.size(); ++s) {
+        int ts = settings.Species[s];
+        for (int i = 0; i < data.xvals[ts].size(); ++i) {
+            if (data.xvals[ts][i] >= settings.FitRange[ts][0] &&
+                data.xvals[ts][i] <= settings.FitRange[ts][1]) {
+                npoint++;
+            }
+        }
+    }
+    size_t ndf = npoint - npar_free;
+    Multifitter fitter;
+    fitter.FixPars(settings.ParameterFixed);
+    fitter.LimitPars(settings.ParameterLimited);
+    fitter.SetParLimits(settings.ParameterLimits);
+    fitter.SetParStepsize(settings.ParameterStepsize);
+    fitter.SetParNames(settings.ParameterNames);
+    fitter.SetParInit(settings.ParameterInitValues);
+    fitter.StepsizePars(settings.ParameterStepsized);
+    fitter.PrintPars(true);
+
+    fitter.Run(chi2);
+    ROOT::Fit::FitResult finalresult = fitter.GetResult();
+
+    double finalchi2 = chi2(fitter.GetResult().GetParams());
+
+    finalresult.SetChi2AndNdf(finalchi2, npoint);
+
+    results = MultifitterResults(settings);
+    results.Chi2 = finalresult.Chi2();
+
+    results.CorrelationMatrix.resize(npar, std::vector<double>(npar));
+    results.CovarianceMatrix.resize(npar, std::vector<double>(npar));
+    results.Edm = finalresult.Edm();
+    results.MinFCN = finalresult.MinFcnValue();
+    results.NCalls = finalresult.NCalls();
+    results.DegreesOfFreedom = finalresult.Ndf();
+    results.ParameterValues.resize(npar);
+    results.ParameterErrors.resize(npar);
+    results.settings.ParameterNames.resize(npar);
+    for (index_t ipar = 0; ipar < npar; ++ipar) {
+        results.ParameterValues[ipar] = finalresult.GetParams()[ipar];
+        results.ParameterErrors[ipar] = finalresult.GetErrors()[ipar];
+        results.settings.ParameterNames[ipar] = finalresult.GetParameterName(ipar);
+    }
+
+    for (index_t ipar = 0; ipar < npar; ++ipar) {
+        for (int jpar = 0; jpar < npar; ++jpar) {
+            results.CovarianceMatrix[ipar][jpar] = finalresult.CovMatrix(ipar, jpar);
+            results.CorrelationMatrix[ipar][jpar] = finalresult.Correlation(ipar, jpar);
+        }
+    }
+};
+
 void fit_tbw_all_2(int argc, char** argv) {
     Datamap xdata;
     std::vector<Datamap> ydata;
