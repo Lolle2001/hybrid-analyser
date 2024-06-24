@@ -18,10 +18,11 @@ using Indexmap = std::map<int, std::vector<unsigned int>>;
 using Datamap = std::map<int, std::vector<double>>;
 using Datamap2D = std::map<int, std::vector<std::vector<double>>>;
 
+namespace CFitter {
 /*
 [WIP]
 */
-class Chi2 {
+class Chi2Function {
    private:
     Indexmap parindex;
     Datamap xdata;
@@ -45,7 +46,7 @@ class Chi2 {
     double FuncWithoutRange(const double* par);
 
    public:
-    Chi2() = default;
+    Chi2Function() = default;
 
     void SetParindexes(const Indexmap& parindex_);
     void SetData(const Datamap& xdata_, const Datamap& ydata_, const Datamap& xerrs_, const Datamap& yerrs_);
@@ -56,10 +57,10 @@ class Chi2 {
     double operator()(const double* par);
 };
 
-/*
-[WIP]
-*/
-class Multifitter {
+/*!
+ * [WIP]
+ */
+class MultiFitter {
    private:
     std::vector<bool> parsettings_fixed;
     std::vector<bool> parsettings_limited;
@@ -73,7 +74,7 @@ class Multifitter {
     ROOT::Fit::FitResult fitresult;
 
    public:
-    Multifitter() = default;
+    MultiFitter() = default;
     void FixPars(const std::vector<bool>& fixed);
     void LimitPars(const std::vector<bool>& limited);
     void SetParLimits(const std::vector<std::vector<double>>& parsettings_limits_);
@@ -84,15 +85,10 @@ class Multifitter {
     void StepsizePars(const std::vector<bool>& stepsized);
     void PrintPars(bool state_print_);
 
-    void Run(Chi2& chi2);
+    void Run(Chi2Function& chi2);
     ROOT::Fit::FitResult GetResult();
 };
 
-namespace CFitter {
-using CMultiChi2Function = Chi2;
-using CMultiFitter = Multifitter;
-// class CMultiChi2Function : public Chi2 {};
-// class CMultiFitter : public Multifitter {};
 }  // namespace CFitter
 
 #endif

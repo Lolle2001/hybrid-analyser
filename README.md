@@ -2,7 +2,7 @@
 
 ## Description
 
-This code is extensible data processing code for heavy ion collision simulation software. Currently it processes data from **AMPT** and the hybrid framework **IPGlasma**+**MUSIC**+**iSS**.
+This code is extensible data processing code for heavy ion collision simulation software. Currently it processes data from **[AMPT](https://myweb.ecu.edu/linz/ampt/)**[^1] and the hybrid framework **[IPGlasma](https://github.com/chunshen1987/ipglasma)**+**[MUSIC](https://github.com/MUSIC-fluid/MUSIC)**+**[iSS](https://github.com/chunshen1987/iSS)**.
 
 Both AMPT and iSS output their data in a format that includes an event with a list of particles and their properties like momentum and mass. This allows for a similar way of data processing, hence this software that allows to process both. The structure of the code however allows for extension to non-similar data output. Data will eventually always be put into histograms.
 
@@ -76,4 +76,8 @@ It is possible to combine multiple runs, by passing a list of runnumbers to `-nr
 - [ ] Add option to write animation histograms into .npy files, for fast loading in python.
 - [ ] Improve commandline parser for hybridp.
 - [ ] Add more options for hybridp to be read from .par files.
-- [ ]
+- [ ] Add subparsers for consistent and more controlable dataprocessing and less errors.
+- [ ] Rename the repository to "hybrid-analyser" and executable to "analyser" and use subparsers to acces animation analysis and fitting.
+- [ ] Switch to JSON/HDF5
+
+[^1]: Z. W. Lin, C. M. Ko, B. A. Li, B. Zhang and S. Pal, A Multi-phase transport model for relativistic heavy ion collisions. Phys. Rev. C 72, 064901 (2005). https://doi.org/10.1103/PhysRevC.72.064901

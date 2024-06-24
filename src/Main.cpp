@@ -1,3 +1,4 @@
+
 #include <iomanip>
 #include <iostream>
 #include <string>
@@ -7,6 +8,25 @@
 #include "Utilities.hpp"
 
 namespace AMPT {
+/*
+parameterfile
+-> histogramsettings
+-> centrality binning
+// inputfiles
+datadirectories
+batchnumber
+processed data directory
+-> same
+-> new
+*/
+
+// void Process(int argc, char* argv[]) {
+//     argparse::ArgumentParser program("main", "1.1.0");
+//     program.add_argument("-col", "--collisiontype")
+//         .help("specifies type of centrality binning")
+//         .default_value(0)
+// };
+
 void Main(int argc, char* argv[]) {
     std::vector<int> NRun;
     std::vector<int> NBatch;

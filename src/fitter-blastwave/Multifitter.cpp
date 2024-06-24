@@ -1,6 +1,6 @@
 #include "Multifitter.hpp"
-
-double Chi2::FuncWithRange(const double* par) {
+namespace CFitter {
+double Chi2Function::FuncWithRange(const double* par) {
     double chi2 = 0;
     for (int ip = 0; ip < size_species; ++ip) {
         int pid = species[ip];
@@ -29,7 +29,7 @@ double Chi2::FuncWithRange(const double* par) {
     }
     return chi2;
 };
-double Chi2::FuncWithoutRange(const double* par) {
+double Chi2Function::FuncWithoutRange(const double* par) {
     double chi2 = 0;
     for (int ip = 0; ip < size_species; ++ip) {
         int pid = species[ip];
@@ -57,10 +57,10 @@ double Chi2::FuncWithoutRange(const double* par) {
     return chi2;
 };
 
-void Chi2::SetParindexes(const Indexmap& parindex_) {
+void Chi2Function::SetParindexes(const Indexmap& parindex_) {
     parindex = parindex_;
 };
-void Chi2::SetData(const Datamap& xdata_, const Datamap& ydata_, const Datamap& xerrs_, const Datamap& yerrs_) {
+void Chi2Function::SetData(const Datamap& xdata_, const Datamap& ydata_, const Datamap& xerrs_, const Datamap& yerrs_) {
     xdata = xdata_;
     ydata = ydata_;
     xerrs = xerrs_;
@@ -69,23 +69,23 @@ void Chi2::SetData(const Datamap& xdata_, const Datamap& ydata_, const Datamap& 
         size_data[p.first] = xdata[p.first].size();
     }
 };
-void Chi2::SetSpecies(const std::vector<int>& species_) {
+void Chi2Function::SetSpecies(const std::vector<int>& species_) {
     species = species_;
 
     size_species = species.size();
 }
-void Chi2::SetFitRange(const Datamap& fitrange_) {
+void Chi2Function::SetFitRange(const Datamap& fitrange_) {
     fitrange = fitrange_;
     state_fitrange = true;
     // operatorfunction = &FuncWithRange;
 };
 
-void Chi2::SetFitFunction(const std::function<double(double*, double*)>& fitfunction_, const size_t& function_npar_) {
+void Chi2Function::SetFitFunction(const std::function<double(double*, double*)>& fitfunction_, const size_t& function_npar_) {
     fitfunction = fitfunction_;
     function_npar = function_npar_;
 };
 
-double Chi2::operator()(const double* par) {
+double Chi2Function::operator()(const double* par) {
     double chi2 = 0;
     for (int ip = 0; ip < size_species; ++ip) {
         int pid = species[ip];
@@ -115,33 +115,33 @@ double Chi2::operator()(const double* par) {
     return chi2;
 };
 
-void Multifitter::FixPars(const std::vector<bool>& fixed) {
+void MultiFitter::FixPars(const std::vector<bool>& fixed) {
     parsettings_fixed = fixed;
 };
-void Multifitter::LimitPars(const std::vector<bool>& limited) {
+void MultiFitter::LimitPars(const std::vector<bool>& limited) {
     parsettings_limited = limited;
 }
-void Multifitter::SetParLimits(const std::vector<std::vector<double>>& parsettings_limits_) {
+void MultiFitter::SetParLimits(const std::vector<std::vector<double>>& parsettings_limits_) {
     parsettings_limits = parsettings_limits_;
 };
-void Multifitter::SetParStepsize(const std::vector<double>& parsettings_stepsize_) {
+void MultiFitter::SetParStepsize(const std::vector<double>& parsettings_stepsize_) {
     parsettings_stepsize = parsettings_stepsize_;
 };
-void Multifitter::SetParNames(const std::vector<std::string>& parsettings_name_) {
+void MultiFitter::SetParNames(const std::vector<std::string>& parsettings_name_) {
     parsettings_name = parsettings_name_;
 };
-void Multifitter::SetParInit(const std::vector<double>& parsettings_init_) {
+void MultiFitter::SetParInit(const std::vector<double>& parsettings_init_) {
     parsettings_init = parsettings_init_;
     parsettings_npar = parsettings_init.size();
 };
-void Multifitter::StepsizePars(const std::vector<bool>& stepsized) {
+void MultiFitter::StepsizePars(const std::vector<bool>& stepsized) {
     parsettings_stepsized = stepsized;
 }
-void Multifitter::PrintPars(bool state_print_) {
+void MultiFitter::PrintPars(bool state_print_) {
     state_print = state_print_;
 }
 
-void Multifitter::Run(Chi2& chi2) {
+void MultiFitter::Run(Chi2Function& chi2) {
     ROOT::Math::Functor fcn(chi2, parsettings_npar);
     ROOT::Fit::Fitter fitter;
     fitter.SetFCN(fcn, parsettings_init.data());
@@ -170,9 +170,12 @@ void Multifitter::Run(Chi2& chi2) {
 
     if (state_print) {
         result.Print(std::cout, true);
+        std::cout << std::endl;
     }
 }
 
-ROOT::Fit::FitResult Multifitter::GetResult() {
+ROOT::Fit::FitResult MultiFitter::GetResult() {
     return fitresult;
+}
+
 }
