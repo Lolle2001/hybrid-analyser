@@ -1,8 +1,12 @@
 # Hybrid Processor
 
+> [!IMPORTANT]
+> If you use/fork this code, please use the following citation:<br><br>
+> L. J. Huisman, _Data analyser for AMPT and IP-Glasma+MUSIC+iSS_, thesis database UU (2024). https://link
+
 ## Description
 
-This code is extensible data processing code for heavy ion collision simulation software. Currently it processes data from **[AMPT](https://myweb.ecu.edu/linz/ampt/)**[^1] and the hybrid framework **[IPGlasma](https://github.com/chunshen1987/ipglasma)**+**[MUSIC](https://github.com/MUSIC-fluid/MUSIC)**+**[iSS](https://github.com/chunshen1987/iSS)**.
+This code is extensible data processing code for heavy ion collision simulation software. Currently it processes data from **[AMPT](https://myweb.ecu.edu/linz/ampt/)**[^1] and the hybrid framework **[IPGlasma](https://github.com/chunshen1987/ipglasma)**+**[MUSIC](https://github.com/MUSIC-fluid/MUSIC)**+**[iSS](https://github.com/chunshen1987/iSS)**[^2][^3][^4].
 
 Both AMPT and iSS output their data in a format that includes an event with a list of particles and their properties like momentum and mass. This allows for a similar way of data processing, hence this software that allows to process both. The structure of the code however allows for extension to non-similar data output. Data will eventually always be put into histograms.
 
@@ -80,4 +84,7 @@ It is possible to combine multiple runs, by passing a list of runnumbers to `-nr
 - [ ] Rename the repository to "hybrid-analyser" and executable to "analyser" and use subparsers to acces animation analysis and fitting.
 - [ ] Switch to JSON/HDF5
 
-[^1]: Z. W. Lin, C. M. Ko, B. A. Li, B. Zhang and S. Pal, A Multi-phase transport model for relativistic heavy ion collisions. Phys. Rev. C 72, 064901 (2005). https://doi.org/10.1103/PhysRevC.72.064901
+[^1]: Z. W. Lin, C. M. Ko, B. A. Li, B. Zhang and S. Pal, _A Multi-phase transport model for relativistic heavy ion collisions_. Phys. Rev. C 72, 064901 (2005). https://doi.org/10.1103/PhysRevC.72.064901
+[^2]: Schenke, S. Jeon, C. Gale. _3+1D hydrodynamic simulation of relativistic heavy-ion collisions_. Phys.Rev.C 82, 014903 (2010) [arXiv:1004.1408](https://arxiv.org/abs/1004.1408)
+[^3]: Schenke, S. Jeon, C. Gale. _Elliptic and triangular flow in event-by-event (3+1)D viscous hydrodynamics_. Phys.Rev.Lett. 106, 042301 (2011). [arXiv:1009.3244](https://arxiv.org/abs/1009.3244)
+[^4]: J.-F. Paquet, C. Shen, G. S. Denicol, M. Luzum, B. Schenke, S. Jeon, and C. Gale. _Production of photons in relativistic heavy-ion collisions_. Phys. Rev. C 93, 044906 (2016). [arXiv:1509.06738](https://arxiv.org/abs/1509.06738)
