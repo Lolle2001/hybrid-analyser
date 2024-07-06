@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #ifndef MULTIFITTER_HPP
 #define MULTIFITTER_HPP
 

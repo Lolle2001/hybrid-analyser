@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #ifndef AMPT_PFINALFT_H
 #define AMPT_PFINALFT_H
 

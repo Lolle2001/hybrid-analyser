@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #ifndef FILEPROCESSOR_HPP
 #define FILEPROCESSOR_HPP
 
@@ -47,6 +48,8 @@ struct RunInfo {
     size_s NEvent;
 };
 Statistics::Block_iss GetInitialStateInfo(int NRun, int eventid, Parameters& parameters);
+Statistics::Block_iss GetInitialStateInfo(std::string);
+Statistics::Block_iss GetInitialStateInfo(std::filesystem::path);
 void ReadFiles(std::vector<iSS::RunInfo> runinfo, std::string OutputDirectory, Parameters& parameters, int collisiontype);
 }  // namespace iSS
 

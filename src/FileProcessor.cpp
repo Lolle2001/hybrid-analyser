@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #include "FileProcessor.hpp"
 
 void Parameters::ReadSettings(std::string filename) {
@@ -311,6 +312,42 @@ Statistics::Block_iss GetInitialStateInfo(int NRun, int eventid, Parameters& par
 }
 
 Statistics::Block_iss GetInitialStateInfo(std::string filename) {
+    std::ifstream file;
+
+    Statistics::Block_iss block;
+
+    file.open(filename, std::ios::in);
+    if (file.is_open()) {
+        std::string dummy1, dummy2, dummy3;
+        double value;
+        while (std::getline(file, dummy1)) {
+            if (dummy1.find("b = ") != std::string::npos) {
+                std::istringstream iss(dummy1);
+                iss >> dummy2 >> dummy3 >> value;
+                block.SetImpactParameter(value);
+            }
+
+            if (dummy1.find("Npart = ") != std::string::npos) {
+                std::istringstream iss(dummy1);
+                iss >> dummy2 >> dummy3 >> value;
+                block.SetNumberOfParticipantNucleons(value);
+            }
+
+            if (dummy1.find("Ncoll = ") != std::string::npos) {
+                std::istringstream iss(dummy1);
+                iss >> dummy2 >> dummy3 >> value;
+                block.SetNumberOfBinaryCollisions(value);
+            }
+        }
+    } else {
+        std::cout << "Failed to open file" << std::endl;
+    }
+
+    file.close();
+    return block;
+}
+
+Statistics::Block_iss GetInitialStateInfo(std::filesystem::path filename) {
     std::ifstream file;
 
     Statistics::Block_iss block;

@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #ifndef FITSETTINGS_HPP
 #define FITSETTINGS_HPP
 
@@ -163,5 +164,5 @@ MultiFitterSettings TBW_3 = {
      {321, {1, 3, 5, 7, 8, 9, 10, 11, 12}},
      {2212, {2, 3, 6, 7, 8, 9, 10, 11, 12}}}};
 }  // namespace FitSets
-}
+}  // namespace CFitter
 #endif

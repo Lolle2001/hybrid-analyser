@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #ifndef MESSENGER_HPP
 #define MESSENGER_HPP
 

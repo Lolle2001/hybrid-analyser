@@ -1,4 +1,4 @@
-
+// Copyright (C) 2024 Lieuwe Huisman
 #include <TApplication.h>
 #include <TAxis.h>
 #include <TCanvas.h>

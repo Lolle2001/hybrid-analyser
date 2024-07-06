@@ -1,4 +1,4 @@
-
+// Copyright (C) 2024 Lieuwe Huisman
 #include "File.hpp"
 
 namespace Model {
@@ -494,21 +494,28 @@ void File_iss::ParseEventStatistics() {
 }
 
 void File_iss::ParseParticleStatistics() {
-    FILE* File = fopen(GetFileDirectory().c_str(), "rb");
-    if (File) {
+    // FILE* File = fopen(GetFileDirectory().c_str(), "rb");
+    std::ifstream file(GetFileDirectory().c_str(), std::ios::binary | std::ios::in);
+
+    if (file.is_open()) {
         Statistics::Block TempBlock;
         Statistics::Block_iss TempBlock_iss(InitialState);
         Statistics::Line_iss TempLine;
         size_t total_particles;
         int pid;
+        // std::cout << GetFileDirectory().c_str() << std::endl;
 
         float array[9];
         int counter = 0;
-        while (fread(&total_particles, sizeof(int), 1, File)) {
+        int arraysize = 9 * sizeof(float);
+
+        while (file.read(reinterpret_cast<char*>(&total_particles), sizeof(int))) {
             TempBlock = *(GetFileData().GetEventBlock(counter));
             for (index_t i = 0; i < total_particles; ++i) {
-                fread(&pid, sizeof(int), 1, File);
-                fread(array, sizeof(float), 9, File);
+                file.read(reinterpret_cast<char*>(&pid), sizeof(int));
+                file.read(reinterpret_cast<char*>(array), arraysize);
+                // fread(&pid, sizeof(int), 1, File);
+                // fread(array, sizeof(float), 9, File);
                 TempLine = Statistics::Line_iss(pid, array);
 
                 TempLine.CalculateTransverseMomentum();
@@ -539,7 +546,7 @@ void File_iss::ParseParticleStatistics() {
             fflush(stdout);
         }
     }
-    fclose(File);
+    file.close();
 }
 
 }  // namespace Model

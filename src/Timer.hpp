@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #ifndef TIMER_HPP
 #define TIMER_HPP
 #include <chrono>

@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #include "Histogram1D.hpp"
 // namespace AMPT {
 namespace Statistics {

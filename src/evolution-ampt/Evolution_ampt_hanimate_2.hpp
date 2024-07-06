@@ -1,4 +1,4 @@
-
+// Copyright (C) 2024 Lieuwe Huisman
 
 #ifndef EVOLUTION_AMPT_HANIMATE_2_HPP
 #define EVOLUTION_AMPT_HANIMATE_2_HPP
@@ -92,7 +92,7 @@ class File {
     }
 
     void ReadFileMulti() {
-                std::ifstream file;
+        std::ifstream file;
         file.open(InputDirectory.c_str(), std::ios::in);
         if (file.is_open()) {
             std::string sa;

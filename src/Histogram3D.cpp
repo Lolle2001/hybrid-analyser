@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #include "Histogram3D.hpp"
 
 // namespace AMPT {

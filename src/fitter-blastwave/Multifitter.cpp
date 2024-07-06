@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #include "Multifitter.hpp"
 namespace CFitter {
 double Chi2Function::FuncWithRange(const double* par) {

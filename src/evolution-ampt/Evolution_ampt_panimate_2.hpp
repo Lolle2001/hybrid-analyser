@@ -1,4 +1,4 @@
-
+// Copyright (C) 2024 Lieuwe Huisman
 
 #ifndef EVOLUTION_AMPT_PANIMATE_2_H
 #define EVOLUTION_AMPT_PANIMATE_2_H

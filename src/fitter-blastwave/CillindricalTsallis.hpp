@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #ifndef CILLINDRICALTSALLIS_HPP
 #define CILLINDRICALTSALLIS_HPP
 

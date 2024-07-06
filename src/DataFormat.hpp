@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #ifndef DATAFORMAT_HPP
 #define DATAFORMAT_HPP
 

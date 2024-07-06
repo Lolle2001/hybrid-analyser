@@ -1,4 +1,4 @@
-
+// Copyright (C) 2024 Lieuwe Huisman
 #include <algorithm>
 #include <cstdlib>
 #include <fstream>

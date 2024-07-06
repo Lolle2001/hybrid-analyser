@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #ifndef DATACONTAINER_HPP
 #define DATACONTAINER_HPP
 

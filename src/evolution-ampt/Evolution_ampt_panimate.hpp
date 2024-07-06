@@ -1,4 +1,4 @@
-
+// Copyright (C) 2024 Lieuwe Huisman
 
 #ifndef AMPT_PANIMATE_H
 #define AMPT_PANIMATE_H

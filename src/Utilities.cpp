@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #include "Utilities.hpp"
 namespace Utilities {
 
@@ -71,6 +72,28 @@ int GetNBatch(std::string FileDirectory) {
         }
     }
     return nbatch;
+}
+
+size_t get_number_of_subfolders(
+    std::filesystem::path directory,
+    std::filesystem::path name,
+    std::string seperation_character) {
+    size_t number_of_subfolders = 0;
+
+    std::string dirname = name.filename();
+    std::string pattern_str = dirname + seperation_character + R"(\d+$)";
+    std::regex pattern(pattern_str);
+    for (const auto& entry : std::filesystem::directory_iterator(directory)) {
+        if (entry.is_directory()) {
+            std::string dir_name = entry.path().filename().string();
+            // std::cout << dir_name << std::endl;
+            if (std::regex_match(dir_name, pattern)) {
+                // std::cout << dir_name << std::endl;
+                number_of_subfolders++;
+            }
+        }
+    }
+    return number_of_subfolders;
 }
 
 namespace Statistics {

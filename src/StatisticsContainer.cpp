@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #include "StatisticsContainer.hpp"
 
 // namespace AMPT {

@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #ifndef DATA_HPP
 #define DATA_HPP
 struct Data {

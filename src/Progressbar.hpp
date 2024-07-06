@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #ifndef PROGRESSBAR_HPP
 #define PROGRESSBAR_HPP
 
@@ -25,6 +26,7 @@ class Progressbar {
     int counter = 0;
 
    public:
+    Progressbar() = default;
     Progressbar(int total_);
 
     void Initialize(int total_);

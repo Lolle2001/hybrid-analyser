@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #ifndef FITTER_UTILITIES_HPP
 #define FITTER_UTILITIES_HPP
 

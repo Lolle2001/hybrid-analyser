@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #ifndef HISTOGRAMMAP3D_HPP
 #define HISTOGRAMMAP3D_HPP
 

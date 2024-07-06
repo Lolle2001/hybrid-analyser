@@ -1,4 +1,4 @@
-
+// Copyright (C) 2024 Lieuwe Huisman
 
 #ifndef AMPT_HANIMATE_HPP
 #define AMPT_HANIMATE_HPP

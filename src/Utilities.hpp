@@ -1,13 +1,14 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #ifndef UTILITIES_HPP
 #define UTILITIES_HPP
 #include <cmath>
 #include <filesystem>
 #include <iostream>
 #include <map>
+#include <regex>
 #include <sstream>
 #include <string>
 #include <vector>
-
 // #include "DataFormat.hpp"
 
 using index_t = unsigned int;
@@ -24,7 +25,10 @@ long double GetFileSize(std::filesystem::path filepath, const int option);
 std::string repeat(int n, std::string c);
 
 int GetNBatch(std::string FileDirectory);
-
+size_t get_number_of_subfolders(
+    std::filesystem::path directory,
+    std::filesystem::path name,
+    std::string seperation_character);
 namespace Statistics {
 double CalculateCommonWidth(size_t n, const std::vector<double>& edges);
 double isWithinBin(double x, index_t index, const std::vector<double>& edges);

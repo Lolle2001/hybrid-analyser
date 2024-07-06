@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #ifndef ELLIPTICALBOLTZMANNGIBBS_HPP
 #define ELLIPTICALBOLTZMANNGIBBS_HPP
 

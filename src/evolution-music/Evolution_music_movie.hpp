@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #ifndef EVOLUTION_MUSIC_MOVIE_HPP
 #define EVOLUTION_MUSIC_MOVIE_HPP
 

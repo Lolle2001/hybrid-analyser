@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #ifndef STATISTICSCONTAINER_HPP
 #define STATISTICSCONTAINER_HPP
 

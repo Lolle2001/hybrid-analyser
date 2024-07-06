@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #ifndef EVOLUTION_AMPT_PARAMETERS_HPP
 #define EVOLUTION_AMPT_PARAMETERS_HPP
 
