@@ -2,7 +2,7 @@
 
 case $(uname) in
     Linux)
-        make -f make/hybridp-linux.make -j12
+        make -f make/analyser-linux.make -j12
         ;;
     Darwin)
         make -f make/hybridp-apple.make -j12

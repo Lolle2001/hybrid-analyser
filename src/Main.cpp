@@ -1,4 +1,10 @@
+// Copyright (C) 2024 Lieuwe Huisman
 
+#include <fmt/color.h>
+#include <fmt/core.h>
+#include <fmt/format.h>
+
+#include <argparse/argparse.hpp>
 #include <iomanip>
 #include <iostream>
 #include <string>
@@ -8,275 +14,436 @@
 #include "Utilities.hpp"
 
 namespace AMPT {
-/*
-parameterfile
--> histogramsettings
--> centrality binning
-// inputfiles
-datadirectories
-batchnumber
-processed data directory
--> same
--> new
-*/
+#define NAME "analyser"
+#define AUTHOR "Liewe Huisman"
+#define PROGRAM_VERSION "1.0.0"
+#define DEBUG 0
 
-// void Process(int argc, char* argv[]) {
-//     argparse::ArgumentParser program("main", "1.1.0");
-//     program.add_argument("-col", "--collisiontype")
-//         .help("specifies type of centrality binning")
-//         .default_value(0)
-// };
+void ProcessFiles(
+    std::vector<std::filesystem::path> datafiles,
+    std::vector<std::filesystem::path> logfiles,
+    unsigned int collisiontype,
+    std::filesystem::path output_directory) {
+    std::string barstring;
+    Utilities::Progressbar progressbar;
+    std::string logstring;
+    Utilities::Duration timer('H');
 
-void Main(int argc, char* argv[]) {
-    std::vector<int> NRun;
-    std::vector<int> NBatch;
-    std::string Directory;
-    int collisiontype;
-    size_t LowerNBatch = 1;
-    std::string ParameterFile;
-    std::string outputdirectory;
-    // std::cout << "hallo" << std::endl;
+    size_t number_of_files = datafiles.size();
 
-    bool flag_nr = false;
-    bool flag_nb = false;
-    bool flag_dir = false;
-    bool flag_col = false;
-    bool flag_par = false;
-    bool flag_read_multi = false;
-    bool flag_outdir = false;
-    for (int i = 1; i < argc - 1; ++i) {
-        // std::cout << i << " " << argv[i] << std::endl;
-        if (std::string(argv[i]).compare("-nr") == 0) {
-            while (i + 1 < argc && std::isdigit(argv[i + 1][0])) {
-                NRun.push_back(std::atoi(argv[++i]));
+    barstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
+    progressbar = Utilities::Progressbar(number_of_files);
+    progressbar.SetFrontString(barstring);
+    progressbar.SetDoneChar("█");
+    progressbar.SetTodoChar("░");
+    progressbar.SetStartChar("║");  //"▕");
+    progressbar.SetEndChar("║");
+
+    double filesize_data = 0;
+    for (index_t i = 0; i < number_of_files; ++i) {
+        filesize_data += Utilities::GetFileSize(datafiles[i], 3);
+        filesize_data += Utilities::GetFileSize(logfiles[i], 3);
+    }
+    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
+    logstring += fmt::format("Total datasize to read : {0:.3} GB", filesize_data);
+    std::cout << logstring << std::endl;
+
+    std::unique_ptr<Model::File_ampt> data_container_combined = std::make_unique<Model::File_ampt>(collisiontype);
+    std::vector<std::unique_ptr<Model::File_ampt>> data_container(number_of_files);
+
+    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
+    logstring += fmt::format("Initializing file objects ...");
+    std::cout << logstring << std::endl;
+
+    progressbar.Print();
+    timer.Start();
+
+#pragma omp parallel
+    {
+#pragma omp for schedule(dynamic)
+        for (index_t i = 0; i < number_of_files; ++i) {
+            data_container[i] = std::make_unique<Model::File_ampt>(logfiles[i], datafiles[i], collisiontype);
+            progressbar.Update();
+
+#pragma omp critical
+            {
+                progressbar.Print();
             }
-            flag_nr = true;
         }
-        if (std::string(argv[i]).compare("-nb") == 0) {
-            while (i + 1 < argc && std::isdigit(argv[i + 1][0])) {
-                NBatch.push_back(std::atoi(argv[++i]));
+    }
+
+    std::cout << std::endl;
+
+    progressbar.Reset();
+
+    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
+    logstring += fmt::format("Parsing event statistics ...");
+    std::cout << logstring << std::endl;
+
+    progressbar.Print();
+#pragma omp parallel
+    {
+#pragma omp for schedule(dynamic)
+        for (index_t i = 0; i < number_of_files; ++i) {
+            data_container[i]->ParseEventStatistics();
+            progressbar.Update();
+
+#pragma omp critical
+            {
+                progressbar.Print();
             }
-            flag_nb = true;
-        }
-        if (std::string(argv[i]).compare("-dir") == 0) {
-            Directory = argv[i + 1];
-            flag_dir = true;
-            i++;
-        }
-        if (std::string(argv[i]).compare("-col") == 0) {
-            collisiontype = std::stoi(argv[i + 1]);
-            flag_col = true;
-            i++;
-        }
-        if (std::string(argv[i]).compare("-nbmin") == 0) {
-            LowerNBatch = std::stoi(argv[i + 1]);
-            // flag_col = true;
-            i++;
-        }
-        if (std::string(argv[i]).compare("-par") == 0) {
-            ParameterFile = argv[i + 1];
-            flag_par = true;
-            i++;
-        }
-        if (std::string(argv[i]).compare("-multi") == 0) {
-            flag_read_multi = std::stoi(argv[i + 1]);
-            i++;
-        }
-        if (std::string(argv[i]).compare("-outdir") == 0) {
-            outputdirectory = argv[i + 1];
-            flag_outdir = true;
-            i++;
         }
     }
+    std::cout << std::endl;
 
-    if (!flag_par) {
-        ParameterFile = "hybridp.par";
+    std::unique_ptr<Model::File_ampt> dummy = std::make_unique<Model::File_ampt>(collisiontype);
+    for (index_t i = 0; i < number_of_files; ++i) {
+        dummy->GetFileData().InsertBlocks(data_container[i]->GetFileData());
     }
-    Parameters parameters;
-    parameters.ReadSettingsJSON(ParameterFile);
-    // std::cout << "hallo" << std::endl;
-    if (!flag_nr) {
-        NRun.push_back(std::stoi(argv[2]));
+
+    dummy->GetFileData().CalculateCentralityClasses();
+
+    for (index_t i = 0; i < number_of_files; ++i) {
+        data_container[i]->GetFileData().SetCentralityEdges("ncharged", dummy->GetFileData().GetCentralityEdges("ncharged"));
     }
-    if (!flag_dir) {
-        Directory = parameters.ampt_data_folder;
-    }
-    if (!flag_nb) {
-        for (int entry : NRun) {
-            NBatch.push_back(Utilities::GetNBatch(Directory + "/" + std::to_string(entry)));
+    data_container_combined->GetFileData().SetCentralityEdges("ncharged", dummy->GetFileData().GetCentralityEdges("ncharged"));
+
+    data_container_combined->InitializeDataContainer();
+
+    progressbar.Reset();
+
+    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
+    logstring += fmt::format("Initialize data containers ...");
+    std::cout << logstring << std::endl;
+
+    progressbar.Print();
+#pragma omp parallel
+    {
+#pragma omp for schedule(dynamic)
+        for (index_t i = 0; i < number_of_files; ++i) {
+            data_container[i]->InitializeDataContainer();
+            progressbar.Update();
+#pragma omp critical
+            {
+                progressbar.Print();
+            }
         }
     }
-    if (!flag_col) {
-        collisiontype = 0;
-    }
+    std::cout << std::endl;
+    progressbar.Reset();
 
-    std::string centralitybinningname;
-    if (collisiontype == 0) {
-        centralitybinningname = "Pb-Pb at 5.02 TeV (0-5-10-20-..90-100)";
-    }
-    if (collisiontype == 1) {
-        centralitybinningname = "p-Pb at 5.02 TeV (0-5-10-20-..90-100)";
-    }
-    if (collisiontype == 2) {
-        centralitybinningname = "p-p at 5.02 TeV (0-100)";
-    }
-    if (collisiontype == 3) {
-        centralitybinningname = "dNch/deta based centrality classification (0-5-10-20-..90-100)";
-    }
-    if (collisiontype == 4) {
-        centralitybinningname = "Pb-Pb at 5.02 TeV (0-5-10-20-..90-100) (Traiectum)";
-    }
-    // std::cout << collisiontype << std::endl;
-    // std::cout << "hallo" << std::endl;
-    // std::cout << "\033[1;48;2;0;111;184";
+    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
+    logstring += fmt::format("Parsing particle statistics ...");
+    std::cout << logstring << std::endl;
 
-    printf("%s╭%-100s╮%s\n", PP::HIGHLIGHT, Utilities::repeat(100, "─").c_str(), PP::RESET);
-    printf("%s│%s %-98s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "AMPT data processer for large data", PP::HIGHLIGHT, PP::RESET);
-    printf("%s│%s %-98s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Version 3.1.0", PP::HIGHLIGHT, PP::RESET);
+    progressbar.Print();
 
-    printf("%s│%s %-98s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Made by Lieuwe Huisman", PP::HIGHLIGHT, PP::RESET);
-    printf("%s│%s %-98s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Made for AMPT version: v23.02.2024", PP::HIGHLIGHT, PP::RESET);
-    printf("%s├%-100s┤%s\n", PP::HIGHLIGHT, Utilities::repeat(100, "─").c_str(), PP::RESET);
-    printf("%s│%s %-18s : %-77d %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Number of Threads", omp_get_num_procs(), PP::HIGHLIGHT, PP::RESET);
-    // printf("%s│%s %-18s : %-47s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Runnumber", std::to_string(NRun).c_str(), PP::HIGHLIGHT, PP::RESET);
-    // printf("%s│%s %-18s : %-47s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "IPGlasma runnumber", std::to_string(IPGlasmaRun).c_str(), PP::HIGHLIGHT, PP::RESET);
-    // printf("%s│%s %-18s : %-47s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Number of events", std::to_string(NEvent).c_str(), PP::HIGHLIGHT, PP::RESET);
-    printf("%s│%s %-18s : %-77s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Data directory", Directory.c_str(), PP::HIGHLIGHT, PP::RESET);
-    printf("%s│%s %-18s : %-77s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Centrality Binning", centralitybinningname.c_str(), PP::HIGHLIGHT, PP::RESET);
-    printf("%s╰%-100s╯%s\n", PP::HIGHLIGHT, Utilities::repeat(100, "─").c_str(), PP::RESET);
-
-    // printf("%s╭%-70s╮%s\n", PP::HIGHLIGHT, Utilities::repeat(70, "─").c_str(), PP::RESET);
-    // printf("%s│%s %-68s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "AMPT data processer for large data", PP::HIGHLIGHT, PP::RESET);
-    // printf("%s│%s %-68s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Version 3.1.0", PP::HIGHLIGHT, PP::RESET);
-    // printf("%s│%s %-68s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Made by Lieuwe Huisman", PP::HIGHLIGHT, PP::RESET);
-    // printf("%s│%s %-68s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Made for AMPT version: v23.02.2024", PP::HIGHLIGHT, PP::RESET);
-    // printf("%s├%-70s┤%s\n", PP::HIGHLIGHT, Utilities::repeat(70, "─").c_str(), PP::RESET);
-    // printf("%s│%s %-18s : %-47d %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Number of Threads", omp_get_num_procs(), PP::HIGHLIGHT, PP::RESET);
-    // // printf("%s│%s %-18s : %-47s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Runnumber", std::to_string(NRun).c_str(), PP::HIGHLIGHT, PP::RESET);
-    // // printf("%s│%s %-18s : %-47s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Batchnumber", std::to_string(NBatch).c_str(), PP::HIGHLIGHT, PP::RESET);
-    // // if (LowerNBatch > 1) {
-    // // printf("%s│%s %-18s : %-47s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Starting at bin", std::to_string(LowerNBatch).c_str(), PP::HIGHLIGHT, PP::RESET);
-    // // }
-    // printf("%s│%s %-18s : %-47s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Data directory", Directory.c_str(), PP::HIGHLIGHT, PP::RESET);
-    // printf("%s│%s %-18s : %-47s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Centrality Binning", centralitybinningname.c_str(), PP::HIGHLIGHT, PP::RESET);
-    // printf("%s╰%-70s╯%s\n", PP::HIGHLIGHT, Utilities::repeat(70, "─").c_str(), PP::RESET);
-
-    std::vector<AMPT::RunInfo> runinfo(NRun.size());
-
-    if (NRun.size() == 1) {
-        outputdirectory = Directory + "/" + std::to_string(NRun[0]) + "/processed";
-    } else if (!flag_outdir) {
-        outputdirectory = Directory + "/p" + std::to_string(NRun[0]) + "/processed";
+#pragma omp parallel
+    {
+#pragma omp for schedule(dynamic)
+        for (index_t i = 0; i < number_of_files; ++i) {
+            // data[i]->InitializeDataContainer();
+            data_container[i]->ParseParticleStatistics();
+            progressbar.Update();
+#pragma omp critical
+            {
+                progressbar.Print();
+            }
+        }
     }
+    std::cout << std::endl;
+    progressbar.Reset();
 
-    for (index_t i = 0; i < NRun.size(); ++i) {
-        runinfo[i].NRun = NRun[i];
-        runinfo[i].NBatchMax = NBatch[i];
-        runinfo[i].NBatchMin = LowerNBatch;
+    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
+    logstring += fmt::format("Combining statistics ...");
+    std::cout << logstring << std::endl;
+
+    progressbar.Print();
+
+    for (index_t i = 0; i < number_of_files; ++i) {
+        *data_container_combined += *data_container[i];
+        // #pragma omp critical
+        //         {
+        progressbar.Update();
+        progressbar.Print();
+        // }
     }
+    std::cout << std::endl;
+    progressbar.Reset();
 
-    AMPT::ReadFiles(runinfo, Directory, outputdirectory, parameters, collisiontype);
+    timer.Stop();
+    logstring = fmt::format("{}{}[INFO]{} ", PP::FINISHED, PP::BOLD, PP::RESET);
+    logstring += fmt::format("Analysis time : {:04d}:{:02d}:{:02d}.{:03d}", (int)timer.chours, (int)timer.cminutes, (int)timer.cseconds, (int)timer.cmilliseconds);
+    std::cout << logstring << std::endl;
+
+    timer.Start();
+
+    std::filesystem::create_directories(output_directory);
+    data_container_combined->WriteData(output_directory);
+
+    timer.Stop();
+    double filesize_result = 0;
+    std::filesystem::recursive_directory_iterator output_directory_iteratator(output_directory);
+    for (const auto& entry : output_directory_iteratator) {
+        filesize_result += Utilities::GetFileSize(entry.path(), 2);
+    }
+    logstring = fmt::format("{}{}[INFO]{} ", PP::FINISHED, PP::BOLD, PP::RESET);
+    logstring += fmt::format("Writing time : {:04}:{:02}:{:02}.{:03} ...", (int)timer.chours, (int)timer.cminutes, (int)timer.cseconds, (int)timer.cmilliseconds);
+    std::cout << logstring << std::endl;
+
+    logstring = fmt::format("{}{}[INFO]{} ", PP::FINISHED, PP::BOLD, PP::RESET);
+    logstring += fmt::format("Total datasize written : {0:.3} MB", filesize_result);
+    std::cout << logstring << std::endl;
 }
+
 }  // namespace AMPT
 
 namespace iSS {
-/*
---runnumbers [-rn]
---numberofthreads [-nt]
---numberofevents [-ne]
---ipglasmarunnumbers [-nrip]
---collisiontype [-col]
---fromtable [-ft]
-*/
-void Main(int argc, char* argv[]) {
-    std::vector<int> NRun;
-    std::vector<int> IPGlasmaRun;
-    std::string Directory;
-    std::string ParameterFile;
-    std::string outputdirectory;
-    std::vector<int> NEvent;
-    int collisiontype = 0;
+void ProcessFiles(
+    std::vector<std::filesystem::path> datafiles,
+    std::vector<std::filesystem::path> logfiles,
+    unsigned int collisiontype,
+    std::filesystem::path output_directory) {
+    std::string barstring;
+    Utilities::Progressbar progressbar;
+    std::string logstring;
+    Utilities::Duration timer('H');
 
-    bool flag_nr = false;
-    bool flag_nrip = false;
-    bool flag_ne = false;
-    bool flag_dir = false;
-    bool flag_col = false;
-    bool flag_par = false;
-    bool flag_outdir = false;
+    size_t number_of_files = datafiles.size();
 
-    int num_threads = omp_get_num_procs();
+    barstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
+    progressbar = Utilities::Progressbar(number_of_files);
+    progressbar.SetFrontString(barstring);
+    progressbar.SetDoneChar("█");
+    progressbar.SetTodoChar("░");
+    progressbar.SetStartChar("║");  //"▕");
+    progressbar.SetEndChar("║");
 
-    for (int i = 1; i < argc - 1; ++i) {
-        // std::cout << i << " " << argv[i] << std::endl;
-        if (std::string(argv[i]).compare("-nr") == 0) {
-            while (i + 1 < argc && std::isdigit(argv[i + 1][0])) {
-                NRun.push_back(std::atoi(argv[++i]));
+    double filesize_data = 0;
+    for (index_t i = 0; i < number_of_files; ++i) {
+        filesize_data += Utilities::GetFileSize(datafiles[i], 3);
+        filesize_data += Utilities::GetFileSize(logfiles[i], 3);
+    }
+
+    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
+    logstring += fmt::format("Total datasize to read : {0:.3} GB", filesize_data);
+    std::cout << logstring << std::endl;
+
+    std::unique_ptr<Model::File_iss> data_container_combined = std::make_unique<Model::File_iss>(collisiontype);
+    std::vector<std::unique_ptr<Model::File_iss>> data_container(number_of_files);
+
+    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
+    logstring += fmt::format("Initializing file objects ...");
+    std::cout << logstring << std::endl;
+
+    progressbar.Print();
+    timer.Start();
+
+#pragma omp parallel
+    {
+#pragma omp for schedule(dynamic)
+        for (index_t i = 0; i < number_of_files; ++i) {
+            Statistics::Block_iss block = iSS::GetInitialStateInfo(logfiles[i]);
+            block.SetEventID(i);
+            block.SetOriginalEventID(i + 1);
+            data_container[i] = std::make_unique<Model::File_iss>(datafiles[i], collisiontype);
+            data_container[i]->SetInitialState(block);
+            progressbar.Update();
+
+#pragma omp critical
+            {
+                progressbar.Print();
             }
-            flag_nr = true;
         }
-        if (std::string(argv[i]).compare("-nt") == 0) {
-            num_threads = std::atoi(argv[++i]);
-        }
-        if (std::string(argv[i]).compare("-ne") == 0) {
-            while (i + 1 < argc && std::isdigit(argv[i + 1][0])) {
-                NEvent.push_back(std::atoi(argv[++i]));
+    }
+    std::cout << std::endl;
+
+    progressbar.Reset();
+
+    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
+    logstring += fmt::format("Parsing event statistics ...");
+    std::cout << logstring << std::endl;
+
+    progressbar.Print();
+
+#pragma omp parallel
+    {
+#pragma omp for schedule(dynamic)
+        for (index_t i = 0; i < number_of_files; ++i) {
+            data_container[i]->ParseEventStatistics();
+            progressbar.Update();
+#pragma omp critical
+            {
+                progressbar.Print();
             }
-            flag_ne = true;
         }
-        if (std::string(argv[i]).compare("-nrip") == 0) {
-            while (i + 1 < argc && std::isdigit(argv[i + 1][0])) {
-                IPGlasmaRun.push_back(std::atoi(argv[++i]));
+    }
+
+    std::cout << std::endl;
+
+    std::unique_ptr<Model::File_iss> dummy = std::make_unique<Model::File_iss>(collisiontype);
+    for (index_t i = 0; i < number_of_files; ++i) {
+        dummy->GetFileData().InsertBlocks(data_container[i]->GetFileData());
+    }
+
+    dummy->GetFileData().CalculateCentralityClasses();
+
+    for (index_t i = 0; i < number_of_files; ++i) {
+        data_container[i]->GetFileData().SetCentralityEdges("ncharged", dummy->GetFileData().GetCentralityEdges("ncharged"));
+    }
+    data_container_combined->GetFileData().SetCentralityEdges("ncharged", dummy->GetFileData().GetCentralityEdges("ncharged"));
+
+    data_container_combined->InitializeDataContainer();
+
+    progressbar.Reset();
+
+    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
+    logstring += fmt::format("Initialize data containers ...");
+    std::cout << logstring << std::endl;
+
+    progressbar.Print();
+
+#pragma omp parallel
+    {
+#pragma omp for schedule(dynamic)
+        for (index_t i = 0; i < number_of_files; ++i) {
+            data_container[i]->InitializeDataContainer();
+            progressbar.Update();
+#pragma omp critical
+            {
+                progressbar.Print();
             }
-            flag_nrip = true;
-        }
-        if (std::string(argv[i]).compare("-dir") == 0) {
-            Directory = argv[i + 1];
-            flag_dir = true;
-            i++;
-        }
-        if (std::string(argv[i]).compare("-col") == 0) {
-            collisiontype = std::stoi(argv[i + 1]);
-            flag_col = true;
-            i++;
-        }
-        if (std::string(argv[i]).compare("-par") == 0) {
-            ParameterFile = argv[i + 1];
-            flag_par = true;
-            i++;
-        }
-
-        if (std::string(argv[i]).compare("-outdir") == 0) {
-            outputdirectory = argv[i + 1];
-            flag_outdir = true;
-            i++;
         }
     }
 
-    if (!flag_nr) {
-        NRun.push_back(std::stoi(argv[2]));
-    }
-    if (!flag_nrip) {
-        IPGlasmaRun = NRun;
-    }
-    if (!flag_par) {
-        ParameterFile = "hybridp.par";
-    }
-    Parameters parameters;
+    std::cout << std::endl;
+    progressbar.Reset();
 
-    parameters.ReadSettingsJSON(ParameterFile);
-    if (!flag_dir) {
-        Directory = parameters.iss_data_folder;
-    }
-    if (!flag_ne) {
-        for (int entry : NRun) {
-            NEvent.push_back(Utilities::GetNBatch(parameters.iss_data_folder + "/" + std::to_string(entry)));
+    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
+    logstring += fmt::format("Parsing particle statistics ...");
+    std::cout << logstring << std::endl;
+
+    progressbar.Print();
+
+#pragma omp parallel
+    {
+#pragma omp for schedule(dynamic)
+        for (index_t i = 0; i < number_of_files; ++i) {
+            // data[i]->InitializeDataContainer();
+            data_container[i]->ParseParticleStatistics();
+            progressbar.Update();
+#pragma omp critical
+            {
+                progressbar.Print();
+            }
         }
     }
-    if (!flag_col) {
-        collisiontype = 0;
+    std::cout << std::endl;
+    progressbar.Reset();
+
+    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
+    logstring += fmt::format("Combining statistics ...");
+    std::cout << logstring << std::endl;
+
+    progressbar.Print();
+
+    for (index_t i = 0; i < number_of_files; ++i) {
+        *data_container_combined += *data_container[i];
+        progressbar.Update();
+        progressbar.Print();
+    }
+    std::cout << std::endl;
+    progressbar.Reset();
+
+    timer.Stop();
+
+    logstring = fmt::format("{}{}[INFO]{} ", PP::FINISHED, PP::BOLD, PP::RESET);
+    logstring += fmt::format("Analysis time : {:04d}:{:02d}:{:02d}.{:03d}", (int)timer.chours, (int)timer.cminutes, (int)timer.cseconds, (int)timer.cmilliseconds);
+    std::cout << logstring << std::endl;
+
+    timer.Start();
+
+    std::filesystem::create_directories(output_directory);
+    data_container_combined->WriteData(output_directory);
+
+    timer.Stop();
+
+    double filesize_result = 0;
+    std::filesystem::recursive_directory_iterator output_directory_iteratator(output_directory);
+    for (const auto& entry : output_directory_iteratator) {
+        filesize_result += Utilities::GetFileSize(entry.path(), 2);
     }
 
+    logstring = fmt::format("{}{}[INFO]{} ", PP::FINISHED, PP::BOLD, PP::RESET);
+    logstring += fmt::format("Writing time : {:04d}:{:02d}:{:02d}.{:03d}", (int)timer.chours, (int)timer.cminutes, (int)timer.cseconds, (int)timer.cmilliseconds);
+    std::cout << logstring << std::endl;
+
+    logstring = fmt::format("{}{}[INFO]{} ", PP::FINISHED, PP::BOLD, PP::RESET);
+    logstring += fmt::format("Total datasize written : {0:.3} MB", filesize_result);
+    std::cout << logstring << std::endl;
+}
+}  // namespace iSS
+
+void Process(int argc, char* argv[]) {
+    argparse::ArgumentParser program(NAME, PROGRAM_VERSION);
+    program.add_description("analyser is a program that parses and analyses the final state data from iSS and AMPT.");
+
+    program.add_argument("-col", "--collisiontype")
+        .help("specifies type of centrality binning")
+        .default_value(0);
+
+    argparse::ArgumentParser parser_ampt("ampt");
+
+    parser_ampt.add_argument("-i", "--input")
+        .nargs(argparse::nargs_pattern::any)
+        .help("name of final state output file from AMPT");
+    parser_ampt.add_argument("-id", "--input-directory")
+        .help("directory to final state output from AMPT");
+    parser_ampt.add_argument("-o", "--output")
+        .help("name of output directory for the analysed data")
+        .nargs(argparse::nargs_pattern::any);
+    parser_ampt.add_argument("-od", "--output-directory")
+        .help("directory to the output");
+
+    // parser_ampt.add_argument("-ccm", "--centrality-classification-mode")
+    // .choices("user","b","npart","ncoll", "Nch");
+    parser_ampt.add_argument("-pf", "--parameter-file");
+    parser_ampt.add_argument("-pd", "--parameter-directory");
+
+    // parser_ampt.add_argument("-br", "--batch-range")
+    // .help("range of event ids that must be parsed");
+    // parser_ampt.add_argument("-l", "--log") // ampt.log
+    // .help("name of log file from AMPT");
+    // parser_ampt.add_argument("-ld", "--log-directory")
+    // .help("directory to log file from AMPT");
+
+    argparse::ArgumentParser parser_iss("iss");
+
+    parser_iss.add_argument("-i", "--input")
+        .nargs(argparse::nargs_pattern::any);
+    parser_iss.add_argument("-id", "--input-directory")
+        .default_value("/home/lieuwe/Documents/Software/iSS/data");
+    parser_iss.add_argument("-o", "--output");
+    parser_iss.add_argument("-od", "--output-directory")
+        .default_value("/home/lieuwe/Documents/Software/iSS/data");
+    parser_iss.add_argument("-br", "--batch-range");
+    parser_iss.add_argument("-l", "--log")
+        .nargs(argparse::nargs_pattern::any);  // ipglasma file: usedParameters*.dat
+    parser_iss.add_argument("-ld", "--log-directory")
+        .default_value("/home/lieuwe/Documents/Software/IPGlasma/data");
+
+    program.add_subparser(parser_ampt);
+    program.add_subparser(parser_iss);
+
+    try {
+        program.parse_args(argc, argv);
+    } catch (const std::exception& err) {
+        std::cerr << err.what() << std::endl;
+        std::cerr << program;
+        std::exit(1);
+    }
+
+    int collisiontype = program.get<int>("-col");
     std::string centralitybinningname;
     if (collisiontype == 0) {
         centralitybinningname = "Pb-Pb at 5.02 TeV (0-5-10-20-..90-100)";
@@ -290,48 +457,110 @@ void Main(int argc, char* argv[]) {
     if (collisiontype == 4) {
         centralitybinningname = "Pb-Pb at 5.02 TeV (0-5-10-20-..90-100) (Traiectum)";
     }
+    int width = 80;
+    std::string logstring;
+    logstring += fmt::format("╭{}╮\n", Utilities::repeat(width + 2, "─"));
+    logstring += fmt::format("│ {:{}} │\n", "Hybrid Analyser for AMPT and iSS", width);
+    logstring += fmt::format("│ {:{}} │\n", "Version 1.0.0", width);
+    logstring += fmt::format("│ {:{}} │\n", "Made by Lieuwe Huisman", width);
+    logstring += fmt::format("│ {:{}} │\n", "Made for AMPT version: v1.26t9b-v2.26t9b", width);
+    logstring += fmt::format("│ {:{}} │\n", "Made for iSS version: v2.0.0.0", width);
+    logstring += fmt::format("├{}┤\n", Utilities::repeat(width + 2, "─"));
+    logstring += fmt::format("│ {:18} : {:<{}} │\n", "Number of threads", omp_get_max_threads(), width - 18 - 3);
+    logstring += fmt::format("│ {:18} : {:{}} │\n", "Centrality binning", centralitybinningname, width - 18 - 3);
 
-    printf("%s╭%-100s╮%s\n", PP::HIGHLIGHT, Utilities::repeat(100, "─").c_str(), PP::RESET);
-    printf("%s│%s %-98s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "iSS data processer for large data", PP::HIGHLIGHT, PP::RESET);
-    printf("%s│%s %-98s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Version 3.1.0", PP::HIGHLIGHT, PP::RESET);
-    printf("%s│%s %-98s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Made by Lieuwe Huisman", PP::HIGHLIGHT, PP::RESET);
-    printf("%s├%-100s┤%s\n", PP::HIGHLIGHT, Utilities::repeat(100, "─").c_str(), PP::RESET);
-    printf("%s│%s %-18s : %-77d %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Number of Threads", num_threads, PP::HIGHLIGHT, PP::RESET);
-    // printf("%s│%s %-18s : %-47s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Runnumber", std::to_string(NRun).c_str(), PP::HIGHLIGHT, PP::RESET);
-    // printf("%s│%s %-18s : %-47s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "IPGlasma runnumber", std::to_string(IPGlasmaRun).c_str(), PP::HIGHLIGHT, PP::RESET);
-    // printf("%s│%s %-18s : %-47s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Number of events", std::to_string(NEvent).c_str(), PP::HIGHLIGHT, PP::RESET);
-    printf("%s│%s %-18s : %-77s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Data directory", parameters.iss_data_folder.c_str(), PP::HIGHLIGHT, PP::RESET);
-    printf("%s│%s %-18s : %-77s %s│%s\n", PP::HIGHLIGHT, PP::RESET, "Centrality Binning", centralitybinningname.c_str(), PP::HIGHLIGHT, PP::RESET);
-    printf("%s╰%-100s╯%s\n", PP::HIGHLIGHT, Utilities::repeat(100, "─").c_str(), PP::RESET);
+    if (program.is_subcommand_used("ampt")) {
+        // bool batch_mode = parser_ampt.is_used("-br");
 
-    std::vector<iSS::RunInfo> runinfo(NRun.size());
+        std::vector<std::string> data_paths = parser_ampt.get<std::vector<std::string>>("-i");
+        std::filesystem::path data_directory = std::filesystem::path(parser_ampt.get<std::string>("-id"));
+        std::filesystem::path output_path = std::filesystem::path(parser_ampt.get<std::string>("-o"));
+        std::filesystem::path output_directory = std::filesystem::path(parser_ampt.get<std::string>("-od"));
 
-    if (NRun.size() == 1) {
-        outputdirectory = parameters.iss_data_folder + "/" + std::to_string(NRun[0]) + "/processed";
-    } else if (!flag_outdir) {
-        outputdirectory = parameters.iss_data_folder + "/p" + std::to_string(NRun[0]) + "/processed";
-    }
-
-    for (index_t i = 0; i < NRun.size(); ++i) {
-        runinfo[i].iSSRun = NRun[i];
-        runinfo[i].IPGlasmaRun = IPGlasmaRun[i];
-        runinfo[i].NEvent = NEvent[i];
-    }
-    iSS::ReadFiles(runinfo, outputdirectory, parameters, collisiontype);
-}
-}  // namespace iSS
-   // namespace iSS
-
-int main(int argc, char* argv[]) {
-    if (argc > 2) {
-        if (std::string(argv[1]).compare("hydro") == 0) {
-            iSS::Main(argc, argv);
-        } else if (std::string(argv[1]).compare("transport") == 0) {
-            AMPT::Main(argc, argv);
-        } else {
-            std::cout << "Please enter a valid model as the first argument!" << std::endl;
+        size_t number_of_inputs = data_paths.size();
+        std::vector<std::filesystem::path> data_files;
+        std::vector<std::filesystem::path> log_files;
+        for (int i = 0; i < number_of_inputs; ++i) {
+            size_t number_of_subfolders = Utilities::get_number_of_subfolders(std::filesystem::absolute(data_directory / data_paths[i]), data_paths[i], "-");
+            for (int j = 0; j < number_of_subfolders; ++j) {
+                std::string subpath;
+                subpath = data_paths[i] + "-" + std::to_string(j + 1) + "/ana/ampt.dat";
+                data_files.push_back(std::filesystem::absolute(data_directory / data_paths[i] / subpath));
+                // std::cout << std::filesystem::absolute(data_directory / data_paths[i] / subpath) << std::endl;
+                subpath = data_paths[i] + "-" + std::to_string(j + 1) + "/ampt.log";
+                log_files.push_back(std::filesystem::absolute(data_directory / data_paths[i] / subpath));
+                // std::cout << std::filesystem::absolute(data_directory / data_paths[i] / subpath) << std::endl;
+            }
         }
+        std::string inputs;
+
+        for (int i = 0; i < number_of_inputs; ++i) {
+            if (i < number_of_inputs - 1) {
+                inputs += data_paths[i] + " ";
+
+            } else {
+                inputs += data_paths[i];
+            }
+        }
+        logstring += fmt::format("│ {:18} : {:{}} │\n", "Input", inputs, width - 18 - 3);
+        logstring += fmt::format("│ {:18} : {:{}} │\n", "Inputdirectory", data_directory.string(), width - 18 - 3);
+        logstring += fmt::format("│ {:18} : {:{}} │\n", "Output", output_path.string(), width - 18 - 3);
+        logstring += fmt::format("│ {:18} : {:{}} │\n", "Outputdirectory", output_directory.string(), width - 18 - 3);
+        logstring += fmt::format("╰{}╯\n", Utilities::repeat(width + 2, "─"));
+        std::cout << logstring;
+        AMPT::ProcessFiles(data_files, log_files, collisiontype, output_directory / output_path);
+
+    } else if (program.is_subcommand_used("iss")) {
+        // bool batch_mode = parser_iss.is_used("-br");
+        std::vector<std::string> data_paths = parser_iss.get<std::vector<std::string>>("-i");
+        std::filesystem::path data_directory = std::filesystem::path(parser_iss.get<std::string>("-id"));
+        std::filesystem::path output_path = std::filesystem::path(parser_iss.get<std::string>("-o"));
+        std::filesystem::path output_directory = std::filesystem::path(parser_iss.get<std::string>("-od"));
+
+        std::vector<std::string> log_paths = parser_iss.get<std::vector<std::string>>("-l");
+        std::filesystem::path log_directory = std::filesystem::path(parser_iss.get<std::string>("-ld"));
+
+        size_t number_of_inputs = data_paths.size();
+        std::vector<std::filesystem::path> data_files;
+        std::vector<std::filesystem::path> log_files;
+        for (int i = 0; i < number_of_inputs; ++i) {
+            size_t number_of_subfolders = Utilities::get_number_of_subfolders(std::filesystem::absolute(data_directory / data_paths[i]), data_paths[i], "-");
+            for (int j = 0; j < number_of_subfolders; ++j) {
+                std::string subpath;
+                subpath = data_paths[i] + "-" + std::to_string(j + 1) + "/particle_samples.bin";
+                data_files.push_back(std::filesystem::absolute(data_directory / data_paths[i] / subpath));
+                subpath = "usedParameters" + std::to_string(j) + ".dat";
+                log_files.push_back(log_directory / log_paths[i] / subpath);
+                // std::cout << data_files[j] << std::endl;
+                // std::cout << log_files[j] << std::endl;
+            }
+        }
+        std::string inputs;
+        std::string logs;
+        for (int i = 0; i < number_of_inputs; ++i) {
+            if (i < number_of_inputs - 1) {
+                inputs += data_paths[i] + " ";
+                logs += log_paths[i] + " ";
+            } else {
+                inputs += data_paths[i];
+                logs += log_paths[i] + " ";
+            }
+        }
+        logstring += fmt::format("│ {:18} : {:{}} │\n", "Input", inputs, width - 18 - 3);
+        logstring += fmt::format("│ {:18} : {:{}} │\n", "Inputdirectory", data_directory.string(), width - 18 - 3);
+        logstring += fmt::format("│ {:18} : {:{}} │\n", "Output", output_path.string(), width - 18 - 3);
+        logstring += fmt::format("│ {:18} : {:{}} │\n", "Outputdirectory", output_directory.string(), width - 18 - 3);
+        logstring += fmt::format("│ {:18} : {:{}} │\n", "Log", logs, width - 18 - 3);
+        logstring += fmt::format("│ {:18} : {:{}} │\n", "Logdirectory", log_directory.string(), width - 18 - 3);
+        logstring += fmt::format("╰{}╯\n", Utilities::repeat(width + 2, "─"));
+        std::cout << logstring;
+        iSS::ProcessFiles(data_files, log_files, collisiontype, output_directory / output_path);
+
     } else {
-        std::cout << "Do not forget to specify the runnumber!" << std::endl;
+        std::cout << "Please use a valid command!" << std::endl;
     }
+}  // namespace void Process(intargc,char*))
+
+int main(int argc, char** argv) {
+    Process(argc, argv);
 }
