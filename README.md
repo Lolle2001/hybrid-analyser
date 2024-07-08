@@ -136,7 +136,22 @@ Then do
 ```cpp
 void dofit(){
     CFitter::Chi2Function chi2;
+    chi2.SetParIndexes(indexmap);
+    chi2.SetData(xvals, yvals, xerrs, yerrs);
+    chi2.SetSpecies(species);
+    chi2.SetFitRange(fitranges);
     chi2.SetFitFunction(function);
+
+    CFitter::MultiFitter fitter;
+    fitter.FixPars(fixedpars);
+    fitter.LimitPars(limitpars);
+    fitter.SetParLimits(parlimits);
+    fitter.SetParStepsize(parsteps);
+    fitter.SetParNames(parnames);
+    fitter.SetParInit(parinit);
+    fitter.StepsizePars(stepsizepars);
+    fitter.Run(chi2);
+    ROOT::Fit::FitResult result = fitter.GetResult();
 }
 ```
 
