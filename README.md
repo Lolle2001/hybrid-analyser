@@ -61,6 +61,76 @@ To parse iSS data use `./analyser iss`, to parse AMPT data use `./analyser ampt`
 
 Default parameter values are read from the `analyser.par` file (such as default directories, which makes it easier to use).
 
+# Hybrid Analyser
+
+## Description
+
+## Installation
+
+### Dependencies
+
+Before compilation first make sure that all dependencies are installed.
+
+- [**GSL**](https://github.com/ampl/gsl)
+- [**ROOT**](https://github.com/root-project/root)
+- [**json**](https://github.com/nlohmann/json)
+- [**fmt**](https://github.com/fmtlib/fmt)
+- [**argparse**](https://github.com/p-ranav/argparse)
+- [**omp**](https://github.com/open-mpi/ompi)
+
+### Compilation
+
+> [!WARNING]
+> The program has been tested on linux and MacOS. Depending on your system you might need to modify the makefiles. Currently there is no CMake support.
+
+## Usage
+
+### Required data structure
+
+For the usage of _analyser_ it is assumed that the files have a certain name and that the data is sorted in a subfolders. In the following cases, the `-i` argument is given `{NAME}` as input. `{N}` is the event/batch number and is automatically determined.
+
+**IPGlasma**
+
+- `{NAME}/usedParameters{N}.dat`
+
+**MUSIC**
+
+- `{NAME}/{NAME}-{N}/evolution_for_movie_xyeta.dat`
+
+**iSS**
+
+- `{NAME}/{NAME}-{N}/particle_samples.bin`
+
+**AMPT**
+
+- `{NAME}/{NAME}-{N}//ana/ampt.dat`
+- `{NAME}/{NAME}-{N}//ampt.log`
+- `{NAME}/{NAME}-{N}//ana1/h-animate.dat`
+- `{NAME}/{NAME}-{N}//ana1/p-animate.dat`
+- `{NAME}/{NAME}-{N}//ana1/p-finalft.dat`
+
+### Running _analyser_ with command line arguments
+
+Running with command line arguments allows to use all features of the program.
+
+### Running _analyser_ with a configuration file
+
+Running with a configuration file allows to setup jobs quickly when the data is stored in the same folders.
+
+### Running _evo-ampt_
+
+### Running _evo-music_
+
+### Running _fitter_
+
+### Adding function to _fitter_
+
+Define a function in the form
+
+```[cpp]
+double function(double * x, double * par)
+```
+
 ## Future improvements
 
 - [ ] Add option to write animation histograms into .npy files, for fast loading in python.
@@ -69,6 +139,7 @@ Default parameter values are read from the `analyser.par` file (such as default 
 - [ ] Add subparsers for consistent and more controlable dataprocessing and less errors.
 - [x] Rename the repository to "hybrid-analyser" and executable to "analyser" and use subparsers to acces animation analysis and fitting.
 - [ ] Switch to JSON/HDF5
+- [ ] Add CMake support.
 
 [^1]: Z. W. Lin, C. M. Ko, B. A. Li, B. Zhang and S. Pal, _A Multi-phase transport model for relativistic heavy ion collisions_. Phys. Rev. C 72, 064901 (2005). https://doi.org/10.1103/PhysRevC.72.064901
 [^2]: Schenke, S. Jeon, C. Gale. _3+1D hydrodynamic simulation of relativistic heavy-ion collisions_. Phys.Rev.C 82, 014903 (2010) [arXiv:1004.1408](https://arxiv.org/abs/1004.1408)
