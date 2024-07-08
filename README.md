@@ -127,8 +127,17 @@ Running with a configuration file allows to setup jobs quickly when the data is 
 
 Define a function in the form
 
-```[c++]
-double function(double * x, double * par)
+```cpp
+double function(double * x, double * par);
+```
+
+Then do
+
+```cpp
+void dofit(){
+    CFitter::Chi2Function chi2;
+    chi2.SetFitFunction(function);
+}
 ```
 
 ## Future improvements
