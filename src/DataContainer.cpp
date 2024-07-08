@@ -40,9 +40,7 @@ void DataContainer::WriteData(std::string DataDirectory) {
     std::ofstream File;
 
     for (const auto &entry : Histograms3D) {
-        Filename << DataDirectory << "/" << Histograms3D[entry.first]->GetName()
-
-                 << "." << "json";
+        Filename << DataDirectory << "/" << Histograms3D[entry.first]->GetName() << "." << "json";
         File.open(Filename.str(), std::ios::out);
         Histograms3D[entry.first]->PrintAll(File);
         File.close();

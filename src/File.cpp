@@ -425,16 +425,18 @@ void File_ampt::ParseParticleStatistics() {
 }
 
 void File_iss::ParseEventStatistics() {
-    FILE* File = fopen(GetFileDirectory().c_str(), "rb");
+    // std::cout << "Parsing " << GetFileDirectory() << std::endl;
+    std::ifstream file(GetFileDirectory().c_str(), std::ios::binary | std::ios::in);
 
-    if (File) {
+    if (file.is_open()) {
         Statistics::Block_iss TempBlock(InitialState);
         Statistics::Line_iss TempLine;
-        size_t total_particles;
+        int total_particles;
         int pid;
         int eventid = 0;
         float array[9];
-        while (fread(&total_particles, sizeof(int), 1, File)) {
+        int arraysize = 9 * sizeof(float);
+        while (file.read(reinterpret_cast<char*>(&total_particles), sizeof(int))) {
             eventid++;
             TempBlock.SetNumberOfParticles(total_particles);
             TempBlock.SetEventID(eventid);
@@ -443,8 +445,8 @@ void File_iss::ParseEventStatistics() {
             double vnsin[Statistics::NUMBER_OF_HARMONICS + 1] = {0};
             unsigned int long chparticlemp = 0;
             for (index_t i = 0; i < TempBlock.GetNumberOfParticles(); ++i) {
-                fread(&pid, sizeof(int), 1, File);
-                fread(array, sizeof(float), 9, File);
+                file.read(reinterpret_cast<char*>(&pid), sizeof(int));
+                file.read(reinterpret_cast<char*>(array), arraysize);
                 TempLine = Statistics::Line_iss(pid, array);
 
                 TempLine.CalculateTransverseMomentum();
@@ -490,7 +492,7 @@ void File_iss::ParseEventStatistics() {
             fflush(stdout);
         }
     }
-    fclose(File);
+    file.close();
 }
 
 void File_iss::ParseParticleStatistics() {
@@ -501,7 +503,7 @@ void File_iss::ParseParticleStatistics() {
         Statistics::Block TempBlock;
         Statistics::Block_iss TempBlock_iss(InitialState);
         Statistics::Line_iss TempLine;
-        size_t total_particles;
+        int total_particles;
         int pid;
         // std::cout << GetFileDirectory().c_str() << std::endl;
 

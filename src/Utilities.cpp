@@ -17,6 +17,22 @@ namespace Utilities {
 //     }
 // }
 
+nlohmann::json read_json_safe(std::filesystem::path filename) {
+    nlohmann::json dictionary;
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open JSON file." << std::endl;
+        return dictionary;
+    }
+    try {
+        file >> dictionary;
+        return dictionary;
+    } catch (nlohmann::json::parse_error& e) {
+        std::cerr << "Failed to parse JSON: " << e.what() << std::endl;
+        return dictionary;
+    }
+}
+
 double igcd(double a, double b, double tol) {
     while (std::abs(b) > tol) {
         double temp = std::fmod(a, b);

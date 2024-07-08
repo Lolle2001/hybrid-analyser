@@ -5,7 +5,7 @@ case $(uname) in
         make -f make/analyser-linux.make -j12
         ;;
     Darwin)
-        make -f make/hybridp-apple.make -j12
+        make -f make/analyser-apple.make -j12
         ;;
     *)
         echo "Unsupported operating system"
