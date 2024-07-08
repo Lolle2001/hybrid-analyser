@@ -127,7 +127,7 @@ Running with a configuration file allows to setup jobs quickly when the data is 
 
 Define a function in the form
 
-```[cpp]
+```[c++]
 double function(double * x, double * par)
 ```
 
