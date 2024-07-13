@@ -1,0 +1,10 @@
+*.job
+analyser
+evo-ampt
+evo-music
+fitter
+upload.sh
+build
+.vscode
+src/old
+src/fitter-blastwave/old
