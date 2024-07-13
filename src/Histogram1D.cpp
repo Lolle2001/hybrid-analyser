@@ -228,8 +228,7 @@ void Histogram1D::operator+=(Histogram1D const& obj) {
             Contents[ix] += obj.Contents[ix];
         }
     } else {
-        printf("%s%s%s ", PP::WARNING, "[WARNING]", PP::RESET);
-        printf("%s\n", "Cannot add two HistogramMaps of different sizes!");
+        cst::man::warning("Cannot add two Histograms(1D) of different sizes!\n");
     }
 }
 

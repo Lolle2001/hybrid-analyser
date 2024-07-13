@@ -10,8 +10,6 @@
 #include "StatisticsContainer.hpp"
 #include "Utilities.hpp"
 
-using PP = Utilities::PretyPrint;
-
 // namespace AMPT {
 namespace Statistics {
 

@@ -17,8 +17,6 @@
 #include "StatisticsContainer.hpp"
 #include "Utilities.hpp"
 
-using PP = Utilities::PretyPrint;
-
 // typedef unsigned int size_t;
 
 // namespace AMPT {

@@ -6,6 +6,7 @@
 #include <fmt/format.h>
 
 #include "File.hpp"
+#include "Messenger.hpp"
 #include "Progressbar.hpp"
 #include "Timer.hpp"
 #include "Utilities.hpp"

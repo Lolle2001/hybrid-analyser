@@ -14,8 +14,6 @@
 #include "Evolution_ampt_pfinalft_2.hpp"
 #include "Evolution_ampt_utilities.hpp"
 
-using PP = Utilities::PretyPrint;
-
 int test_hadron(int argc, char **argv, AMPT::Evolution::Parameters &parameters) {
     std::string runnumber = argv[1];
     std::string batchnumber = "1";

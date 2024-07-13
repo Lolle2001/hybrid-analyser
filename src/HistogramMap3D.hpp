@@ -16,8 +16,6 @@
 #include "StatisticsContainer.hpp"
 #include "Utilities.hpp"
 
-using PP = Utilities::PretyPrint;
-
 namespace Statistics {
 using Vector3DMap = std::vector<std::vector<std::vector<std::map<int, StatisticsContainer>>>>;
 using Vector2DMap = std::vector<std::vector<std::map<int, StatisticsContainer>>>;

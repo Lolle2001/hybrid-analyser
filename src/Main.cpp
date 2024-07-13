@@ -13,12 +13,15 @@
 
 #include "File.hpp"
 #include "FileProcessor.hpp"
+#include "Messenger.hpp"
 #include "Utilities.hpp"
 
 #define NAME "analyser"
 #define AUTHOR "Liewe Huisman"
 #define PROGRAM_VERSION "1.0.0"
-#define DEBUG 0
+#define DEBUGFLAG 0
+
+//
 
 void Process(int argc, char* argv[]) {
     argparse::ArgumentParser program(NAME, PROGRAM_VERSION);
@@ -136,6 +139,19 @@ void Process(int argc, char* argv[]) {
             output_path /= suboutput;
         }
 
+        std::vector<std::filesystem::path> data_files_for_test;
+
+        for (int i = 0; i < data_paths.size(); ++i) {
+            data_files_for_test.push_back(std::filesystem::absolute(data_directory / data_paths[i]));
+        }
+
+        bool data_error_state = Utilities::files_exist(data_files_for_test);
+        // bool log_error_state = Utilities::files_exist(log_files_for_test);
+        if (!data_error_state) {
+            cst::man::error("One or more of the input files do not exist!\n");
+            std::exit(1);
+        }
+
         size_t number_of_inputs = data_paths.size();
         std::vector<std::filesystem::path> data_files;
         std::vector<std::filesystem::path> log_files;
@@ -161,6 +177,7 @@ void Process(int argc, char* argv[]) {
         logstring += fmt::format("│ {:18} : {:{}} │\n", "Outputdirectory", output_directory.string(), width - 18 - 3);
         logstring += fmt::format("╰{}╯\n", Utilities::repeat(width + 2, "─"));
         std::cout << logstring;
+
         AMPT::ProcessFiles(data_files, log_files, collisiontype, output_directory / output_path);
 
     } else if (program.is_subcommand_used("iss")) {
@@ -180,6 +197,23 @@ void Process(int argc, char* argv[]) {
             std::string suboutput;
             Utilities::json_to_parameter(parameter_dictionary["iss"], "default_output_extension", suboutput);
             output_path /= suboutput;
+        }
+
+        std::vector<std::filesystem::path> data_files_for_test;
+        std::vector<std::filesystem::path> log_files_for_test;
+        for (int i = 0; i < data_paths.size(); ++i) {
+            data_files_for_test.push_back(std::filesystem::absolute(data_directory / data_paths[i]));
+            log_files_for_test.push_back(std::filesystem::absolute(log_directory / log_paths[i]));
+        }
+
+        bool data_error_state = Utilities::files_exist(data_files_for_test);
+        bool log_error_state = Utilities::files_exist(log_files_for_test);
+        if (!data_error_state || !log_error_state) {
+            // std::string mes;
+            // mes += fmt::format("{}[ERROR]{} ", Utilities::PretyPrint::ERROR, Utilities::PretyPrint::RESET);
+            // mes += fmt::format("One or more of the input files do not exist.\n");
+            std::cout << cst::man::error << "One or more of the input files do not exist!" << std::endl;
+            std::exit(1);
         }
 
         size_t number_of_inputs = data_paths.size();
@@ -213,6 +247,7 @@ void Process(int argc, char* argv[]) {
         logstring += fmt::format("│ {:18} : {:{}} │\n", "Logdirectory", log_directory.string(), width - 18 - 3);
         logstring += fmt::format("╰{}╯\n", Utilities::repeat(width + 2, "─"));
         std::cout << logstring;
+
         iSS::ProcessFiles(data_files, log_files, collisiontype, output_directory / output_path);
 
     } else {

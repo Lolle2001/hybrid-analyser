@@ -64,10 +64,7 @@ void File_iss::Parse() {
     } else {
 #pragma omp critical
         {
-            printf("%s%s%s ", PP::WARNING, "[WARNING]", PP::RESET);
-            printf("%-17s : %s\n", "Cannot open file",
-                   GetFileDirectory().c_str());
-            fflush(stdout);
+            cst::man::warning("Cannot open file : {}\n", GetFileDirectory().c_str());
         }
     }
     fclose(File);
@@ -111,22 +108,13 @@ void File_ampt::ParseLog() {
     } else {
 #pragma omp critical
         {
-            printf("%s%s%s ", PP::WARNING, "[WARNING]", PP::RESET);
-            printf("%-17s : %s\n", "Cannot open file",
-                   GetFileDirectory().c_str());
-            fflush(stdout);
+            cst::man::warning("Cannot open file : {}\n", GetFileDirectory().c_str());
         }
     }
     File.close();
 }
 
 void File_ampt::Parse() {
-    // #pragma omp critical
-    //     {
-    //         printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
-    //         printf("%-17s : %s\n", "Parsing data from", GetFileDirectory().c_str());
-    //         fflush(stdout);
-    //     }
     ParseLog();
 
     std::ifstream File;
@@ -154,21 +142,10 @@ void File_ampt::Parse() {
         }
         GetFileData().ShrinkEventBlocks();
 
-        // #pragma omp critical
-        //         {
-        //             printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-        //             printf("%-17s : %s\n", "Parsed data from",
-        //                    GetFileDirectory().c_str());
-        //             fflush(stdout);
-        //         }
-
     } else {
 #pragma omp critical
         {
-            printf("%s%s%s ", PP::WARNING, "[WARNING]", PP::RESET);
-            printf("%-17s : %s\n", "Cannot open file",
-                   GetFileDirectory().c_str());
-            fflush(stdout);
+            cst::man::warning("Cannot open file : {}\n", GetFileDirectory().c_str());
         }
     }
     File.close();
@@ -241,10 +218,7 @@ void File_ampt::ParseFull() {
     } else {
 #pragma omp critical
         {
-            printf("%s%s%s ", PP::WARNING, "[WARNING]", PP::RESET);
-            printf("%-17s : %s\n", "Cannot open file",
-                   GetFileDirectory().c_str());
-            fflush(stdout);
+            cst::man::warning("Cannot open file : {}\n", GetFileDirectory().c_str());
         }
     }
     File.close();
@@ -308,10 +282,7 @@ void File_iss::ParseFull() {
     } else {
 #pragma omp critical
         {
-            printf("%s%s%s ", PP::WARNING, "[WARNING]", PP::RESET);
-            printf("%-17s : %s\n", "Cannot open file",
-                   GetFileDirectory().c_str());
-            fflush(stdout);
+            cst::man::warning("Cannot open file : {}\n", GetFileDirectory().c_str());
         }
     }
     fclose(File);
@@ -374,10 +345,7 @@ void File_ampt::ParseEventStatistics() {
     } else {
 #pragma omp critical
         {
-            printf("%s%s%s ", PP::WARNING, "[WARNING]", PP::RESET);
-            printf("%-17s : %s\n", "Cannot open file",
-                   GetFileDirectory().c_str());
-            fflush(stdout);
+            cst::man::warning("Cannot open file : {}\n", GetFileDirectory().c_str());
         }
     }
     File.close();
@@ -415,10 +383,7 @@ void File_ampt::ParseParticleStatistics() {
     } else {
 #pragma omp critical
         {
-            printf("%s%s%s ", PP::WARNING, "[WARNING]", PP::RESET);
-            printf("%-17s : %s\n", "Cannot open file",
-                   GetFileDirectory().c_str());
-            fflush(stdout);
+            cst::man::warning("Cannot open file : {}\n", GetFileDirectory().c_str());
         }
     }
     File.close();
@@ -486,10 +451,7 @@ void File_iss::ParseEventStatistics() {
     } else {
 #pragma omp critical
         {
-            printf("%s%s%s ", PP::WARNING, "[WARNING]", PP::RESET);
-            printf("%-17s : %s\n", "Cannot open file",
-                   GetFileDirectory().c_str());
-            fflush(stdout);
+            cst::man::warning("Cannot open file : {}\n", GetFileDirectory().c_str());
         }
     }
     file.close();
@@ -542,10 +504,7 @@ void File_iss::ParseParticleStatistics() {
     } else {
 #pragma omp critical
         {
-            printf("%s%s%s ", PP::WARNING, "[WARNING]", PP::RESET);
-            printf("%-17s : %s\n", "Cannot open file",
-                   GetFileDirectory().c_str());
-            fflush(stdout);
+            cst::man::warning("Cannot open file : {}\n", GetFileDirectory().c_str());
         }
     }
     file.close();

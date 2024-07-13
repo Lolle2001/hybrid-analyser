@@ -2,6 +2,19 @@
 #include "Utilities.hpp"
 namespace Utilities {
 
+// namespace cst {
+// namespace filesystem {
+// std::filesystem::path absolute_without_relative_symbols(const std::filesystem::path& path) {
+//     std::filesystem::path result;
+//     try {
+//         result = std::filesystem::canonical(path);
+//     } catch (const std::filesystem::filesystem_error& e) {
+//         std::cerr << "Error converting the path string: " << e.what() << std::endl;
+//     }
+//     return result;
+// }
+// }  // namespace filesystem
+// }  // namespace cst
 // void Concatenate(std::vector<Statistics::Block> &v1, const std::vector<Statistics::Block> &v2) {
 //     v1.insert(std::end(v1), std::begin(v2), std::end(v2));
 // };
@@ -16,19 +29,30 @@ namespace Utilities {
 //         return (igcd(b, a - std::floor(a / b) * b, base));
 //     }
 // }
+bool files_exist(const std::vector<std::filesystem::path>& paths) {
+    bool no_error = true;
+    for (auto path : paths) {
+        if (!std::filesystem::exists(path)) {
+            cst::man::warning("No such file found: {}\n", std::filesystem::absolute(path).string());
+
+            no_error = false;
+        }
+    }
+    return no_error;
+}
 
 nlohmann::json read_json_safe(std::filesystem::path filename) {
     nlohmann::json dictionary;
     std::ifstream file(filename);
     if (!file.is_open()) {
-        std::cerr << "Failed to open JSON file." << std::endl;
+        std::cerr << cst::man::error << "Failed to open JSON file." << std::endl;
         return dictionary;
     }
     try {
         file >> dictionary;
         return dictionary;
     } catch (nlohmann::json::parse_error& e) {
-        std::cerr << "Failed to parse JSON: " << e.what() << std::endl;
+        std::cerr << cst::man::error << "Failed to parse JSON: " << e.what() << std::endl;
         return dictionary;
     }
 }

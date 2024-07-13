@@ -253,9 +253,7 @@ void DataContainer::Add(DataContainer const &obj) {
         } else {
 #pragma omp critical
             {
-                printf("%s%s%s ", PP::WARNING, "[WARNING]", PP::RESET);
-                printf("%s\n", "Cannot add file object");
-                fflush(stdout);
+                cst::man::warning("Cannot add histogram object!\n");
             }
         }
     }
@@ -268,9 +266,7 @@ void DataContainer::Add(DataContainer const &obj) {
         } else {
 #pragma omp critical
             {
-                printf("%s%s%s ", PP::WARNING, "[WARNING]", PP::RESET);
-                printf("%s\n", "Cannot add file object");
-                fflush(stdout);
+                cst::man::warning("Cannot add histogram object!\n");
             }
         }
     }
@@ -287,9 +283,7 @@ void DataContainer::Add(DataContainer const &obj) {
         else {
 #pragma omp critical
             {
-                printf("%s%s%s ", PP::WARNING, "[WARNING]", PP::RESET);
-                printf("%s\n", "Cannot add file object");
-                fflush(stdout);
+                cst::man::warning("Cannot add histogram object!\n");
             }
         }
     }
@@ -300,9 +294,7 @@ void DataContainer::Add(DataContainer const &obj) {
         } else {
 #pragma omp critical
             {
-                printf("%s%s%s ", PP::WARNING, "[WARNING]", PP::RESET);
-                printf("%s\n", "Cannot add file object");
-                fflush(stdout);
+                cst::man::warning("Cannot add histogram object!\n");
             }
         }
     }

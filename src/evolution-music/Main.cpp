@@ -12,8 +12,6 @@
 #include "../evolution-ampt/Evolution_ampt_parameters.hpp"
 #include "Evolution_music_movie.hpp"
 
-using PP = Utilities::PretyPrint;
-
 void process_file(int argc, char **argv) {
     std::string runnumber = argv[1];
     std::string runbatch = argv[2];

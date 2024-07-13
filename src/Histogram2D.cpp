@@ -275,8 +275,7 @@ void Histogram2D::operator+=(Histogram2D const& obj) {
             }
         }
     } else {
-        printf("%s%s%s ", PP::WARNING, "[WARNING]", PP::RESET);
-        printf("%s\n", "Cannot add two HistogramMaps of different sizes!");
+        cst::man::warning("Cannot add two Histograms(2D) of different sizes!\n");
     }
 }
 

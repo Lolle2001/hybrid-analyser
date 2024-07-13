@@ -482,8 +482,7 @@ void HistogramMap3D::operator+=(HistogramMap3D const& obj) {
             }
         }
     } else {
-        printf("%s%s%s ", PP::WARNING, "[WARNING]", PP::RESET);
-        printf("%s\n", "Cannot add two HistogramMaps of different sizes!");
+        cst::man::warning("Cannot add two Histograms(MAP3D) of different sizes!\n");
     }
 }
 

@@ -17,8 +17,6 @@
 #include "StatisticsContainer.hpp"
 #include "Utilities.hpp"
 
-using PP = Utilities::PretyPrint;
-
 // namespace AMPT {
 namespace Statistics {
 using Vector3DMap = std::vector<std::vector<std::vector<std::map<int, StatisticsContainer>>>>;

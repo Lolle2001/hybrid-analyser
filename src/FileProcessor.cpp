@@ -15,11 +15,11 @@ void ProcessFiles(
 
     size_t number_of_files = datafiles.size();
 
-    barstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
+    barstring = cst::dec::pending("[INFO]");
     progressbar = Utilities::Progressbar(number_of_files);
     progressbar.SetFrontString(barstring);
     // progressbar.SetDoneChar("█");
-    progressbar.SetDoneChar(std::string("\033[38;2;57;181;74m█") + PP::RESET);
+    progressbar.SetDoneChar(cst::dec::success("█"));
     progressbar.SetTodoChar("░");
     progressbar.SetStartChar("║");  //"▕");
     progressbar.SetEndChar("║");
@@ -29,19 +29,14 @@ void ProcessFiles(
         filesize_data += Utilities::GetFileSize(datafiles[i], 3);
         filesize_data += Utilities::GetFileSize(logfiles[i], 3);
     }
-    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
-    logstring += fmt::format("Number of files to read : {}{}{}", PP::HIGHLIGHT, number_of_files, PP::RESET);
-    std::cout << logstring << std::endl;
-    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
-    logstring += fmt::format("Total datasize to read : {}{:.3} GB{}", PP::HIGHLIGHT, filesize_data, PP::RESET);
-    std::cout << logstring << std::endl;
+
+    cst::man::pending("Number of files to read : {}\n", cst::dec::highlight(std::to_string(number_of_files)));
+    cst::man::pending("Total datasize to read : {}\n", cst::dec::highlight("{:.3} GB", filesize_data));
 
     std::unique_ptr<Model::File_ampt> data_container_combined = std::make_unique<Model::File_ampt>(collisiontype);
     std::vector<std::unique_ptr<Model::File_ampt>> data_container(number_of_files);
 
-    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
-    logstring += fmt::format("Initializing file objects ...");
-    std::cout << logstring << std::endl;
+    cst::man::pending("Initializing file objects ...\n");
 
     progressbar.Print();
     timer.Start();
@@ -64,9 +59,7 @@ void ProcessFiles(
 
     progressbar.Reset();
 
-    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
-    logstring += fmt::format("Parsing event statistics ...");
-    std::cout << logstring << std::endl;
+    cst::man::pending("Parsing event statistics ...\n");
 
     progressbar.Print();
 #pragma omp parallel
@@ -100,9 +93,7 @@ void ProcessFiles(
 
     progressbar.Reset();
 
-    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
-    logstring += fmt::format("Initialize data containers ...");
-    std::cout << logstring << std::endl;
+    cst::man::pending("Initialize data containers ...\n");
 
     progressbar.Print();
 #pragma omp parallel
@@ -120,10 +111,7 @@ void ProcessFiles(
     std::cout << std::endl;
     progressbar.Reset();
 
-    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
-    logstring += fmt::format("Parsing particle statistics ...");
-    std::cout << logstring << std::endl;
-
+    cst::man::pending("Parsing particle statistics ...\n");
     progressbar.Print();
 
 #pragma omp parallel
@@ -142,9 +130,7 @@ void ProcessFiles(
     std::cout << std::endl;
     progressbar.Reset();
 
-    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
-    logstring += fmt::format("Combining statistics ...");
-    std::cout << logstring << std::endl;
+    cst::man::pending("Combining statistics ...\n");
 
     progressbar.Print();
 
@@ -161,9 +147,8 @@ void ProcessFiles(
 
     timer.Stop();
 
-    logstring = fmt::format("{}{}[INFO]{} ", PP::FINISHED, PP::BOLD, PP::RESET);
-    logstring += fmt::format("Analysis time : {}{:04d}:{:02d}:{:02d}.{:03d}{}", PP::HIGHLIGHT, (int)timer.chours, (int)timer.cminutes, (int)timer.cseconds, (int)timer.cmilliseconds, PP::RESET);
-    std::cout << logstring << std::endl;
+    cst::man::success("Analysis time : {}\n",
+                      cst::dec::highlight("{:04d}:{:02d}:{:02d}.{:03d}", (int)timer.chours, (int)timer.cminutes, (int)timer.cseconds, (int)timer.cmilliseconds));
 
     timer.Start();
 
@@ -176,13 +161,10 @@ void ProcessFiles(
     for (const auto& entry : output_directory_iteratator) {
         filesize_result += Utilities::GetFileSize(entry.path(), 2);
     }
-    logstring = fmt::format("{}{}[INFO]{} ", PP::FINISHED, PP::BOLD, PP::RESET);
-    logstring += fmt::format("Writing time : {}{:04d}:{:02d}:{:02d}.{:03d}{}", PP::HIGHLIGHT, (int)timer.chours, (int)timer.cminutes, (int)timer.cseconds, (int)timer.cmilliseconds, PP::RESET);
-    std::cout << logstring << std::endl;
+    cst::man::success("Writing time : {}\n",
+                      cst::dec::highlight("{:04d}:{:02d}:{:02d}.{:03d}", (int)timer.chours, (int)timer.cminutes, (int)timer.cseconds, (int)timer.cmilliseconds));
 
-    logstring = fmt::format("{}{}[INFO]{} ", PP::FINISHED, PP::BOLD, PP::RESET);
-    logstring += fmt::format("Total datasize written : {}{:.3} MB{}", PP::HIGHLIGHT, filesize_result, PP::RESET);
-    std::cout << logstring << std::endl;
+    cst::man::success("Total datasize written : {}\n", cst::dec::highlight("{:.3} GB", filesize_result));
 }
 
 }  // namespace AMPT
@@ -236,10 +218,10 @@ void ProcessFiles(
 
     size_t number_of_files = datafiles.size();
 
-    barstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
+    barstring = cst::dec::pending("[INFO]");
     progressbar = Utilities::Progressbar(number_of_files);
     progressbar.SetFrontString(barstring);
-    progressbar.SetDoneChar(std::string("\033[38;2;57;181;74m█") + PP::RESET);
+    progressbar.SetDoneChar(cst::dec::success("█"));
     progressbar.SetTodoChar("░");
     progressbar.SetStartChar("║");  //"▕");
     progressbar.SetEndChar("║");
@@ -249,19 +231,13 @@ void ProcessFiles(
         filesize_data += Utilities::GetFileSize(datafiles[i], 3);
         filesize_data += Utilities::GetFileSize(logfiles[i], 3);
     }
-    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
-    logstring += fmt::format("Number of files to read : {}{}{}", PP::HIGHLIGHT, number_of_files, PP::RESET);
-    std::cout << logstring << std::endl;
-    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
-    logstring += fmt::format("Total datasize to read : {}{:.3} GB{}", PP::HIGHLIGHT, filesize_data, PP::RESET);
-    std::cout << logstring << std::endl;
+    cst::man::pending("Number of files to read : {}\n", cst::dec::highlight(std::to_string(number_of_files)));
+    cst::man::pending("Total datasize to read : {}\n", cst::dec::highlight("{:.3} GB", filesize_data));
 
     std::unique_ptr<Model::File_iss> data_container_combined = std::make_unique<Model::File_iss>(collisiontype);
     std::vector<std::unique_ptr<Model::File_iss>> data_container(number_of_files);
 
-    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
-    logstring += fmt::format("Initializing file objects ...");
-    std::cout << logstring << std::endl;
+    cst::man::pending("Initializing file objects ...\n");
 
     progressbar.Print();
     timer.Start();
@@ -287,9 +263,7 @@ void ProcessFiles(
 
     progressbar.Reset();
 
-    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
-    logstring += fmt::format("Parsing event statistics ...");
-    std::cout << logstring << std::endl;
+    cst::man::pending("Parsing event statistics ...\n");
 
     progressbar.Print();
 
@@ -324,9 +298,7 @@ void ProcessFiles(
 
     progressbar.Reset();
 
-    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
-    logstring += fmt::format("Initialize data containers ...");
-    std::cout << logstring << std::endl;
+    cst::man::pending("Initialize data containers ...\n");
 
     progressbar.Print();
 
@@ -346,9 +318,7 @@ void ProcessFiles(
     std::cout << std::endl;
     progressbar.Reset();
 
-    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
-    logstring += fmt::format("Parsing particle statistics ...");
-    std::cout << logstring << std::endl;
+    cst::man::pending("Parsing particle statistics ...\n");
 
     progressbar.Print();
 
@@ -368,9 +338,7 @@ void ProcessFiles(
     std::cout << std::endl;
     progressbar.Reset();
 
-    logstring = fmt::format("{}{}[INFO]{} ", PP::STARTED, PP::BOLD, PP::RESET);
-    logstring += fmt::format("Combining statistics ...");
-    std::cout << logstring << std::endl;
+    cst::man::pending("Combining statistics ...\n");
 
     progressbar.Print();
 
@@ -384,9 +352,8 @@ void ProcessFiles(
 
     timer.Stop();
 
-    logstring = fmt::format("{}{}[INFO]{} ", PP::FINISHED, PP::BOLD, PP::RESET);
-    logstring += fmt::format("Analysis time : {}{:04d}:{:02d}:{:02d}.{:03d}{}", PP::HIGHLIGHT, (int)timer.chours, (int)timer.cminutes, (int)timer.cseconds, (int)timer.cmilliseconds, PP::RESET);
-    std::cout << logstring << std::endl;
+    cst::man::success("Analysis time : {}\n",
+                      cst::dec::highlight("{:04d}:{:02d}:{:02d}.{:03d}", (int)timer.chours, (int)timer.cminutes, (int)timer.cseconds, (int)timer.cmilliseconds));
 
     timer.Start();
 
@@ -401,12 +368,9 @@ void ProcessFiles(
         filesize_result += Utilities::GetFileSize(entry.path(), 2);
     }
 
-    logstring = fmt::format("{}{}[INFO]{} ", PP::FINISHED, PP::BOLD, PP::RESET);
-    logstring += fmt::format("Writing time : {}{:04d}:{:02d}:{:02d}.{:03d}{}", PP::HIGHLIGHT, (int)timer.chours, (int)timer.cminutes, (int)timer.cseconds, (int)timer.cmilliseconds, PP::RESET);
-    std::cout << logstring << std::endl;
+    cst::man::success("Writing time : {}\n",
+                      cst::dec::highlight("{:04d}:{:02d}:{:02d}.{:03d}", (int)timer.chours, (int)timer.cminutes, (int)timer.cseconds, (int)timer.cmilliseconds));
 
-    logstring = fmt::format("{}{}[INFO]{} ", PP::FINISHED, PP::BOLD, PP::RESET);
-    logstring += fmt::format("Total datasize written : {}{:.3} MB{}", PP::HIGHLIGHT, filesize_result, PP::RESET);
-    std::cout << logstring << std::endl;
+    cst::man::success("Total datasize written : {}\n", cst::dec::highlight("{:.3} GB", filesize_result));
 }
 }  // namespace iSS
