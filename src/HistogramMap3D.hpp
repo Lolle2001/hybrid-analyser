@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #ifndef HISTOGRAMMAP3D_HPP
 #define HISTOGRAMMAP3D_HPP
 
@@ -15,8 +16,6 @@
 #include "StatisticsContainer.hpp"
 #include "Utilities.hpp"
 
-using PP = Utilities::PretyPrint;
-
 namespace Statistics {
 using Vector3DMap = std::vector<std::vector<std::vector<std::map<int, StatisticsContainer>>>>;
 using Vector2DMap = std::vector<std::vector<std::map<int, StatisticsContainer>>>;
@@ -32,7 +31,7 @@ class HistogramMap3D {
     Vector3DMap Contents;
     Vector1DMapVector2D ContentsConverted;
 
-    int nx, ny, nz;
+    size_t nx, ny, nz;
 
     std::map<int, int> IndexMapX;
     std::map<int, int> IndexMapY;
@@ -51,21 +50,26 @@ class HistogramMap3D {
     std::vector<double> EdgesY;
     std::vector<double> EdgesZ;
 
+    std::string Name;
+
    public:
     HistogramMap3D(){};
     // HistogramMap3D(int & nx_, int & ny_, int & nz_);
-    HistogramMap3D(std::vector<double> EdgesX_, std::vector<double> EdgesY_, std::vector<double> EdgesZ_);
+    HistogramMap3D(std::string Name_, std::vector<double> EdgesX_, std::vector<double> EdgesY_, std::vector<double> EdgesZ_);
 
-    void Resize(int& nx_, int& ny_, int& nz_);
+    void Resize(size_t& nx_, size_t& ny_, size_t& nz_);
 
     void InitializeIndexMap();
 
     void AddEvent();
+    void AddEventAverage();
 
     void Add(double& valx, double& valy, double& valz, int& key, double valcontent);
     void AddCurrent(double& valx, double& valy, double& valz, int& key, double valcontent);
 
     void Convert();
+
+    std::string& GetName();
 
     void PrintEdges(std::ostream& output);
     void PrintTotalSQR(std::ostream& output);
@@ -77,46 +81,46 @@ class HistogramMap3D {
     void ReadTotal(std::string filename);
     void ReadCount(std::string filename);
 
-    int GetNbinsX() { return nx; };
-    int GetNbinsY() { return ny; };
-    int GetNbinsZ() { return nz; };
+    size_t GetNbinsX() { return nx; };
+    size_t GetNbinsY() { return ny; };
+    size_t GetNbinsZ() { return nz; };
 
-    double GetBinWidthX(int ix) {
+    double GetBinWidthX(index_t ix) {
         if (ix < nx) {
             return (EdgesX[ix + 1] - EdgesX[ix]);
         } else {
             return 0;
         }
     }
-    double GetBinWidthY(int iy) {
+    double GetBinWidthY(index_t iy) {
         if (iy < ny) {
             return (EdgesY[iy + 1] - EdgesY[iy]);
         } else {
             return 0;
         }
     }
-    double GetBinWidthZ(int iz) {
+    double GetBinWidthZ(index_t iz) {
         if (iz < nz) {
             return (EdgesZ[iz + 1] - EdgesZ[iz]);
         } else {
             return 0;
         }
     }
-    double GetBinMidX(int ix) {
+    double GetBinMidX(index_t ix) {
         if (ix < nx) {
             return (EdgesX[ix + 1] + EdgesX[ix]) / 2;
         } else {
             return 0;
         }
     }
-    double GetBinMidY(int iy) {
+    double GetBinMidY(index_t iy) {
         if (iy < ny) {
             return (EdgesY[iy + 1] + EdgesY[iy]) / 2;
         } else {
             return 0;
         }
     }
-    double GetBinMidZ(int iz) {
+    double GetBinMidZ(index_t iz) {
         if (iz < nz) {
             return (EdgesZ[iz + 1] + EdgesZ[iz]) / 2;
         } else {
@@ -134,10 +138,10 @@ class HistogramMap3D {
         return EdgesZ;
     }
 
-    StatisticsContainer& operator()(int& ix, int& iy, int& iz, int& key);
-    Vector0DMap& operator()(int& ix, int& iy, int& iz);
-    Vector1DMap& operator()(int& ix, int& iy);
-    Vector2DMap& operator()(int& ix);
+    StatisticsContainer& operator()(index_t& ix, index_t& iy, index_t& iz, index_t& key);
+    Vector0DMap& operator()(index_t& ix, index_t& iy, index_t& iz);
+    Vector1DMap& operator()(index_t& ix, index_t& iy);
+    Vector2DMap& operator()(index_t& ix);
 
     StatisticsContainer& operator()(double& valx, double& valy, double& valz, int& key);
     Vector0DMap& operator()(double& valx, double& valy, double& valz);

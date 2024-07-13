@@ -1,160 +1,186 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #include "FileProcessor.hpp"
+
 namespace AMPT {
-void ReadFiles(int NRun, int NBatchMin, int NBatchMax, std::string Directory, int collisiontype) {
-    printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
-    printf("%s : %d(%d)\n", "Reading data from run (size)", NRun, NBatchMax - NBatchMin + 1);
-    fflush(stdout);
 
-    std::unique_ptr<Model::File_ampt> campt = std::make_unique<Model::File_ampt>();
+void ProcessFiles(
+    std::vector<std::filesystem::path> datafiles,
+    std::vector<std::filesystem::path> logfiles,
+    unsigned int collisiontype,
+    std::filesystem::path output_directory) {
+    std::string barstring;
+    Utilities::Progressbar progressbar;
+    std::string logstring;
+    Utilities::Duration timer('H');
 
-    campt->InitializeDataContainer();
-    std::vector<std::unique_ptr<Model::File_ampt>> data;
+    size_t number_of_files = datafiles.size();
 
-    data.resize(NBatchMax - NBatchMin + 1);
-    // File_input * input;
-    int BatchSize = NBatchMax - NBatchMin + 1;
+    barstring = cst::dec::pending("[INFO]");
+    progressbar = Utilities::Progressbar(number_of_files);
+    progressbar.SetFrontString(barstring);
+    // progressbar.SetDoneChar("█");
+    progressbar.SetDoneChar(cst::dec::success("█"));
+    progressbar.SetTodoChar("░");
+    progressbar.SetStartChar("║");  //"▕");
+    progressbar.SetEndChar("║");
 
-    double FileSize = 0;
-    for (int i = NBatchMin; i <= NBatchMax; ++i) {
-        FileSize += Utilities::GetFileSize(Directory + "/" + std::to_string(NRun) + "/" + std::to_string(NRun) + "_" + std::to_string(i) + "/ana/ampt.dat", 3);
-    }
-    printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
-    printf("%s : %s%.3f GB%s\n", "Total datasize to read", PP::HIGHLIGHT, FileSize, PP::RESET);
-    fflush(stdout);
-
-    // int TotalNevent = 0;
-
-    // int nevent[50];
-    // for(int i = NBatchMin; i <= NBatchMax; ++i){
-    //     input = new File_input(Directory + std::to_string(NRun)+ "/" + std::to_string(NRun) + "_" + std::to_string(i) + "/ana/input.ampt");
-    //     input -> ReadFile();
-    //     TotalNevent += input -> NEVENT;
-    //     nevent[i] = input -> NEVENT;
-
-    // }
-    // printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
-    // printf("%s : %s%d%s\n", "Total datasize to read", PP::HIGHLIGHT, TotalNevent, PP::RESET);
-    // fflush(stdout);
-
-    // std::cout << input -> IAT << " " << input -> IZT << std::endl;
-
-    for (int i = NBatchMin; i <= NBatchMax; ++i) {
-        data[i] = std::make_unique<Model::File_ampt>(Directory + "/" + std::to_string(NRun) + "/" + std::to_string(NRun) + "_" + std::to_string(i) + "/ana/ampt.dat", collisiontype);
-        data[i]->InitializeDataContainer();
-        // data[i] -> Data.SetParameters(input);
-        // data[i] -> Data.InitializeHistograms();
+    double filesize_data = 0;
+    for (index_t i = 0; i < number_of_files; ++i) {
+        filesize_data += Utilities::GetFileSize(datafiles[i], 3);
+        filesize_data += Utilities::GetFileSize(logfiles[i], 3);
     }
 
-    Utilities::Duration Clock('M');
-    Clock.Start();
-    int Counter = 0;
+    cst::man::pending("Number of files to read : {}\n", cst::dec::highlight(std::to_string(number_of_files)));
+    cst::man::pending("Total datasize to read : {}\n", cst::dec::highlight("{:.3} GB", filesize_data));
+
+    std::unique_ptr<Model::File_ampt> data_container_combined = std::make_unique<Model::File_ampt>(collisiontype);
+    std::vector<std::unique_ptr<Model::File_ampt>> data_container(number_of_files);
+
+    cst::man::pending("Initializing file objects ...\n");
+
+    progressbar.Print();
+    timer.Start();
+
 #pragma omp parallel
     {
-#pragma omp for
-        for (int i = NBatchMin; i <= NBatchMax; ++i) {
-            data[i]->Parse();
-#pragma omp atomic
-            {
-                Counter++;
-            }
+#pragma omp for schedule(dynamic)
+        for (index_t i = 0; i < number_of_files; ++i) {
+            data_container[i] = std::make_unique<Model::File_ampt>(logfiles[i], datafiles[i], collisiontype);
+            progressbar.Update();
+
 #pragma omp critical
             {
-                std::cout << "finished " << Counter << " of " << BatchSize;
+                progressbar.Print();
             }
         }
     }
 
-    for (int i = NBatchMin; i <= NBatchMax; ++i) {
-        *campt += *data[i];
+    std::cout << std::endl;
+
+    progressbar.Reset();
+
+    cst::man::pending("Parsing event statistics ...\n");
+
+    progressbar.Print();
+#pragma omp parallel
+    {
+#pragma omp for schedule(dynamic)
+        for (index_t i = 0; i < number_of_files; ++i) {
+            data_container[i]->ParseEventStatistics();
+            progressbar.Update();
+
+#pragma omp critical
+            {
+                progressbar.Print();
+            }
+        }
+    }
+    std::cout << std::endl;
+
+    std::unique_ptr<Model::File_ampt> dummy = std::make_unique<Model::File_ampt>(collisiontype);
+    for (index_t i = 0; i < number_of_files; ++i) {
+        dummy->GetFileData().InsertBlocks(data_container[i]->GetFileData());
     }
 
-    Clock.Stop();
+    dummy->GetFileData().CalculateCentralityClasses();
 
-    printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-    printf("%s : %s%03ld:%02lld.%03lld%s\n", "Reading time", PP::HIGHLIGHT, Clock.cminutes, Clock.cseconds, Clock.cmilliseconds, PP::RESET);
-    fflush(stdout);
-
-    Clock.Start();
-
-    std::stringstream datadirectory;
-    datadirectory << Directory << "/" << NRun << "/"
-                  << "processed";
-    system(("mkdir -p \"" + datadirectory.str() + "\"").c_str());
-    campt->WriteData(datadirectory.str());
-
-    Clock.Stop();
-
-    long double totalsize = 0;
-    std::filesystem::recursive_directory_iterator datadirectory_iter(datadirectory.str());
-    for (const auto& entry : datadirectory_iter) {
-        totalsize += Utilities::GetFileSize(entry.path(), 2);
-        // std::cout <<  << std::endl;
+    for (index_t i = 0; i < number_of_files; ++i) {
+        data_container[i]->GetFileData().SetCentralityEdges("ncharged", dummy->GetFileData().GetCentralityEdges("ncharged"));
     }
+    data_container_combined->GetFileData().SetCentralityEdges("ncharged", dummy->GetFileData().GetCentralityEdges("ncharged"));
 
-    printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-    printf("%s : %s%03ld:%02lld.%03lld%s\n", "Writing time", PP::HIGHLIGHT, Clock.cminutes, Clock.cseconds, Clock.cmilliseconds, PP::RESET);
-    fflush(stdout);
-    printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-    printf("%s : %s%.3Lf MB%s\n", "Total datasize written", PP::HIGHLIGHT, totalsize, PP::RESET);
-    fflush(stdout);
+    data_container_combined->InitializeDataContainer();
+
+    progressbar.Reset();
+
+    cst::man::pending("Initialize data containers ...\n");
+
+    progressbar.Print();
+#pragma omp parallel
+    {
+#pragma omp for schedule(dynamic)
+        for (index_t i = 0; i < number_of_files; ++i) {
+            data_container[i]->InitializeDataContainer();
+            progressbar.Update();
+#pragma omp critical
+            {
+                progressbar.Print();
+            }
+        }
+    }
+    std::cout << std::endl;
+    progressbar.Reset();
+
+    cst::man::pending("Parsing particle statistics ...\n");
+    progressbar.Print();
+
+#pragma omp parallel
+    {
+#pragma omp for schedule(dynamic)
+        for (index_t i = 0; i < number_of_files; ++i) {
+            // data[i]->InitializeDataContainer();
+            data_container[i]->ParseParticleStatistics();
+            progressbar.Update();
+#pragma omp critical
+            {
+                progressbar.Print();
+            }
+        }
+    }
+    std::cout << std::endl;
+    progressbar.Reset();
+
+    cst::man::pending("Combining statistics ...\n");
+
+    progressbar.Print();
+
+    for (index_t i = 0; i < number_of_files; ++i) {
+        *data_container_combined += *data_container[i];
+        // #pragma omp critical
+        //         {
+        progressbar.Update();
+        progressbar.Print();
+        // }
+    }
+    std::cout << std::endl;
+    progressbar.Reset();
+
+    timer.Stop();
+
+    cst::man::success("Analysis time : {}\n",
+                      cst::dec::highlight("{:04d}:{:02d}:{:02d}.{:03d}", (int)timer.chours, (int)timer.cminutes, (int)timer.cseconds, (int)timer.cmilliseconds));
+
+    timer.Start();
+
+    std::filesystem::create_directories(output_directory);
+    data_container_combined->WriteData(output_directory);
+
+    timer.Stop();
+    double filesize_result = 0;
+    std::filesystem::recursive_directory_iterator output_directory_iteratator(output_directory);
+    for (const auto& entry : output_directory_iteratator) {
+        filesize_result += Utilities::GetFileSize(entry.path(), 2);
+    }
+    cst::man::success("Writing time : {}\n",
+                      cst::dec::highlight("{:04d}:{:02d}:{:02d}.{:03d}", (int)timer.chours, (int)timer.cminutes, (int)timer.cseconds, (int)timer.cmilliseconds));
+
+    cst::man::success("Total datasize written : {}\n", cst::dec::highlight("{:.3} GB", filesize_result));
 }
+
 }  // namespace AMPT
 
 namespace iSS {
-void ReadSettings(Parameters& parameters, std::string filename) {
-    std::ifstream file;
 
-    // std::cout << filename.str() << std::endl;
-    bool after_equal = false;
-    file.open(filename, std::ios::in);
-    if (file.is_open()) {
-        std::string line;
-        std::string dummy1, dummy2, dummy3;
-        while (std::getline(file, line)) {
-            // std::cout << dummy1 << std::endl;
-
-            if (line.find("ipglasma_data_folder") != std::string::npos) {
-                std::istringstream iss(line);
-                iss >> dummy2 >> dummy3 >> parameters.ipglasma_data_folder;
-            }
-
-            if (line.find("iss_data_folder") != std::string::npos) {
-                std::istringstream iss(line);
-                iss >> dummy2 >> dummy3 >> parameters.iss_data_folder;
-            }
-
-            if (line.find("result_folder") != std::string::npos) {
-                std::istringstream iss(line);
-                iss >> dummy2 >> dummy3 >> parameters.result_folder;
-            }
-        }
-    } else {
-        std::cout << "Failed to open file" << std::endl;
-    }
-
-    file.close();
-}
-
-// If initial state info is coppied into the correct music folder and then iss folder,
-// then initial state info can be accessed more easily. Or a file should be made where
-// a list of all initial state info is stored.
-Statistics::Block_iss GetInitialStateInfo(int NRun, int eventid, Parameters& parameters) {
+Statistics::Block_iss GetInitialStateInfo(std::filesystem::path filename) {
     std::ifstream file;
 
     Statistics::Block_iss block;
 
-    std::stringstream filename;
-
-    filename << parameters.ipglasma_data_folder << "/" << NRun << "/usedParameters" << eventid << ".dat";
-    // std::cout << filename.str() << std::endl;
-
-    file.open(filename.str(), std::ios::in);
+    file.open(filename, std::ios::in);
     if (file.is_open()) {
         std::string dummy1, dummy2, dummy3;
         double value;
         while (std::getline(file, dummy1)) {
-            // std::cout << dummy1 << std::endl;
-
             if (dummy1.find("b = ") != std::string::npos) {
                 std::istringstream iss(dummy1);
                 iss >> dummy2 >> dummy3 >> value;
@@ -170,7 +196,7 @@ Statistics::Block_iss GetInitialStateInfo(int NRun, int eventid, Parameters& par
             if (dummy1.find("Ncoll = ") != std::string::npos) {
                 std::istringstream iss(dummy1);
                 iss >> dummy2 >> dummy3 >> value;
-                block.SetNumberOfCollidingNucleons(value);
+                block.SetNumberOfBinaryCollisions(value);
             }
         }
     } else {
@@ -180,89 +206,171 @@ Statistics::Block_iss GetInitialStateInfo(int NRun, int eventid, Parameters& par
     file.close();
     return block;
 }
+void ProcessFiles(
+    std::vector<std::filesystem::path> datafiles,
+    std::vector<std::filesystem::path> logfiles,
+    unsigned int collisiontype,
+    std::filesystem::path output_directory) {
+    std::string barstring;
+    Utilities::Progressbar progressbar;
+    std::string logstring;
+    Utilities::Duration timer('H');
 
-void ReadFiles(int iSSRun, int IPGlasmaRun, int NEvent, std::string parametername, int collisiontype) {
-    printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
-    printf("%s : %d(%d)\n", "Reading data from run (size)", iSSRun, NEvent);
-    fflush(stdout);
+    size_t number_of_files = datafiles.size();
 
-    Parameters parameters;
-    ReadSettings(parameters, parametername);
+    barstring = cst::dec::pending("[INFO]");
+    progressbar = Utilities::Progressbar(number_of_files);
+    progressbar.SetFrontString(barstring);
+    progressbar.SetDoneChar(cst::dec::success("█"));
+    progressbar.SetTodoChar("░");
+    progressbar.SetStartChar("║");  //"▕");
+    progressbar.SetEndChar("║");
 
-    std::unique_ptr<Model::File_iss> ciss = std::make_unique<Model::File_iss>();
-    ciss->InitializeDataContainer();
-    std::vector<std::unique_ptr<Model::File_iss>> data;
-
-    data.resize(NEvent);
-
-    double FileSize = 0;
-    for (int i = 0; i < NEvent; ++i) {
-        std::stringstream directory;
-        directory << parameters.iss_data_folder << "/" << iSSRun << "/" << iSSRun << "_" << std::to_string(i) << "/particle_samples.bin";
-
-        FileSize += Utilities::GetFileSize(directory.str(), 3);
+    double filesize_data = 0;
+    for (index_t i = 0; i < number_of_files; ++i) {
+        filesize_data += Utilities::GetFileSize(datafiles[i], 3);
+        filesize_data += Utilities::GetFileSize(logfiles[i], 3);
     }
-    printf("%s%s%s ", PP::STARTED, "[INFO]", PP::RESET);
-    printf("%s : %s%.3f GB%s\n", "Total datasize to read", PP::HIGHLIGHT, FileSize, PP::RESET);
-    fflush(stdout);
+    cst::man::pending("Number of files to read : {}\n", cst::dec::highlight(std::to_string(number_of_files)));
+    cst::man::pending("Total datasize to read : {}\n", cst::dec::highlight("{:.3} GB", filesize_data));
 
-    for (int i = 0; i < NEvent; ++i) {
-        Statistics::Block_iss block = GetInitialStateInfo(IPGlasmaRun, i, parameters);
+    std::unique_ptr<Model::File_iss> data_container_combined = std::make_unique<Model::File_iss>(collisiontype);
+    std::vector<std::unique_ptr<Model::File_iss>> data_container(number_of_files);
 
-        block.SetEventID(i);
-        std::stringstream directory;
-        directory << parameters.iss_data_folder << "/" << iSSRun << "/" << iSSRun << "_" << std::to_string(i) << "/particle_samples.bin";
+    cst::man::pending("Initializing file objects ...\n");
 
-        data[i] = std::make_unique<Model::File_iss>(directory.str(), collisiontype);
-        data[i]->SetInitialState(block);
-        data[i]->InitializeDataContainer();
-    }
+    progressbar.Print();
+    timer.Start();
 
-    Utilities::Duration Clock('M');
-    Clock.Start();
-
-    int Counter = 0;
 #pragma omp parallel
     {
-#pragma omp for
-        for (int i = 0; i < NEvent; ++i) {
-            data[i]->Parse();
-#pragma omp atomic
-            {
-                Counter++;
-            }
+#pragma omp for schedule(dynamic)
+        for (index_t i = 0; i < number_of_files; ++i) {
+            Statistics::Block_iss block = iSS::GetInitialStateInfo(logfiles[i]);
+            block.SetEventID(i);
+            block.SetOriginalEventID(i + 1);
+            data_container[i] = std::make_unique<Model::File_iss>(datafiles[i], collisiontype);
+            data_container[i]->SetInitialState(block);
+            progressbar.Update();
+
 #pragma omp critical
             {
-                std::cout << "finished " << Counter << " of " << NEvent;
+                progressbar.Print();
+            }
+        }
+    }
+    std::cout << std::endl;
+
+    progressbar.Reset();
+
+    cst::man::pending("Parsing event statistics ...\n");
+
+    progressbar.Print();
+
+#pragma omp parallel
+    {
+#pragma omp for schedule(dynamic)
+        for (index_t i = 0; i < number_of_files; ++i) {
+            data_container[i]->ParseEventStatistics();
+            progressbar.Update();
+#pragma omp critical
+            {
+                progressbar.Print();
             }
         }
     }
 
-    for (int i = 0; i < NEvent; ++i) {
-        *ciss += *data[i];
+    std::cout << std::endl;
+
+    std::unique_ptr<Model::File_iss> dummy = std::make_unique<Model::File_iss>(collisiontype);
+    for (index_t i = 0; i < number_of_files; ++i) {
+        dummy->GetFileData().InsertBlocks(data_container[i]->GetFileData());
     }
-    Clock.Stop();
 
-    printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-    printf("%s : %s%03ld:%02ld.%03ld%s\n", "Reading time", PP::HIGHLIGHT, Clock.cminutes, Clock.cseconds, Clock.cmilliseconds, PP::RESET);
-    fflush(stdout);
+    dummy->GetFileData().CalculateCentralityClasses();
 
-    Clock.Start();
+    for (index_t i = 0; i < number_of_files; ++i) {
+        data_container[i]->GetFileData().SetCentralityEdges("ncharged", dummy->GetFileData().GetCentralityEdges("ncharged"));
+    }
+    data_container_combined->GetFileData().SetCentralityEdges("ncharged", dummy->GetFileData().GetCentralityEdges("ncharged"));
 
-    std::stringstream directory;
-    directory << parameters.iss_data_folder << "/" << iSSRun << "/" << parameters.result_folder;
-    std::stringstream command;
-    command << "mkdir -p " << directory.str();
+    data_container_combined->InitializeDataContainer();
 
-    system(command.str().c_str());
+    progressbar.Reset();
 
-    ciss->WriteData(directory.str());
+    cst::man::pending("Initialize data containers ...\n");
 
-    Clock.Stop();
+    progressbar.Print();
 
-    printf("%s%s%s ", PP::FINISHED, "[INFO]", PP::RESET);
-    printf("%s : %s%03ld:%02ld.%03ld%s\n", "Writing time", PP::HIGHLIGHT, Clock.cminutes, Clock.cseconds, Clock.cmilliseconds, PP::RESET);
-    fflush(stdout);
+#pragma omp parallel
+    {
+#pragma omp for schedule(dynamic)
+        for (index_t i = 0; i < number_of_files; ++i) {
+            data_container[i]->InitializeDataContainer();
+            progressbar.Update();
+#pragma omp critical
+            {
+                progressbar.Print();
+            }
+        }
+    }
+
+    std::cout << std::endl;
+    progressbar.Reset();
+
+    cst::man::pending("Parsing particle statistics ...\n");
+
+    progressbar.Print();
+
+#pragma omp parallel
+    {
+#pragma omp for schedule(dynamic)
+        for (index_t i = 0; i < number_of_files; ++i) {
+            // data[i]->InitializeDataContainer();
+            data_container[i]->ParseParticleStatistics();
+            progressbar.Update();
+#pragma omp critical
+            {
+                progressbar.Print();
+            }
+        }
+    }
+    std::cout << std::endl;
+    progressbar.Reset();
+
+    cst::man::pending("Combining statistics ...\n");
+
+    progressbar.Print();
+
+    for (index_t i = 0; i < number_of_files; ++i) {
+        *data_container_combined += *data_container[i];
+        progressbar.Update();
+        progressbar.Print();
+    }
+    std::cout << std::endl;
+    progressbar.Reset();
+
+    timer.Stop();
+
+    cst::man::success("Analysis time : {}\n",
+                      cst::dec::highlight("{:04d}:{:02d}:{:02d}.{:03d}", (int)timer.chours, (int)timer.cminutes, (int)timer.cseconds, (int)timer.cmilliseconds));
+
+    timer.Start();
+
+    std::filesystem::create_directories(output_directory);
+    data_container_combined->WriteData(output_directory);
+
+    timer.Stop();
+
+    double filesize_result = 0;
+    std::filesystem::recursive_directory_iterator output_directory_iteratator(output_directory);
+    for (const auto& entry : output_directory_iteratator) {
+        filesize_result += Utilities::GetFileSize(entry.path(), 2);
+    }
+
+    cst::man::success("Writing time : {}\n",
+                      cst::dec::highlight("{:04d}:{:02d}:{:02d}.{:03d}", (int)timer.chours, (int)timer.cminutes, (int)timer.cseconds, (int)timer.cmilliseconds));
+
+    cst::man::success("Total datasize written : {}\n", cst::dec::highlight("{:.3} GB", filesize_result));
 }
-
 }  // namespace iSS

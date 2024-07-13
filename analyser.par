@@ -1,0 +1,20 @@
+{
+  "ipglasma": {
+    "directories": {
+      "data": "../IPGlasma/data"
+    },
+    "default_output_extension": "processed"
+  },
+  "iss": {
+    "directories": {
+      "data": "../iSS/data"
+    },
+    "default_output_extension": "processed"
+  },
+  "ampt": {
+    "directories": {
+      "data": "../AMPT/data"
+    },
+    "default_output_extension": "processed"
+  }
+}

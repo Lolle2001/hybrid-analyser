@@ -1,32 +1,34 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #ifndef FILEPROCESSOR_HPP
 #define FILEPROCESSOR_HPP
+#include <fmt/color.h>
+#include <fmt/core.h>
+#include <fmt/format.h>
 
-#include <omp.h>
-
-#include <fstream>
-#include <iostream>
-#include <string>
-
-#include "DataFormat.hpp"
 #include "File.hpp"
+#include "Messenger.hpp"
+#include "Progressbar.hpp"
 #include "Timer.hpp"
 #include "Utilities.hpp"
 
 namespace AMPT {
-void ReadFiles(int NRun, int NBatchMin, int NBatchMax, std::string Directory, int collisiontype);
-}
+
+void ProcessFiles(
+    std::vector<std::filesystem::path> datafiles,
+    std::vector<std::filesystem::path> logfiles,
+    unsigned int collisiontype,
+    std::filesystem::path output_directory);
+
+}  // namespace AMPT
+
 namespace iSS {
-struct Parameters {
-    std::string ipglasma_data_folder;
-    std::string iss_data_folder;
-    std::string result_folder;
-    std::vector<int> iSSRun;
-    std::vector<int> IPGlasmaRun;
-    std::vector<int> NEvent;
-};
-void ReadSettings(Parameters& parameters, std::string filename);
-Statistics::Block_iss GetInitialStateInfo(int NRun, int eventid, Parameters& parameters);
-void ReadFiles(int iSSRun, int IPGlasmaRun, int NEvent, std::string parametername, int collisiontype);
+
+Statistics::Block_iss GetInitialStateInfo(std::filesystem::path filename);
+void ProcessFiles(
+    std::vector<std::filesystem::path> datafiles,
+    std::vector<std::filesystem::path> logfiles,
+    unsigned int collisiontype,
+    std::filesystem::path output_directory);
 }  // namespace iSS
 
 #endif

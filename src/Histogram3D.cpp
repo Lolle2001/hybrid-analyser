@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #include "Histogram3D.hpp"
 
 // namespace AMPT {
@@ -8,11 +9,10 @@ namespace Statistics {
 // };
 
 Histogram3D::Histogram3D(
+    std::string Name_,
     std::vector<double> EdgesX_,
     std::vector<double> EdgesY_,
-    std::vector<double> EdgesZ_) : EdgesX(EdgesX_),
-                                   EdgesY(EdgesY_),
-                                   EdgesZ(EdgesZ_) {
+    std::vector<double> EdgesZ_) : Name(Name_), EdgesX(EdgesX_), EdgesY(EdgesY_), EdgesZ(EdgesZ_) {
     nx = EdgesX.size() - 1;
     ny = EdgesY.size() - 1;
     nz = EdgesZ.size() - 1;
@@ -20,162 +20,192 @@ Histogram3D::Histogram3D(
     InitializeIndexMap();
 }
 
-void Histogram3D::Resize(int& nx_, int& ny_, int& nz_) {
-    Contents.resize(nx_, Vector2D(ny_, Vector1D(nz_)));
+std::string& Histogram3D::GetName() {
+    return Name;
+}
+
+void Histogram3D::Resize(size_t& nx_, size_t& ny_, size_t& nz_) {
+    Contents.resize(nx_ * ny_ * nz_);
 }
 
 void Histogram3D::AddEvent() {
-    // std::cout << "#" << Contents[10][0][0][211].Total << std::endl;
-    for (int ix = 0; ix < nx; ++ix) {
-        for (int iy = 0; iy < ny; ++iy) {
-            for (int iz = 0; iz < nz; ++iz) {
-                Contents[ix][iy][iz].AddEvent();
-                // entry.second.Total += entry.second.TotalCurrent;
-                // entry.second.TotalSQR += entry.second.TotalCurrent * entry.second.TotalCurrent;
-                // entry.second.TotalCurrent = 0;
+    for (index_t ix = 0; ix < nx; ++ix) {
+        for (index_t iy = 0; iy < ny; ++iy) {
+            for (index_t iz = 0; iz < nz; ++iz) {
+                Contents[GetIndex(ix, iy, iz)].AddEvent();
             }
         }
     }
-    // std::cout << "!" << Contents[10][0][0][211].Total << std::endl;
 }
 
-void Histogram3D::Add(double& valx, double& valy, double& valz, double valcontent) {
-    if (valx >= x_min && valx < x_max && valy >= y_min && valy < y_max && valz >= z_min && valz < z_max) {
-        int ix = IndexMapX[(int)((valx - x_min) / (x_width))];
-        int iy = IndexMapY[(int)((valy - y_min) / (y_width))];
-        int iz = IndexMapZ[(int)((valz - z_min) / (z_width))];
-        Contents[ix][iy][iz].Add(valcontent);
+void Histogram3D::AddEventAverage() {
+    for (index_t ix = 0; ix < nx; ++ix) {
+        for (index_t iy = 0; iy < ny; ++iy) {
+            for (index_t iz = 0; iz < nz; ++iz) {
+                Contents[GetIndex(ix, iy, iz)].AddEventSpecial();
+            }
+        }
     }
 }
 
 void Histogram3D::AddCurrent(double& valx, double& valy, double& valz, double valcontent) {
-    if (valx >= x_min && valx < x_max && valy >= y_min && valy < y_max && valz >= z_min && valz < z_max) {
-        int ix = IndexMapX[(int)((valx - x_min) / (x_width))];
-        int iy = IndexMapY[(int)((valy - y_min) / (y_width))];
-        int iz = IndexMapZ[(int)((valz - z_min) / (z_width))];
-        Contents[ix][iy][iz].AddCurrent(valcontent);
+    if (valx > x_min && valx <= x_max && valy > y_min && valy <= y_max && valz > z_min && valz <= z_max) {
+        index_t ix = IndexMapX[(index_t)((valx - x_min) / (x_width))];
+        index_t iy = IndexMapY[(index_t)((valy - y_min) / (y_width))];
+        index_t iz = IndexMapZ[(index_t)((valz - z_min) / (z_width))];
+        Contents[GetIndex(ix, iy, iz)].AddCurrent(valcontent);
+    }
+}
+
+void Histogram3D::Add(double& valx, double& valy, double& valz, double valcontent) {
+    if (valx > x_min && valx <= x_max && valy > y_min && valy <= y_max && valz > z_min && valz <= z_max) {
+        index_t ix = IndexMapX[(index_t)((valx - x_min) / (x_width))];
+        index_t iy = IndexMapY[(index_t)((valy - y_min) / (y_width))];
+        index_t iz = IndexMapZ[(index_t)((valz - z_min) / (z_width))];
+        Contents[GetIndex(ix, iy, iz)].Add(valcontent);
     }
 }
 
 void Histogram3D::InitializeIndexMap() {
-    x_max = EdgesX.back();
-    x_min = EdgesX.front();
+    if (EdgesX[1] - EdgesX[0] > 0) {
+        x_max = EdgesX.back();
+        x_min = EdgesX.front();
+    } else {
+        x_max = EdgesX.front();
+        x_min = EdgesX.back();
+    }
+
     y_max = EdgesY.back();
     y_min = EdgesY.front();
     z_max = EdgesZ.back();
     z_min = EdgesZ.front();
 
-    std::vector<double> xwidths(nx);
-    std::vector<double> ywidths(ny);
-    std::vector<double> zwidths(nz);
+    x_width = Utilities::Statistics::CalculateCommonWidth(nx, EdgesX);
+    Utilities::Statistics::FillIndexMap(nx, x_min, x_max, x_width, EdgesX, IndexMapX);
+    y_width = Utilities::Statistics::CalculateCommonWidth(ny, EdgesY);
+    Utilities::Statistics::FillIndexMap(ny, y_min, y_max, y_width, EdgesY, IndexMapY);
+    z_width = Utilities::Statistics::CalculateCommonWidth(ny, EdgesZ);
+    Utilities::Statistics::FillIndexMap(ny, z_min, z_max, z_width, EdgesZ, IndexMapZ);
+}
 
-    for (int ix = 0; ix < nx; ++ix) {
-        xwidths[ix] = EdgesX[ix + 1] - EdgesX[ix];
-        // std::cout << xwidths[ix] << std::endl;
+void Histogram3D::ReverseEdges() {
+    for (auto& entry : IndexMapX) {
+        entry.second = nx - 1 - entry.second;
     }
-    for (int iy = 0; iy < ny; ++iy) {
-        ywidths[iy] = EdgesY[iy + 1] - EdgesY[iy];
+    for (auto& entry : IndexMapY) {
+        entry.second = ny - 1 - entry.second;
     }
-    for (int iz = 0; iz < nz; ++iz) {
-        zwidths[iz] = EdgesZ[iz + 1] - EdgesZ[iz];
+    for (auto& entry : IndexMapZ) {
+        entry.second = nz - 1 - entry.second;
     }
+}
 
-    double x_smallest_width = xwidths[0];
-    double y_smallest_width = ywidths[0];
-    double z_smallest_width = zwidths[0];
+void Histogram3D::PrintAll(std::ostream& output) {
+    nlohmann::json j;
 
-    double x_temp_width;
-    double y_temp_width;
-    double z_temp_width;
+    std::vector<std::vector<std::vector<double>>> average(nx, std::vector<std::vector<double>>(ny, std::vector<double>(nz, 0)));
+    std::vector<std::vector<std::vector<double>>> averagesqr(nx, std::vector<std::vector<double>>(ny, std::vector<double>(nz, 0)));
+    std::vector<std::vector<std::vector<double>>> total(nx, std::vector<std::vector<double>>(ny, std::vector<double>(nz, 0)));
+    std::vector<std::vector<std::vector<double>>> totalsqr(nx, std::vector<std::vector<double>>(ny, std::vector<double>(nz, 0)));
+    std::vector<std::vector<std::vector<double>>> error(nx, std::vector<std::vector<double>>(ny, std::vector<double>(nz, 0)));
+    std::vector<std::vector<std::vector<size_t>>> count(nx, std::vector<std::vector<size_t>>(ny, std::vector<size_t>(nz, 0)));
 
-    for (int ix = 0; ix < nx; ++ix) {
-        for (int jx = ix + 1; jx < nx; ++jx) {
-            x_temp_width = Utilities::igcd(xwidths[ix], xwidths[jx], 0.001);
-            if (x_temp_width < x_smallest_width) {
-                x_smallest_width = x_temp_width;
+    for (index_t ix = 0; ix < nx; ++ix) {
+        for (index_t iy = 0; iy < ny; ++iy) {
+            for (index_t iz = 0; iz < nz; ++iz) {
+                index_t index = GetIndex(ix, iy, iz);
+                average[ix][iy][iz] = Contents[index].Total / Contents[index].EntryCount;
+                averagesqr[ix][iy][iz] = Contents[index].TotalSQR / Contents[index].EntryCount;
+                total[ix][iy][iz] = Contents[index].Total;
+                totalsqr[ix][iy][iz] = Contents[index].TotalSQR;
+                error[ix][iy][iz] = std::sqrt(averagesqr[ix][iy][iz] - average[ix][iy][iz] * average[ix][iy][iz]);
+                count[ix][iy][iz] = Contents[index].EntryCount;
             }
         }
     }
-    for (int iy = 0; iy < ny; ++iy) {
-        for (int jy = iy + 1; jy < ny; ++jy) {
-            y_temp_width = Utilities::igcd(ywidths[iy], ywidths[jy], 0.001);
-            if (y_temp_width < y_smallest_width) {
-                y_smallest_width = y_temp_width;
-            }
-        }
+    std::vector<double> xmids(nx);
+    std::vector<double> ymids(ny);
+    std::vector<double> zmids(nz);
+    std::vector<double> xwids(nx);
+    std::vector<double> ywids(ny);
+    std::vector<double> zwids(nz);
+    std::vector<double> xerr(nx);
+    std::vector<double> yerr(ny);
+    std::vector<double> zerr(nz);
+
+    for (index_t ix = 0; ix < nx; ++ix) {
+        xmids[ix] = (EdgesX[ix + 1] + EdgesX[ix]) / 2;
+        xwids[ix] = (EdgesX[ix + 1] - EdgesX[ix]);
+        xerr[ix] = (EdgesX[ix + 1] - EdgesX[ix]) / 2;
     }
-    for (int iz = 0; iz < nz; ++iz) {
-        for (int jz = iz + 1; jz < nz; ++jz) {
-            z_temp_width = Utilities::igcd(zwidths[iz], zwidths[jz], 0.001);
-            if (z_temp_width < z_smallest_width) {
-                z_smallest_width = z_temp_width;
-            }
-        }
+    for (index_t iy = 0; iy < ny; ++iy) {
+        ymids[iy] = (EdgesY[iy + 1] + EdgesY[iy]) / 2;
+        ywids[iy] = (EdgesY[iy + 1] - EdgesY[iy]);
+        yerr[iy] = (EdgesY[iy + 1] - EdgesY[iy]) / 2;
     }
-
-    x_width = x_smallest_width;
-    y_width = y_smallest_width;
-    z_width = z_smallest_width;
-
-    int temp_nx = static_cast<int>((x_max - x_min) / x_width);
-    int temp_ny = static_cast<int>((y_max - y_min) / y_width);
-    int temp_nz = static_cast<int>((z_max - z_min) / z_width);
-
-    // std::cout << x_max << " " << x_min << " " << x_width << " " << temp_nx << std::endl;
-
-    double x;
-    double y;
-    double z;
-
-    for (int ix = 0; ix < temp_nx; ++ix) {
-        x = (x_min + ix * x_width + x_width * 0.5);
-
-        for (int jx = 0; jx < nx; ++jx) {
-            if (x > EdgesX[jx] && x < EdgesX[jx + 1]) {
-                IndexMapX[ix] = jx;
-            }
-        }
-    }
-    for (int iy = 0; iy < temp_ny; ++iy) {
-        y = (y_min + iy * y_width + y_width * 0.5);
-
-        for (int jy = 0; jy < ny; ++jy) {
-            if (y > EdgesY[jy] && y < EdgesY[jy + 1]) {
-                IndexMapY[iy] = jy;
-            }
-        }
-    }
-    for (int iz = 0; iz < temp_nz; ++iz) {
-        z = (z_min + iz * z_width + z_width * 0.5);
-
-        for (int jz = 0; jz < nz; ++jz) {
-            if (z > EdgesZ[jz] && z < EdgesZ[jz + 1]) {
-                IndexMapZ[iz] = jz;
-            }
-        }
+    for (index_t iz = 0; iz < nz; ++iz) {
+        zmids[iz] = (EdgesZ[iz + 1] + EdgesZ[iz]) / 2;
+        zwids[iz] = (EdgesZ[iz + 1] - EdgesZ[iz]);
+        zerr[iz] = (EdgesZ[iz + 1] - EdgesZ[iz]) / 2;
     }
 
-    xwidths.clear();
-    ywidths.clear();
-    zwidths.clear();
+    j["name"] = Name;
+    j["settings"]["nbins"]["x"] = nx;
+    j["settings"]["edges"]["x"] = EdgesX;
+    j["settings"]["wids"]["x"] = xwids;
+    j["settings"]["mids"]["x"] = xmids;
+    j["settings"]["errs"]["x"] = xerr;
+    j["settings"]["names"]["x"] = "ph";
+
+    j["settings"]["nbins"]["y"] = ny;
+    j["settings"]["edges"]["y"] = EdgesY;
+    j["settings"]["wids"]["y"] = ywids;
+    j["settings"]["mids"]["y"] = ymids;
+    j["settings"]["errs"]["y"] = yerr;
+    j["settings"]["names"]["y"] = "ph";
+
+    j["settings"]["nbins"]["z"] = nz;
+    j["settings"]["edges"]["z"] = EdgesZ;
+    j["settings"]["wids"]["z"] = zwids;
+    j["settings"]["mids"]["z"] = zmids;
+    j["settings"]["errs"]["z"] = zerr;
+    j["settings"]["names"]["z"] = "ph";
+
+    j["settings"]["dimension"] = 3;
+    nlohmann::json javerage(average);
+    nlohmann::json javeragesqr(averagesqr);
+    nlohmann::json jerror(error);
+    nlohmann::json jtotal(total);
+    nlohmann::json jtotalsqr(totalsqr);
+    nlohmann::json jcount(count);
+
+    j["contents"]["average"] = javerage;
+    j["contents"]["averagesqr"] = javeragesqr;
+    j["contents"]["error"] = jerror;
+    j["contents"]["total"] = jtotal;
+    j["contents"]["totalsqr"] = jtotalsqr;
+    j["contents"]["count"] = jcount;
+    j["contents"]["name"] = Name;
+
+    output << j.dump(4);
 }
 
 void Histogram3D::PrintEdges(std::ostream& output) {
     output << "nbins(x) = " << nx << "\n";
     output << "edges(x) = ";
-    for (int ix = 0; ix <= nx; ++ix) {
+    for (index_t ix = 0; ix <= nx; ++ix) {
         output << EdgesX[ix] << " ";
     }
     output << "\n";
     output << "nbins(y) = " << ny << "\n";
     output << "edges(y) = ";
-    for (int iy = 0; iy <= ny; ++iy) {
+    for (index_t iy = 0; iy <= ny; ++iy) {
         output << EdgesY[iy] << " ";
     }
     output << "\n";
     output << "nbins(z) = " << nz << "\n";
     output << "edges(z) = ";
-    for (int iz = 0; iz <= nz; ++iz) {
+    for (index_t iz = 0; iz <= nz; ++iz) {
         output << EdgesZ[iz] << " ";
     }
     output << "\n";
@@ -183,79 +213,91 @@ void Histogram3D::PrintEdges(std::ostream& output) {
 
 void Histogram3D::PrintCount(std::ostream& output) {
     // std::cout << nx << " " << ny << " " << nz << std::endl;
-    for (int ix = 0; ix < nx; ++ix) {
+    for (index_t ix = 0; ix < nx; ++ix) {
         output << "# " << ix << "\n";
-        for (int iy = 0; iy < ny; ++iy) {
-            for (int iz = 0; iz < nz; ++iz) {
-                output << Contents[ix][iy][iz].EntryCount << " ";
-                // std::cout << Contents[ix][iy][iz].EntryCount << std::endl;
+        for (index_t iy = 0; iy < ny; ++iy) {
+            for (index_t iz = 0; iz < nz; ++iz) {
+                output << Contents[GetIndex(ix, iy, iz)].EntryCount << " ";
+                // std::cout << Contents[GetIndex(ix, iy, iz)].EntryCount << std::endl;
             }
             output << "\n";
         }
     }
 }
 void Histogram3D::PrintTotalSQR(std::ostream& output) {
-    for (int ix = 0; ix < nx; ++ix) {
+    for (index_t ix = 0; ix < nx; ++ix) {
         output << "# " << ix << "\n";
-        for (int iy = 0; iy < ny; ++iy) {
-            for (int iz = 0; iz < nz; ++iz) {
-                output << Contents[ix][iy][iz].TotalSQR << " ";
+        for (index_t iy = 0; iy < ny; ++iy) {
+            for (index_t iz = 0; iz < nz; ++iz) {
+                output << Contents[GetIndex(ix, iy, iz)].TotalSQR << " ";
             }
             output << "\n";
         }
     }
 }
 void Histogram3D::PrintTotal(std::ostream& output) {
-    for (int ix = 0; ix < nx; ++ix) {
+    for (index_t ix = 0; ix < nx; ++ix) {
         output << "# " << ix << "\n";
-        for (int iy = 0; iy < ny; ++iy) {
-            for (int iz = 0; iz < nz; ++iz) {
-                output << Contents[ix][iy][iz].Total << " ";
+        for (index_t iy = 0; iy < ny; ++iy) {
+            for (index_t iz = 0; iz < nz; ++iz) {
+                output << Contents[GetIndex(ix, iy, iz)].Total << " ";
             }
             output << "\n";
         }
     }
 }
 
-StatisticsContainer& Histogram3D::operator()(int& ix, int& iy, int& iz) {
-    return Contents[ix][iy][iz];
+void Histogram3D::PrintVariance(std::ostream& output) {
+    for (index_t ix = 0; ix < nx; ++ix) {
+        output << "# " << ix << "\n";
+        for (index_t iy = 0; iy < ny; ++iy) {
+            for (index_t iz = 0; iz < nz; ++iz) {
+                output << Contents[GetIndex(ix, iy, iz)].Variance << " ";
+            }
+            output << "\n";
+        }
+    }
 }
 
-Vector1D& Histogram3D::operator()(int& ix, int& iy) {
-    return Contents[ix][iy];
+StatisticsContainer& Histogram3D::operator()(index_t& ix, index_t& iy, index_t& iz) {
+    return Contents[GetIndex(ix, iy, iz)];
 }
-Vector2D& Histogram3D::operator()(int& ix) {
-    return Contents[ix];
-}
+
+// Vector1D& Histogram3D::operator()(int& ix, int& iy) {
+//     return Contents[ix][iy];
+// }
+// Vector2D& Histogram3D::operator()(int& ix) {
+//     return Contents[ix];
+// }
 
 StatisticsContainer& Histogram3D::operator()(double& valx, double& valy, double& valz) {
-    int ix = IndexMapX[static_cast<int>((valx - x_min) / (x_width))];
-    int iy = IndexMapY[static_cast<int>((valy - y_min) / (y_width))];
-    int iz = IndexMapZ[static_cast<int>((valz - z_min) / (z_width))];
-    return Contents[ix][iy][iz];
+    index_t ix = IndexMapX[static_cast<index_t>((valx - x_min) / (x_width))];
+    index_t iy = IndexMapY[static_cast<index_t>((valy - y_min) / (y_width))];
+    index_t iz = IndexMapZ[static_cast<index_t>((valz - z_min) / (z_width))];
+    return Contents[GetIndex(ix, iy, iz)];
 }
-Vector1D& Histogram3D::operator()(double& valx, double& valy) {
-    int ix = IndexMapX[static_cast<int>((valx - x_min) / (x_width))];
-    int iy = IndexMapY[static_cast<int>((valy - y_min) / (y_width))];
-    return Contents[ix][iy];
-}
-Vector2D& Histogram3D::operator()(double& valx) {
-    int ix = IndexMapX[static_cast<int>((valx - x_min) / (x_width))];
-    return Contents[ix];
-}
+// Vector1D& Histogram3D::operator()(double& valx, double& valy) {
+//     int ix = IndexMapX[static_cast<int>((valx - x_min) / (x_width))];
+//     int iy = IndexMapY[static_cast<int>((valy - y_min) / (y_width))];
+//     return Contents[ix][iy];
+// }
+// Vector2D& Histogram3D::operator()(double& valx) {
+//     int ix = IndexMapX[static_cast<int>((valx - x_min) / (x_width))];
+//     return Contents[ix];
+// }
 
 void Histogram3D::operator+=(Histogram3D const& obj) {
     if (nx == obj.nx && ny == obj.ny && nz == obj.nz) {
-        for (int ix = 0; ix < nx; ++ix) {
-            for (int iy = 0; iy < ny; ++iy) {
-                for (int iz = 0; iz < nz; ++iz) {
-                    Contents[ix][iy][iz] += obj.Contents[ix][iy][iz];
+        for (index_t ix = 0; ix < nx; ++ix) {
+            for (index_t iy = 0; iy < ny; ++iy) {
+                for (index_t iz = 0; iz < nz; ++iz) {
+                    size_t index = GetIndex(ix, iy, iz);
+                    Contents[index] += obj.Contents[index];
                 }
             }
         }
     } else {
-        printf("%s%s%s ", PP::WARNING, "[WARNING]", PP::RESET);
-        printf("%s\n", "Cannot add two HistogramMaps of different sizes!");
+        cst::man::warning("Cannot add two Histograms(3D) of different sizes!\n");
     }
 }
 
@@ -321,13 +363,13 @@ void Histogram3D::ReadTotalSQR(std::string filename) {
     std::istringstream iss;
 
     file.open(filename, std::ios::in);
-    for (int ix = 0; ix < nx; ++ix) {
+    for (index_t ix = 0; ix < nx; ++ix) {
         std::getline(file, line);
-        for (int iy = 0; iy < ny; ++iy) {
+        for (index_t iy = 0; iy < ny; ++iy) {
             std::getline(file, line);
             iss = std::istringstream(line);
-            for (int iz = 0; iz < nz; ++iz) {
-                iss >> Contents[ix][iy][iz].TotalSQR;
+            for (index_t iz = 0; iz < nz; ++iz) {
+                iss >> Contents[GetIndex(ix, iy, iz)].TotalSQR;
             }
         }
     }
@@ -339,13 +381,13 @@ void Histogram3D::ReadTotal(std::string filename) {
     std::istringstream iss;
 
     file.open(filename, std::ios::in);
-    for (int ix = 0; ix < nx; ++ix) {
+    for (index_t ix = 0; ix < nx; ++ix) {
         std::getline(file, line);
-        for (int iy = 0; iy < ny; ++iy) {
+        for (index_t iy = 0; iy < ny; ++iy) {
             std::getline(file, line);
             iss = std::istringstream(line);
-            for (int iz = 0; iz < nz; ++iz) {
-                iss >> Contents[ix][iy][iz].Total;
+            for (index_t iz = 0; iz < nz; ++iz) {
+                iss >> Contents[GetIndex(ix, iy, iz)].Total;
             }
         }
     }
@@ -357,13 +399,13 @@ void Histogram3D::ReadCount(std::string filename) {
     std::istringstream iss;
 
     file.open(filename, std::ios::in);
-    for (int ix = 0; ix < nx; ++ix) {
+    for (index_t ix = 0; ix < nx; ++ix) {
         std::getline(file, line);
-        for (int iy = 0; iy < ny; ++iy) {
+        for (index_t iy = 0; iy < ny; ++iy) {
             std::getline(file, line);
             iss = std::istringstream(line);
-            for (int iz = 0; iz < nz; ++iz) {
-                iss >> Contents[ix][iy][iz].EntryCount;
+            for (index_t iz = 0; iz < nz; ++iz) {
+                iss >> Contents[GetIndex(ix, iy, iz)].EntryCount;
             }
         }
     }

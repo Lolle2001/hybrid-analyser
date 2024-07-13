@@ -1,6 +1,93 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #include "DataFormat.hpp"
 
 namespace Statistics {
+
+void Line::CalculateMomentum() {
+    // Needs transverse momentum
+    MomentumSQR = TransverseMomentumSQR + MomZ * MomZ;
+    Momentum = std::sqrt(MomentumSQR);
+}
+
+void Line::CalculateEnergy() {
+    // Needs momentum
+    Energy = std::sqrt(Mass * Mass + MomentumSQR);
+}
+
+void Line::CalculatePhi() {
+    Phi = std::atan2(MomY, MomX);
+}
+void Line::CalculatePhi(double RPA) {
+    PhiOld = std::atan2(MomY, MomX);
+    Phi = PhiOld - RPA;
+}
+
+void Line::CalculateAnisotropicFlowOld(int nharmonic) {
+    AnisotropicFlowOld[nharmonic] = std::cos(nharmonic * PhiOld);
+}
+
+void Line::CalculateTransverseMomentum() {
+    TransverseMomentumSQR = MomX * MomX + MomY * MomY;
+    TransverseMomentum = std::sqrt(TransverseMomentumSQR);
+}
+
+void Line::CalculateAnisotropicFlow(int nharmonic) {
+    // Needs phi
+    AnisotropicFlow[nharmonic] = std::cos(nharmonic * Phi);
+}
+
+void Line::CalculateAnisotropicFlowSin(int nharmonic) {
+    // Needs phi
+    AnisotropicFlowSin[nharmonic] = std::sin(nharmonic * Phi);
+}
+
+void Line::CalculateAnisotropicFlowCos(int nharmonic) {
+    // Needs phi
+    AnisotropicFlowCos[nharmonic] = std::cos(nharmonic * Phi);
+}
+
+void Line::CalculateTransverseMass() {
+    // Needs transverse momentum
+    TransverseMass = std::sqrt(Mass * Mass + TransverseMomentumSQR);
+}
+
+void Line::CalculatePseudoRapidity() {
+    // Needs momentum
+    PseudoRapidity = std::atanh(MomZ / Momentum);
+}
+
+void Line::CalculateRapidity() {
+    // Needs momentum and energy
+    // Energy = std::sqrt(Mass * Mass + MomentumSQR);
+    Rapidity = std::atanh(MomZ / Energy);
+    // Rapidity = 0.5 * std::log((Energy + MomZ) / (Energy - MomZ));
+}
+
+void Line::CalculateProperties(int nharmonic_min, int nharmonic_max) {
+    CalculateTransverseMomentum();
+    CalculateMomentum();
+    CalculateEnergy();
+    CalculatePhi();
+    for (int i = nharmonic_min; i <= nharmonic_max; ++i) {
+        CalculateAnisotropicFlow(i);
+    }
+    CalculatePseudoRapidity();
+    CalculateRapidity();
+}
+
+Line_iss::Line_iss(int pid, float array[9]) {
+    SetParticlePythiaID(pid);
+    SetMass(array[0]);
+    SetPosT(array[1]);
+    SetPosX(array[2]);
+    SetPosY(array[3]);
+    SetPosZ(array[4]);
+    SetEnergy(array[5]);
+    SetMomX(array[6]);
+    SetMomY(array[7]);
+    SetMomZ(array[8]);
+}
+
 std::istream& operator>>(std::istream& input, Line_ampt& obj) {
     int ParticlePythiaID;
     double MomX;
@@ -25,6 +112,52 @@ std::istream& operator>>(std::istream& input, Line_ampt& obj) {
     obj.SetPosT(FreezeOutTime);
 
     return input;
+}
+
+std::ostream& operator<<(std::ostream& output, Line_ampt& obj) {
+    output << std::setw(5) << std::left << obj.GetParticlePythiaID() << " ";
+    output << std::scientific << std::setw(13) << std::right << obj.GetPhi() << " ";
+    output << std::scientific << std::setw(13) << std::right << obj.GetTransverseMomentum() << " ";
+    output << std::scientific << std::setw(13) << std::right << obj.GetAnisotropicFlow(2) << " ";
+    output << std::scientific << std::setw(13) << std::right << obj.GetAnisotropicFlowCos(2) << " ";
+    output << std::scientific << std::setw(13) << std::right << obj.GetAnisotropicFlowSin(2) << " ";
+    return output;
+}
+
+std::ostream& operator<<(std::ostream& output, Line_iss& obj) {
+    output << std::setw(5) << std::left << obj.GetParticlePythiaID() << " ";
+    output << std::scientific << std::setw(13) << std::right << obj.GetPhi() << " ";
+    output << std::scientific << std::setw(13) << std::right << obj.GetTransverseMomentum() << " ";
+    output << std::scientific << std::setw(13) << std::right << obj.GetAnisotropicFlow(2) << " ";
+    output << std::scientific << std::setw(13) << std::right << obj.GetAnisotropicFlowCos(2) << " ";
+    output << std::scientific << std::setw(13) << std::right << obj.GetAnisotropicFlowSin(2) << " ";
+    return output;
+}
+
+void Block::Write(std::ostream& output) const {
+    output << std::setw(6) << std::left << EventID << " "
+           << std::setw(9) << std::left << NumberOfParticles << " "
+           << std::scientific << std::setw(13) << std::left << NumberOfChargedParticles << " "
+           << std::scientific << std::setw(13) << std::left << ImpactParameter << " "
+           << std::setw(4) << std::left << NumberOfParticipantNucleons << " "
+           << std::setw(6) << std::left << NumberOfBinaryCollisions << " ";
+    for (index_t n = 1; n <= NUMBER_OF_HARMONICS; ++n) {
+        output << std::scientific << std::setw(13) << std::right << EventPlaneAngle[n] << " ";
+    }
+
+    output << std::scientific << std::setw(13) << std::right << ReactionPlaneAngle;
+}
+
+void Block_ampt::Write(std::ostream& output) const {
+    Block::Write(output);
+    output << " <> "
+           << std::setw(3) << std::left << EventIterationFlag << " "
+           << std::setw(4) << std::left << NumberOfParticipantNucleons_PROJ << " "
+           << std::setw(4) << std::left << NumberOfParticipantNucleons_TARG << " "
+           << std::setw(4) << std::left << NumberOfParticipantNucleonsElastic_PROJ << " "
+           << std::setw(4) << std::left << NumberOfParticipantNucleonsInelastic_PROJ << " "
+           << std::setw(4) << std::left << NumberOfParticipantNucleonsElastic_TARG << " "
+           << std::setw(4) << std::left << NumberOfParticipantNucleonsInelastic_TARG;
 }
 
 std::istream& operator>>(std::istream& input, Block_ampt& obj) {
@@ -73,60 +206,12 @@ std::ostream& operator<<(std::ostream& output, Block_ampt& obj) {
     return output;
 }
 
-void Line::CalculateMomentum() {
-    // Needs transverse momentum
-    MomentumSQR = TransverseMomentumSQR + MomZ * MomZ;
-    Momentum = std::sqrt(MomentumSQR);
-}
-
-void Line::CalculateEnergy() {
-    // Needs momentum
-    Energy = std::sqrt(Mass * Mass + MomentumSQR);
-}
-
-void Line::CalculatePhi() {
-    Phi = std::atan2(MomY, MomX);
-}
-void Line::CalculatePhi(double RPA) {
-    Phi = std::atan2(MomY, MomX) - RPA;
-}
-
-void Line::CalculateTransverseMomentum() {
-    TransverseMomentumSQR = MomX * MomX + MomY * MomY;
-    TransverseMomentum = std::sqrt(TransverseMomentumSQR);
-}
-
-void Line::CalculateAnisotropicFlow(int nharmonic) {
-    // Needs phi
-    AnisotropicFlow[nharmonic] = std::cos(nharmonic * Phi);
-}
-
-void Line::CalculateTransverseMass() {
-    // Needs transverse momentum
-    TransverseMass = std::sqrt(Mass * Mass + TransverseMomentumSQR);
-}
-
-void Line::CalculatePseudoRapidity() {
-    // Needs momentum
-    PseudoRapidity = std::atanh(MomZ / Momentum);
-}
-
-void Line::CalculateRapidity() {
-    // Needs momentum and energy
-    Energy = std::sqrt(Mass * Mass + MomentumSQR);
-    Rapidity = 0.5 * std::log((Energy + MomZ) / (Energy - MomZ));
-}
-
-void Line::CalculateProperties(int nharmonic_min, int nharmonic_max) {
-    CalculateTransverseMomentum();
-    CalculateMomentum();
-    // CalculateEnergy();
-    CalculatePhi();
-    for (int i = nharmonic_min; i <= nharmonic_max; ++i) {
-        CalculateAnisotropicFlow(i);
-    }
-    CalculatePseudoRapidity();
-    CalculateRapidity();
+std::ostream& operator<<(std::ostream& output, Log_ampt& obj) {
+    output << obj.eventid << " ";
+    output << obj.eventiteration.back() << " ";
+    output << obj.impactparameter.back() << " ";
+    output << obj.ncoll.back() << " ";
+    return output;
 }
 
 }  // namespace Statistics

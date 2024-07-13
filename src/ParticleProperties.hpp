@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #ifndef PARTICLEPROPERTIES_HPP
 #define PARTICLEPROPERTIES_HPP
 

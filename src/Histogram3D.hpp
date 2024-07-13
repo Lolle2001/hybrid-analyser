@@ -1,3 +1,4 @@
+// Copyright (C) 2024 Lieuwe Huisman
 #ifndef HISTOGRAM3D_HPP
 #define HISTOGRAM3D_HPP
 
@@ -7,6 +8,7 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <nlohmann/json.hpp>
 #include <sstream>
 #include <thread>
 #include <vector>
@@ -14,8 +16,6 @@
 #include "Messenger.hpp"
 #include "StatisticsContainer.hpp"
 #include "Utilities.hpp"
-
-using PP = Utilities::PretyPrint;
 
 // namespace AMPT {
 namespace Statistics {
@@ -34,9 +34,9 @@ using Vector1D = std::vector<StatisticsContainer>;
 
 class Histogram3D {
    private:
-    Vector3D Contents;
+    Vector1D Contents;
 
-    int nx, ny, nz;
+    size_t nx, ny, nz;
 
     std::map<int, int> IndexMapX;
     std::map<int, int> IndexMapY;
@@ -55,70 +55,80 @@ class Histogram3D {
     std::vector<double> EdgesY;
     std::vector<double> EdgesZ;
 
-   public:
-    Histogram3D(){};
-    // Histogram3D(int & nx_, int & ny_, int & nz_);
-    Histogram3D(std::vector<double> EdgesX_, std::vector<double> EdgesY_, std::vector<double> EdgesZ_);
+    bool is_reversed = false;
+    std::string Name;
 
-    void Resize(int& nx_, int& ny_, int& nz_);
+   public:
+    Histogram3D() = default;
+    // Histogram3D(int & nx_, int & ny_, int & nz_);
+    Histogram3D(std::string Name_, std::vector<double> EdgesX_, std::vector<double> EdgesY_, std::vector<double> EdgesZ_);
+
+    void Resize(size_t& nx_, size_t& ny_, size_t& nz_);
 
     void InitializeIndexMap();
 
+    std::string& GetName();
+
     void AddEvent();
+    void AddEventAverage();
     void Add(double& valx, double& valy, double& valz, double valcontent);
     void AddCurrent(double& valx, double& valy, double& valz, double valcontent);
 
+    void PrintAll(std::ostream& output);
     // void Convert();
     void PrintEdges(std::ostream& output);
     void PrintTotalSQR(std::ostream& output);
     void PrintTotal(std::ostream& output);
     void PrintCount(std::ostream& output);
+    void PrintVariance(std::ostream& output);
+
+    void ReverseEdges();
 
     void ReadEdges(std::string filename);
     void ReadTotalSQR(std::string filename);
     void ReadTotal(std::string filename);
     void ReadCount(std::string filename);
 
-    int GetNbinsX() { return nx; };
-    int GetNbinsY() { return ny; };
-    int GetNbinsZ() { return nz; };
+    size_t GetNbinsX() { return nx; };
+    size_t GetNbinsY() { return ny; };
+    size_t GetNbinsZ() { return nz; };
 
-    double GetBinWidthX(int ix) {
+    double GetBinWidthX(index_t ix) {
         if (ix < nx) {
             return (EdgesX[ix + 1] - EdgesX[ix]);
         } else {
             return 0;
         }
     }
-    double GetBinWidthY(int iy) {
+    double GetBinWidthY(index_t iy) {
         if (iy < ny) {
             return (EdgesY[iy + 1] - EdgesY[iy]);
         } else {
             return 0;
         }
     }
-    double GetBinWidthZ(int iz) {
+    double GetBinWidthZ(index_t iz) {
         if (iz < nz) {
             return (EdgesZ[iz + 1] - EdgesZ[iz]);
         } else {
             return 0;
         }
     }
-    double GetBinMidX(int ix) {
+    double GetBinMidX(index_t ix) {
         if (ix < nx) {
             return (EdgesX[ix + 1] + EdgesX[ix]) / 2;
         } else {
             return 0;
         }
     }
-    double GetBinMidY(int iy) {
+    double GetBinMidY(index_t iy) {
         if (iy < ny) {
             return (EdgesY[iy + 1] + EdgesY[iy]) / 2;
         } else {
             return 0;
         }
     }
-    double GetBinMidZ(int iz) {
+    double GetBinMidZ(index_t iz) {
         if (iz < nz) {
             return (EdgesZ[iz + 1] + EdgesZ[iz]) / 2;
         } else {
@@ -136,13 +146,21 @@ class Histogram3D {
         return EdgesZ;
     }
 
-    StatisticsContainer& operator()(int& ix, int& iy, int& iz);
-    Vector1D& operator()(int& ix, int& iy);
-    Vector2D& operator()(int& ix);
+    size_t GetIndex(index_t ix, index_t iy, index_t iz) {
+        return iz + iy * nz + ix * ny * nz;
+    }
+
+    StatisticsContainer& GetContent(index_t ix, index_t iy, index_t iz) {
+        return Contents[GetIndex(ix, iy, iz)];
+    }
+
+    StatisticsContainer& operator()(index_t& ix, index_t& iy, index_t& iz);
+    // Vector1D& operator()(int& ix, int& iy);
+    // Vector2D& operator()(int& ix);
 
     StatisticsContainer& operator()(double& valx, double& valy, double& valz);
-    Vector1D& operator()(double& valx, double& valy);
-    Vector2D& operator()(double& valx);
+    // Vector1D& operator()(double& valx, double& valy);
+    // Vector2D& operator()(double& valx);
 
     void operator+=(Histogram3D const& obj);
 };
