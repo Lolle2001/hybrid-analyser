@@ -1,0 +1,12 @@
+#: table_doi: 10.17182/hepdata.78365.v1/t2
+#: name: DN/DETARAP(ETARAP=0)
+#: description: Charged-particle pseudorapidity density at midrapidity in most perihperhal (80-90%) Pb-Pb collisions at $\sqrt{s_{\scriptscriptstyle\mathrm{NN}}}=5.02\,\mathrm{TeV}$.
+
+#: data_file: Table2.yaml
+#: keyword reactions: PB PB --> Charged X
+#: keyword observables: DN/DETARAP
+#: keyword cmenergies: 5023.0
+#: CENTRALITY [PCT],,,80.0-90.0
+$N_{\mathrm{part}}$,$N_{\mathrm{part}}$ LOW,$N_{\mathrm{part}}$ HIGH,$\mathrm{d}N_{\mathrm{ch}}/\mathrm{d}\eta|_{|\eta|<0.5}$,stat +,stat -,sys +,sys -
+7.32,7.22,7.42,17.52,0.05,-0.05,1.0,-1.0
+

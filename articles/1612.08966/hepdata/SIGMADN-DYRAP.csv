@@ -1,0 +1,17 @@
+#: table_doi: 10.17182/hepdata.78365.v1/t5
+#: name: SIGMA DN/DYRAP
+#: description: Scaling behaviour as a function $\sqrt{s_{_{\mathrm{NN}}}}$ of the width of the charged-particle or -pion rapidity-density distribution with respect to the Landau-Carruthers width (top) and rapidity range (bottom).  Charged-pion points from AGS and SPS are adapted from the literature [PRL94.162301], while the PHOBOS (filled crosses) [PRL91,052303] and BRAHMS (open crosses) [PRL88.202301] charged-hadron points are translated from the corresponding $\mathrm{d}N_{\mathrm{ch}}/\mathrm{d}\eta$ results.
+
+#: data_file: Table5.yaml
+#: keyword reactions: A A --> CHARGED X
+#: keyword observables: SIGMA DN/DYRAP
+#: keyword cmenergies: 5023.0
+$\sqrt{s_{\mathrm{NN}}}$,$\sigma_{\mathrm{d}N_{X}/\mathrm{d}y}$,stat +,stat -,sys +,sys -
+5023.0,4.1,0.0,-0.0,0.1,-0.1
+
+$\sqrt{s_{\mathrm{NN}}}$,$\sigma_{\mathrm{L-C}}$,error +,error -
+5023.0,2.8,0.0,-0.0
+
+$\sqrt{s_{\mathrm{NN}}}$,$y_{\mathrm{beam}}$,error +,error -
+5023.0,8.6,0.0,-0.0
+

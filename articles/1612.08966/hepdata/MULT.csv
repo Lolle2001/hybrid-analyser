@@ -1,0 +1,20 @@
+#: table_doi: 10.17182/hepdata.78365.v1/t3
+#: name: MULT
+#: description: Total number of charged particles as a function of the mean number of participating nucleons [PRC88.044909]. The total charged-particle multiplicity is given as the integral over $\mathrm{d}N_{\mathrm{ch}}/\mathrm{d}\eta$ over the measured region ($-3.5<\eta<5$) and extrapolations from fitted functions in the unmeasured regions. The contribution from unmeasured $\eta$ regions amounts to $\approx30\%$ of the total number of charged particles. The uncertainty on the extrapolation to the unmeasured pseudorapidity region is smaller than the size of the markers.  The contribution to the systematic uncertainties from the centrality determination and electromagnetic processes are vanishing compared to the contribution from the largest differences between the fitted functions.  A function inspired by factorisation [PRC83.024913] is fitted to the data, and the best fit yields $a=51.5\pm7.3$, $b=0.16\pm0.05$.
+
+#: data_file: Table3.yaml
+#: keyword reactions: PB PB --> CHARGED X
+#: keyword observables: MULT
+#: keyword cmenergies: 5023.0
+$\langle N_{\mathrm{part}}\rangle$,$\langle N_{\mathrm{part}}\rangle$ LOW,$\langle N_{\mathrm{part}}\rangle$ HIGH,$\mathrm{Total}\ \mathit{N}_{\mathrm{ch}}$,stat +,stat -,sys_1 +,sys_1 -,sys_2 +,sys_2 -
+7.32,7.22,7.42,230.0,0.0,-0.0,20.0,-20.0,20.0,-20.0
+15.402000000000001,15.202,15.602,560.0,0.0,-0.0,50.0,-50.0,50.0,-50.0
+29.581000000000003,29.181,29.981,1180.0,0.0,-0.0,90.0,-90.0,70.0,-70.0
+53.07,52.07,54.07,2200.0,0.0,-0.0,100.0,-100.0,100.0,-100.0
+85.43,84.43,86.43,3800.0,0.0,-0.0,200.0,-200.0,100.0,-100.0
+129.702,128.702,130.702,6000.0,0.0,-0.0,300.0,-300.0,100.0,-100.0
+187.4,186.4,188.4,9100.0,0.0,-0.0,550.0,-550.0,90.0,-90.0
+263.205,261.205,265.205,13420.0,0.0,-0.0,900.0,-900.0,50.0,-50.0
+332.804,331.804,333.804,17770.0,0.0,-0.0,1280.0,-1280.0,20.0,-20.0
+389.3007,388.8007,389.8007,21490.0,0.0,-0.0,1460.0,-1460.0,20.0,-20.0
+
